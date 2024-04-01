@@ -22,5 +22,5 @@ zz [at] nyu.edu, zhaz [at] amazon.com
 Deep Learning, Artificial Intelligence, Large-Scale Distributed System, Computer Architecture
 
 #### Other Interests
-Cognitive Science, Philosopy, Literature, Piano, Reading (you can find some in my [goodrads page](https://www.goodreads.com/user/show/50187028-zheng-zhang)
+Cognitive Science, Philosopy, Literature, Piano, Reading (you can find some in my [Goodreads page](https://www.goodreads.com/user/show/50187028-zheng-zhang)
 
