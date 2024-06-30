@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 180">
+  <!-- Chain -->
+  <g transform="translate(10, 30)">
+    <text x="100" y="0" text-anchor="middle" font-size="12" font-weight="bold">Chain</text>
+    <circle cx="25" cy="50" r="20" fill="white" stroke="black" stroke-width="2" />
+    <circle cx="100" cy="50" r="20" fill="white" stroke="black" stroke-width="2" />
+    <circle cx="175" cy="50" r="20" fill="white" stroke="black" stroke-width="2" />
+    <text x="25" y="55" text-anchor="middle" font-size="12">A</text>
+    <text x="100" y="55" text-anchor="middle" font-size="12">B</text>
+    <text x="175" y="55" text-anchor="middle" font-size="12">C</text>
+    <line x1="45" y1="50" x2="80" y2="50" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <line x1="120" y1="50" x2="155" y2="50" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  </g>
+
+  <!-- Fork -->
+  <g transform="translate(220, 30)">
+    <text x="75" y="0" text-anchor="middle" font-size="12" font-weight="bold">Fork</text>
+    <circle cx="75" cy="50" r="20" fill="white" stroke="black" stroke-width="2" />
+    <circle cx="25" cy="100" r="20" fill="white" stroke="black" stroke-width="2" />
+    <circle cx="125" cy="100" r="20" fill="white" stroke="black" stroke-width="2" />
+    <text x="75" y="55" text-anchor="middle" font-size="12">A</text>
+    <text x="25" y="105" text-anchor="middle" font-size="12">B</text>
+    <text x="125" y="105" text-anchor="middle" font-size="12">C</text>
+    <line x1="61.96" y1="65.36" x2="38.04" y2="84.64" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <line x1="88.04" y1="65.36" x2="111.96" y2="84.64" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  </g>
+
+  <!-- Collider -->
+  <g transform="translate(430, 30)">
+    <text x="75" y="0" text-anchor="middle" font-size="12" font-weight="bold">Collider</text>
+    <circle cx="25" cy="50" r="20" fill="white" stroke="black" stroke-width="2" />
+    <circle cx="125" cy="50" r="20" fill="white" stroke="black" stroke-width="2" />
+    <circle cx="75" cy="100" r="20" fill="white" stroke="black" stroke-width="2" />
+    <text x="25" y="55" text-anchor="middle" font-size="12">A</text>
+    <text x="125" y="55" text-anchor="middle" font-size="12">B</text>
+    <text x="75" y="105" text-anchor="middle" font-size="12">C</text>
+    <line x1="38.04" y1="65.36" x2="61.96" y2="84.64" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <line x1="111.96" y1="65.36" x2="88.04" y2="84.64" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  </g>
+
+  <!-- Confounder -->
+  <g transform="translate(640, 30)">
+    <text x="75" y="0" text-anchor="middle" font-size="12" font-weight="bold">Confounder</text>
+    <circle cx="75" cy="50" r="20" fill="white" stroke="black" stroke-width="2" />
+    <circle cx="25" cy="100" r="20" fill="white" stroke="black" stroke-width="2" />
+    <circle cx="125" cy="100" r="20" fill="white" stroke="black" stroke-width="2" />
+    <text x="75" y="55" text-anchor="middle" font-size="12">A</text>
+    <text x="25" y="105" text-anchor="middle" font-size="12">B</text>
+    <text x="125" y="105" text-anchor="middle" font-size="12">C</text>
+    <line x1="61.96" y1="65.36" x2="38.04" y2="84.64" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <line x1="88.04" y1="65.36" x2="111.96" y2="84.64" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <line x1="45" y1="100" x2="105" y2="100" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  </g>
+
+  <!-- Arrowhead marker -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" />
+    </marker>
+  </defs>
+</svg>

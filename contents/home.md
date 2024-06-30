@@ -8,7 +8,7 @@ zz [at] nyu.edu, zhaz [at] amazon.com
 - 1993 - 1996, PhD, Electrical and Computer Engineering, Univ of Illinois at Urbana Champaign
 
 #### Work Journey
-- 2018 - present, Founding Director, Amazon Web Service (AWS) Shanghai AI Lab
+- 2018 - present, Senior Principal Scientist, Founding Director, Amazon Web Service (AWS) Shanghai AI Lab
 - 2014 - 2018, Global Network Professor, NYU Shanghai ([home page](https://research.shanghai.nyu.edu/centers-and-institutes/datascience/people/zheng-zhang))
 - 2002 - 2014, Microsoft Research Asia, Research Area Manager (Network and System)
 - 1996 - 2002, Hewlett Packard Laboratory, Member of Technical Staff

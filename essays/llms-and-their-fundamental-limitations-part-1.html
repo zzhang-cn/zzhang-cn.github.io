@@ -1,0 +1,705 @@
+<!doctype html>
+<html><head><title>LLMs and their Fundamental Limitations (Part 1)</title><meta charset="UTF-8"><link href="http://fonts.googleapis.com/css?family=Crimson+Text:400,400italic,700,700italic|Roboto:400,700,700italic,400italic" rel="stylesheet" type="text/css"><style>/*
+ * Copyright 2014 Quip
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
+body {
+    font-size: 15px;
+    color: #333;
+    background: white;
+    padding: 60px 95px;
+    max-width: 900px;
+    margin: 0 auto;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern";
+    font-kerning: normal;
+    -moz-font-feature-settings: "kern";
+    -webkit-font-feature-settings: "kern";
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+th {
+    font-family: Roboto, sans-serif;
+    font-weight: 700;
+    margin: 0;
+    margin-top: 1.25em;
+    margin-bottom: 0.75em;
+}
+
+h1 {
+    font-size: 35px;
+    line-height: 42px;
+}
+
+h1:first-child {
+    margin-top: 0;
+}
+
+h2 {
+    font-size: 22px;
+    line-height: 22px;
+}
+
+h3 {
+    font-size: 18px;
+    line-height: 16px;
+}
+
+h4,
+h5,
+h6 {
+    font-size: 15px;
+    line-height: 14px;
+}
+h5 {
+    font-style: italic;
+}
+
+h6 {
+    font-weight: unset;
+    text-decoration: underline;
+}
+
+.capitalize-h3 h3 {
+    text-transform: uppercase;
+}
+
+/* Body text */
+body,
+p,
+ul,
+ol,
+td {
+    font-family: "Crimson Text", serif;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+blockquote,
+q {
+    display: block;
+    margin: 1em 0;
+    font-style: italic;
+}
+
+blockquote a,
+q a {
+    text-decoration: underline;
+}
+
+blockquote {
+    padding-left: 10px;
+    border-left: 4px solid #a6a6a6;
+}
+
+q {
+    color: #a6a6a6;
+    line-height: 40px;
+    font-size: 24px;
+    text-align: center;
+    quotes: none;
+}
+
+q a {
+    color: #a6a6a6;
+}
+
+code,
+pre {
+    font-family: Consolas, "Liberation Mono", Menlo, "Courier Prime Web",
+        Courier, monospace;
+    background: #f2f2f2;
+}
+
+code {
+    padding: 1px;
+    margin: 0 -1px;
+    border-radius: 3px;
+}
+
+pre {
+    display: block;
+    line-height: 20px;
+    text-shadow: 0 1px white;
+    padding: 5px 5px 5px 30px;
+    white-space: nowrap;
+    position: relative;
+    margin: 1em 0;
+}
+
+pre:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 15px;
+    border-left: solid 1px #dadada;
+}
+
+/* Text Alignment */
+.line {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.align-center {
+    text-align: center;
+}
+
+.align-right {
+    text-align: end;
+}
+
+/* Lists */
+div[data-section-style="5"],
+div[data-section-style="6"],
+div[data-section-style="7"] {
+    margin: 12px 0;
+}
+
+ul {
+    padding: 0 0 0 40px;
+}
+
+ul li {
+    margin-bottom: 0.4em;
+}
+
+/* Bulleted list */
+div[data-section-style="5"] ul {
+    list-style-type: disc;
+}
+div[data-section-style="5"] ul ul {
+    list-style-type: circle;
+}
+div[data-section-style="5"] ul ul ul {
+    list-style-type: square;
+}
+div[data-section-style="5"] ul ul ul ul {
+    list-style-type: disc;
+}
+div[data-section-style="5"] ul ul ul ul ul {
+    list-style-type: circle;
+}
+div[data-section-style="5"] ul ul ul ul ul ul {
+    list-style-type: square;
+}
+
+/* Numbered list */
+div[data-section-style="6"] ul {
+    list-style-type: decimal;
+}
+div[data-section-style="6"] ul ul {
+    list-style-type: lower-alpha;
+}
+div[data-section-style="6"] ul ul ul {
+    list-style-type: lower-roman;
+}
+div[data-section-style="6"] ul ul ul ul {
+    list-style-type: decimal;
+}
+div[data-section-style="6"] ul ul ul ul ul {
+    list-style-type: lower-alpha;
+}
+div[data-section-style="6"] ul ul ul ul ul ul {
+    list-style-type: lower-roman;
+}
+
+/* Checklist */
+div[data-section-style="7"] ul {
+    list-style-type: none;
+}
+
+div[data-section-style="7"] ul li:before {
+    content: "\2610";
+    position: absolute;
+    display: inline;
+    margin-right: 1.2em;
+    margin-left: -1.2em;
+}
+
+div[data-section-style="7"] ul li.parent:before {
+    content: "";
+}
+
+div[data-section-style="7"] ul li.checked {
+    text-decoration: line-through;
+}
+
+div[data-section-style="7"] ul li.checked:before {
+    content: "\2611";
+    text-decoration: none;
+}
+
+/* Tables */
+div[data-section-style="8"] {
+    margin: 12px 0;
+}
+
+table {
+    border-spacing: 0;
+    border-collapse: separate;
+    border: solid 1px #bbb;
+    table-layout: fixed;
+    position: relative;
+}
+
+table th,
+table td {
+    padding: 2px 2px 0;
+    min-width: 1.5em;
+    word-wrap: break-word;
+}
+
+table th {
+    border-bottom: 1px solid #c7cbd1;
+    background: #f2f2f2;
+    font-weight: bold;
+    vertical-align: bottom;
+    color: #3a4449;
+    text-align: center;
+}
+
+table td {
+    padding-top: 0;
+    border-left: 1px solid #c7cbd1;
+    border-top: 1px solid #c7cbd1;
+    vertical-align: top;
+}
+
+table td.bold {
+    font-weight: bold;
+}
+
+table td.italic {
+    font-style: italic;
+}
+
+table td.underline {
+    text-decoration: underline;
+}
+
+table td.strikethrough {
+    text-decoration: line-through;
+}
+
+table td.underline.strikethrough {
+    text-decoration: underline line-through;
+}
+
+table td:first-child {
+    border-left: hidden;
+}
+
+table tr:first-child td {
+    border-top: hidden;
+}
+
+/* Images */
+div[data-section-style="11"] {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div[data-section-style="11"][data-section-float="0"] {
+    clear: both;
+    text-align: center;
+}
+
+div[data-section-style="11"][data-section-float="1"] {
+    float: left;
+    clear: left;
+    margin-right: 20px;
+}
+
+div[data-section-style="11"][data-section-float="2"] {
+    float: right;
+    clear: right;
+    margin-left: 20px;
+}
+
+div[data-section-style="11"] img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: auto;
+}
+
+div[data-section-style="11"].show-border {
+    outline: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.05);
+}
+
+hr {
+    width: 70px;
+    margin: 20px auto;
+}
+
+/* Apps */
+div[data-section-style="19"].placeholder {
+    margin: 0.8em auto;
+    padding: 4px 0;
+    display: block;
+    color: #3d87f5;
+    text-align: center;
+    border: 1px solid rgba(41, 182, 242, 0.2);
+    border-radius: 3px;
+    background: #e9f8fe;
+    font-family: Roboto, sans-serif;
+}
+
+div[data-section-style="19"].first-party-element {
+    margin-bottom: 10px;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+div[data-section-style="19"].first-party-element.kanban {
+    background-image: url("https://quip-cdn.com/nK0hSyhsb4jrLIL2s5Ma-g");
+    height: 166px;
+}
+
+div[data-section-style="19"].first-party-element.calendar {
+    background-image: url("https://quip-cdn.com/OYujqLny03RILxcLIiyERg");
+    height: 244px;
+}
+
+div[data-section-style="19"].first-party-element.poll {
+    background-image: url("https://quip-cdn.com/fbIiFrcKGv__4NB7CBfxoA");
+    height: 116px;
+}
+
+div[data-section-style="19"].first-party-element.countdown {
+    background-image: url("https://quip-cdn.com/3bPhykD2dBei9sSjCWteTQ");
+    height: 96px;
+}
+
+div[data-section-style="19"].first-party-element.process_bar {
+    background-image: url("https://quip-cdn.com/ybQlHnHEIIBLog5rZmYs_w");
+    height: 36px;
+}
+
+div[data-section-style="19"].first-party-element.project_tracker {
+    background-image: url("https://quip-cdn.com/OFQU087b4Mxzz1ZaHwtjXA");
+    height: 164px;
+}
+
+div[data-section-style="19"] img {
+    margin: 0.5em;
+}
+
+div[data-section-style="19"] img.masked-image {
+    margin: 0;
+    transform-origin: top left;
+}
+
+div[data-section-style="19"] .image-mask {
+    position: relative;
+    overflow: hidden;
+}
+/*
+ * Copyright 2019 Quip
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
+body {
+    counter-reset: indent0 indent1 indent2 indent3 indent4 indent5 indent6
+        indent7 indent8;
+}
+
+/* Numbered list */
+div[data-section-style="6"] {
+    counter-reset: indent0 indent1 indent2 indent3 indent4 indent5 indent6
+        indent7 indent8;
+}
+div[data-section-style="6"].list-numbering-continue {
+    counter-reset: none;
+}
+div[data-section-style="6"].list-numbering-restart-at {
+    counter-reset: indent0 var(--indent0) indent1 indent2 indent3 indent4
+        indent5 indent6 indent7 indent8;
+}
+div[data-section-style="6"] ul {
+    /* indent0 is not reset since it is shared across the div elements */
+    list-style-type: none !important;
+}
+div[data-section-style="6"] ul ul {
+    counter-reset: indent1;
+}
+div[data-section-style="6"] ul ul ul {
+    counter-reset: indent2;
+}
+div[data-section-style="6"] ul ul ul ul {
+    counter-reset: indent3;
+}
+div[data-section-style="6"] ul ul ul ul ul {
+    counter-reset: indent4;
+}
+div[data-section-style="6"] ul ul ul ul ul ul {
+    counter-reset: indent5;
+}
+div[data-section-style="6"] ul li {
+    counter-increment: indent0;
+}
+div[data-section-style="6"] ul ul li {
+    counter-increment: indent1;
+}
+div[data-section-style="6"] ul ul ul li {
+    counter-increment: indent2;
+}
+div[data-section-style="6"] ul ul ul ul li {
+    counter-increment: indent3;
+}
+div[data-section-style="6"] ul ul ul ul ul li {
+    counter-increment: indent4;
+}
+div[data-section-style="6"] ul ul ul ul ul ul li {
+    counter-increment: indent5;
+}
+div[data-section-style="6"] ul li:before {
+    content: counter(indent0, decimal) ". ";
+}
+div[data-section-style="6"] ul ul li:before {
+    content: counter(indent1, lower-alpha) ". ";
+}
+div[data-section-style="6"] ul ul ul li:before {
+    content: counter(indent2, lower-roman) ". ";
+}
+div[data-section-style="6"] ul ul ul ul li:before {
+    content: counter(indent3, decimal) ". ";
+}
+div[data-section-style="6"] ul ul ul ul ul li:before {
+    content: counter(indent4, lower-alpha) ". ";
+}
+div[data-section-style="6"] ul ul ul ul ul ul li:before {
+    content: counter(indent5, lower-roman) ". ";
+}
+</style></head><body><h1 id='temp:C:TTH682612bcf3d446b299f90cb37'>LLMs and their Fundamental Limitations (Part 1)</h1>
+
+<b>Preview draft</b>: feedbacks and critiques are heartily welcomed. Since Quip doesn’t have a good way to control visibilities among commentators, so if you want to place comments inline, please make a copy and then add me to it. Email or slack me on @zhaz works as well. Will be working on the later parts, so expect delays. Thanks!<br/>
+
+<br/>
+
+<b>Abstract</b>: Large Language Models (LLMs) are text-based generative models that aim to function as a World Model (WM) [1]. We begin with a definition of what we expect from a WM, then dive into two aspects. First, at a microscopic level, we discuss the operation of correctly encoding graphical structures into sentences. Such structures underlie our cognitive processes when we intend to describe relationships between concepts and entities, communicate causal inference, prediction, and common sense reasoning. We highlight the non-bijective nature of such encoding and its implications for learning. Second, at a macroscopic level, we argue that a well-learned LLM will align its generation distribution with the real-world data distribution that often follows a power law [2]. This alignment, bridged with Kolmogorov complexity [3], explains the empirical finding of the scaling law of language models [4]. Importantly, our analysis is not tied to any specific LLM implementation but applies broadly to text-based generative models aiming to capture world knowledge and reasoning. Part 2 will discuss how Transformer-based LLMs function as generative WMs, focusing on the key mechanisms that make them work. Finally, in Part 3, we will discuss the limitations of such models and the cautions that need to be exercised when applying them.<br/>
+
+<h2 id='temp:C:TTHe75bd7d6882e4d4ca3311aebe'>Introduction</h2>
+
+<h3 id='temp:C:TTHd5fd9843efb94b3fbc2442c7e'>What We Expect from a World Model</h3>
+
+A World Model (WM) in the context of AI refers to an internal representation or understanding of how the world works that an AI system develops. When applied to a given context (e.g., "a child running on wet grass"), a WM can infer causal relationships ("wet grass is slippery"), make predictions ("the child might slip and fall"), and apply common sense reasoning ("an adult might warn the child to be careful").<br/>
+
+<br/>
+
+These capabilities are generalizable, allowing the WM to transfer knowledge to new scenarios. For example, the principles learned from the "child running on wet grass" scenario can be applied to situations like "a novice skier on an icy slope" or "a person using a new smartphone for the first time." In each case, the WM adapts its understanding of unfamiliar conditions, potential risks, and appropriate cautionary responses.<br/>
+
+<h3 id='temp:C:TTHfe55cb0d910d45bc84900b2a9'>Making a Text-Based World Model</h3>
+
+A WM must store and retrieve a representation of interconnected facts, concepts, rules, and patterns across various domains. While this functionality shares similarities with encyclopedias and search engines, a WM's true value lies in its dynamic application of this knowledge. The core differentiators are its abilities to perform causal inference, make predictions, and apply common sense reasoning in contextually appropriate and generalizable ways.<br/>
+
+<br/>
+
+Large Language Models (LLMs) can produce human-like sentences. However, the first challenge is not mimicking human language but faithfully communicating the meaning intended by the underlying cognitive processes. Secondly, well-learned LLMs should align their generation probabilities with the distributions observed in the real world. These two aspects are explored in the rest of this document:<br/>
+
+<div data-section-style='5' style="" class=""><ul id='temp:C:TTH3e16dc9ee7a348ba98866ee58'><li id='temp:C:TTHc1604d82259f4856a379fbf27' class='' value='1'>Firstly, we delve into the intricate process of converting complex graph-based information into coherent text. This involves understanding how LLMs can accurately encode and decode various graphical structures, such as causal relationships, into natural language sentences. Since there are different linearizations of the same graph, there are implications for the learning and reasoning capabilities of LLMs.
+
+<br/></li><li id='temp:C:TTH95036fd209194e23a27dd8691' class=''>Secondly, we address the alignment of LLMs' generative probabilities with the real-world distributions of information, often characterized by power law distributions. Such alignment ensures that LLMs can effectively replicate real-world scenarios, from common daily interactions to rare, complex events. By bridging this alignment with the concept of Kolmogorov complexity, we aim to explain how empirical scaling laws observed in language models can be understood.
+
+<br/></li></ul></div><h2 id='temp:C:TTH710eb5871ec84b1a8ff0a82c2'>From Graphs to Words: Understanding and Training LLMs in Cognitive Processes</h2>
+
+<h3 id='temp:C:TTHece787df05e14c528ea64e47d'>The Graph-to-Words Operator</h3>
+
+Converting “meaning” into a sequence of words is a complex process where the source of information is often a graph. In the context of causal inference, ground-truth causal graphs may be available, and the challenge is to accurately encode these graphs into a sequence of words.<br/>
+
+
+<div data-section-style='11' style='max-width:100%' class=''><img src="../images/causal-graphs-svg.svg" id='temp:C:TTHb4394f98621a41d79ba3aefc5' width='800' height='152' alt="image.png"></img></div>Fundamental causal structures, often used as building blocks for more complex models, include:<br/>
+
+<div data-section-style='5' style="" class=""><ul id='temp:C:TTH2b6499cefc75419abebdb1527'><li id='temp:C:TTH1b4186f4a722429abec684142' class='' value='1'><b>Chain</b>: A → B → C. Sequential causation where A causes B, which then causes C.
+
+<br/></li><li id='temp:C:TTH1eca2737befc42a5aca5d0dd7' class=''><b>Fork</b>: A → B, A → C. Common cause structure where A independently causes both B and C.
+
+<br/></li><li id='temp:C:TTH88abb31bda6f4ac5882158e8e' class=''><b>Collider</b>: A → C ← B. Two independent causes (A and B) both affect a common outcome (C).
+
+<br/></li><li id='temp:C:TTH5e0b570d735d422791fa7d35a' class=''><b>Confounder</b>: A → B, A → C, B → C. A affects both B and C, while B also directly affects C.
+
+<br/></li></ul></div>Communicating these causal graphs involves converting (or "linearizing") these structures into sentences that describe the relationships clearly and accurately. Multiple descriptions can exist for the <b><i>same</i></b> graph, each aiming to convey the relationships effectively. For example, the factors influencing a child's height, such as parental genes and nutrition, can be described as:<br/>
+
+<div data-section-style='5' style="" class=""><ul id='temp:C:TTH9c24bfdd802a4096b9b348528'><li id='temp:C:TTH067c3c89578f43c58242d3258' class='' value='1'>"A child's height is influenced by both parental genes and the child's nutrition."
+
+<br/></li><li id='temp:C:TTHb7a1d9426cc949d79e023adcb' class=''>"Both the genes inherited from parents and the nutrition a child receives affect their height."
+
+<br/></li><li id='temp:C:TTH52530b8d35e1445c9c6deae60' class=''>"To determine a child's height, you need to consider both their parental genes and their nutrition."
+
+<br/></li></ul></div>Causal graphs can also be expressed in programming constructs, which provide a precise and unambiguous syntax. A correct program, viewed as a sequence of operations on a Turing machine, can be seen as linearized causal data. In programming, concepts like "use-before-defined" are errors that should never occur in a correct program.<br/>
+
+<br/>
+
+The differences between expressing causal graphs in words versus programs lie in precision, interpretability, flexibility, and reusability. Words are more accessible and flexible for initial communication, while programs offer precise definitions suitable for implementation and automation.<br/>
+
+<h3 id='temp:C:TTH138908fd003741dca89c6d468'>Implications of Graphical Structures in Cognitive Processes for LLMs</h3>
+
+The training corpus for Large Language Models (LLMs) includes a wide range of human-generated texts and programs. This dataset contains descriptions of individual facts, concepts, rules, patterns, and complex cognitive processes. These processes, from causal inference to predictions and common sense reasoning, are typically expressed as flattened versions of graphical structures. However, the presence of these elements in the training data does not guarantee their factual accuracy, logical soundness, or empirical correctness.<br/>
+
+<br/>
+
+<b>Causal graphs are just one type of graphical structure used to represent these cognitive processes.</b> In addition to causal inference, graphical structures also represent relations between concepts and entities and other forms of reasoning, such as prediction models and common sense knowledge networks. These structures are vital for LLMs to understand and generate text that reflects human cognitive processes.<br/>
+
+<br/>
+
+Multiple ways to linearize the same graphical structures lead to significant implications:<br/>
+
+<div data-section-style='5' style="" class=""><ul id='temp:C:TTH5df4f09a7cf44c46b02c91088'><li id='temp:C:TTHa4f50325ca7f4e7c8ab1c5e13' class='' value='1'><b>Frequency Variations in Descriptions</b>: Different descriptions of the same structure vary in frequency within the training corpus. Consequently, LLMs may have a weaker grasp of less frequent representations, leading to inconsistencies in understanding and generating causal relationships, predictive patterns, and common sense reasoning. This variability is linked to the “Reversal Curse,” where LLMs trained on "A is B" struggle with the reverse "B is A" even when logically equivalent [5].
+
+<br/></li><li id='temp:C:TTH7514e98282e2442d817c001cd' class=''><b>Compression and Information Preservation</b>: Compressing text encodes the specific order of a particular linearization, making it impossible to decode the compressed information into a different sentence with the same meaning. Remembering all linearizations individually would be inefficient and risk information loss. Balancing compression efficiency with the preservation of semantic equivalence across different expressions of the same graphical structure is challenging.
+
+<br/></li></ul></div>These implications highlight the challenges and opportunities in developing LLMs that can effectively understand and reason about complex cognitive processes, despite the inherent limitations of text-based training data.<br/>
+
+<h2 id='temp:C:TTH0629a81a08084d37ada83fef6'>Alignment of LLM's Generation Probability with Real-World Distributions</h2>
+
+The goal of building Large Language Models (LLMs) is to develop a generative model that replicates the effects of our cognitive processes. For an LLM to be considered well-learned, it must evolve into a generative model whose generation probability aligns with the overall distributions observed in the real world.<br/>
+
+<div data-section-style='11' style='max-width:100%' class=''><img src='../images/2distributions.png' id='temp:C:TTH460de78a11b54e8a993a820a7' width='800' height='208' alt="image.png"></img></div><h3 id='temp:C:TTH936d5cc3d5ed401e83846cdc1'>Power Law Distribution in the World We Aim to Model</h3>
+
+There are two fundamental distributions that describe our world:<br/>
+
+<div data-section-style='6' style="" class=""><ul id='temp:C:TTHa2893b35ebb346eda2e75ebb4'><li id='temp:C:TTH20d3245a6842463b9637906ef' class='' value='1'><b>Normal Distribution</b>: This characterizes variations in traits of individuals and entities, such as height, intelligence, expertise, and other biological or behavioral attributes.
+
+<br/></li><li id='temp:C:TTH57845483c13b45bb8c4df2af3' class=''><b>Power Law Distribution</b>: This describes the distribution of phenomena that emerge when entities interact and self-organize, such as the size of cities, the popularity of websites, or the distribution of wealth [6].
+
+<br/></li></ul></div>These distributions arise from specific mechanisms. The normal distribution results from the Central Limit Theorem, where additive factors lead to a normal distribution of variables such as height and intelligence. Conversely, power law distributions often stem from multiplicative processes. Key mechanisms include:<br/>
+
+<div data-section-style='5' style="" class=""><ul id='temp:C:TTH4e770983cac74a6b97200214c'><li id='temp:C:TTHd72cc700ffda4ef69503caa61' class='' value='1'><b>Preferential Attachment</b>: Popular entities attract more connections, leading to skewed distributions, as seen in social networks.
+
+<br/></li><li id='temp:C:TTH7a0c79f8d64c42aaa9ebd8b87' class=''><b>Self-Organized Criticality</b>: Systems evolve into a critical state where minor events trigger significant cascades, such as in earthquakes or stock market crashes.
+
+<br/></li><li id='temp:C:TTH7cf68ce4eac6430686db43083' class=''><b>Cumulative Advantage</b>: Early advantages result in large long-term benefits, observable in scientific citations and social influence.
+
+<br/></li><li id='temp:C:TTH0a09937c2f4b4f12b720a7091' class=''><b>Fractal Processes</b>: Self-similar structures at different scales, like river branching or coastlines, also lead to power law distributions.
+
+<br/></li></ul></div>These mechanisms show that power law distributions arise from complex interactions where effects multiply rather than simply add up. Power law distributions appear in many significant areas:<br/>
+
+<div data-section-style='5' style="" class=""><ul id='temp:C:TTH97b36d86202f40739fb126829'><li id='temp:C:TTHb52c5bd907ab4130b244cb6ef' class='' value='1'><b>Nature</b>: The mass of celestial bodies follows a power law, with a few large entities like stars and planets and many smaller ones.
+
+<br/></li><li id='temp:C:TTH51aecda9c8d24046825b36b6b' class=''><b>Urban Development</b>: City sizes exhibit this pattern, with a few large cities and many smaller towns.
+
+<br/></li><li id='temp:C:TTH253df963fe4040f6ac73fc1a7' class=''><b>Economics</b>: Wealth distribution follows a power law, where a small percentage of individuals control a large portion of wealth.
+
+<br/></li><li id='temp:C:TTH9337aa0e42d7419a8fe4fa585' class=''><b>Productivity</b>: The "80-20 rule" applies to workplace productivity, where 20% of employees yield 80% of results.
+
+<br/></li><li id='temp:C:TTH20d951f975c74115bf0875fd9' class=''><b>Business</b>: A few companies dominate market share.
+
+<br/></li><li id='temp:C:TTH9ea418d9ad7d40228b46e4cf1' class=''><b>Internet</b>: Website traffic and social media influence are heavily skewed towards a few top sites and users.
+
+<br/></li></ul></div>These instances highlight the pervasive impact of power law distributions. They show that single properties of entities emerge as power law distributions as a result of their interactions.<br/>
+
+<br/>
+
+Therefore, narratives about these entities will reflect the inherent complexity and thus similarly follow a power law distribution. Simple narratives, involving fewer entities and straightforward interactions, are more common. Complex narratives, which involve numerous entities and intricate interactions, are rarer. For example, the logistics of running a large company are much more complex than the daily chores of a household. Similarly, it takes scores of books to explain the logic (or lack thereof) behind conflicts at a national scale, whereas street skirmishes may fill only half a police report.<br/>
+
+<br/>
+
+If the data we collect for training LLMs follows a power law distribution, the generative probability of well-learned LLMs is likely to follow a power law as well, reflecting the real-world scenarios that LLMs must navigate—from the most frequent and simple to the most exceptional and complex.<br/>
+
+<h3 id='temp:C:TTH63ccd86d64044b1c9184d09ac'>Empirical Evidence and Theoretical Insights into Scaling Laws</h3>
+
+The scaling law for language models, as described in "Scaling Laws for Neural Language Models" by Kaplan et al. [4], and later in "Training Compute-Optimal Large Language Models" by Jordan Hoffmann et al. [7], reveals a robust empirical relationship between model performance and key factors such as model size, dataset size, and compute used for training. Specifically, model performance, typically measured by metrics like perplexity or accuracy on various tasks, improves as a power law function of these factors. This means that as we increase the model size, dataset size, or compute, the log of the error rate decreases linearly with the log of the increased factor. <br/>
+
+<div data-section-style='11' style='max-width:100%' class=''><img src='../images/scaling-laws.png' id='temp:C:TTHb04c323166874d6da9bf75042' alt="image.png"></img></div>(From "Scaling Laws for Neural Language Models" by Kaplan et al. [4])<br/>
+
+<br/>
+
+This relationship holds remarkably consistently across different model architectures and a wide range of scales, from millions to hundreds of billions of parameters. Importantly, these laws suggest that performance continues to improve with scale, albeit with diminishing returns, and so far no clear upper bound has been observed.<br/>
+
+<br/>
+
+While the underlying reasons for these scaling laws are not fully understood, the power law distribution in data and model behavior aligns well with the concept of Kolmogorov complexity [3]. This concept from information theory measures the complexity of an object (in this case, language patterns) by the length of the shortest computer program that can reproduce it. Two key intuitions emerge from this alignment:<br/>
+
+<div data-section-style='5' style="" class=""><ul id='temp:C:TTHd0ae93853d474d51a9b7480b7'><li id='temp:C:TTHbaf7aba2627a450a851a021cf' class='' value='1'><b>Power Law Distribution in Data and Kolmogorov Complexity</b>: The power law distribution in the data corresponds to the spectrum of Kolmogorov complexity in language. Simple, frequent instances (like basic queries or daily interactions) have low Kolmogorov complexity—they can be described or generated by short programs. In contrast, complex cases (like intricate scientific problems or rare events) have high Kolmogorov complexity, requiring longer programs to describe or generate them.
+
+<br/></li><li id='temp:C:TTH9e07a37922bf49d69322ea722' class=''><b>Generative Probability of Well-Learned LLMs</b>: The generative probability of well-learned LLMs likely follows a power law, suggesting that the models are effectively learning to mirror the complexity distribution of the real-world scenarios they're trained on. As models scale up, they become better at generating both simple and increasingly complex outputs, reflecting the power law nature of the training data.
+
+<br/></li></ul></div>The implication is that these scaling laws are not merely an artifact of current training methods but may reflect the fact that a well-learned model do indeed capture fundamental properties of information distribution in our world. Assuming that training data is fully deduped, then it follows that power law distribution holds between model performance and data size.<br/>
+
+<br/>
+
+Understanding these scaling laws in LLMs requires a deeper investigation into the complexities of both the data and the models themselves. Two studies approach this from a complexity point of view:<br/>
+
+<div data-section-style='5' style="" class=""><ul id='temp:C:TTH7369fe24ad344a719e87f2947'><li id='temp:C:TTH58784cfe6c654ea28fad92795' class='' value='1'><b>"TinyStories: How Small Can Language Models Be and Still Speak Coherent English?" [8]</b>: The authors used GPT-3.5 to create a dataset of simple, short stories (50-200 words) for young children. The study found that models around 100M parameters performed consistently well, handling context and basic reasoning effectively. Smaller models, like those with 10M parameters, could still generate fluent and coherent stories, while even the smallest 1.5M parameter models showed some capability to produce simple, coherent text.
+
+<br/></li><li id='temp:C:TTH5714f98bb6684f26b01828828' class=''><b>"gzip Predicts Data-dependent Scaling Laws" [9]</b>: The author generates synthetic data with various complexity using Probabilistic Context-Free Grammars (PCFG) and shows that the scaling law is sensitive to data complexity.
+
+<br/></li></ul></div>Regarding the bound of scaling law: the most complex narrative pertains to the collective endeavor of Homo sapiens. This narrative includes the vast history of the universe as we understand it today, the detailed story of human history up to now, the complex web of our accumulated knowledge, discoveries, and innovations, and the far-reaching extent of our imagination. As long as we continue to explore and invent, this bound will keep expanding.<br/>
+
+<h2 id='temp:C:TTH46dde41391de481d9e8087955'>References</h2>
+
+[1] Brown, T. B., et al. (2020). Language Models are Few-Shot Learners. arXiv preprint arXiv:2005.14165.<br/>
+
+<br/>
+
+[2] Clauset, A., Shalizi, C. R., &amp; Newman, M. E. (2009). Power-law distributions in empirical data. SIAM review, 51(4), 661-703.<br/>
+
+<br/>
+
+[3] Vitányi, P. M., &amp; Li, M. (1997). An Introduction to Kolmogorov Complexity and Its Applications. Springer.<br/>
+
+<br/>
+
+[4] Kaplan, J., et al. (2020). Scaling Laws for Neural Language Models. arXiv preprint arXiv:2001.08361.<br/>
+
+<br/>
+
+[5] Pearl, J. (2009). Causality: Models, Reasoning, and Inference. Cambridge University Press.<br/>
+
+<br/>
+
+[6] Mitzenmacher, M. (2004). A brief history of generative models for power law and lognormal distributions. Internet Mathematics, 1(2), 226-251.<br/>
+
+<br/>
+
+[7] Hoffmann, J., et al. (2022). Training Compute-Optimal Large Language Models. arXiv preprint arXiv:2203.15556.<br/>
+
+<br/>
+
+[8] Eldan, R., &amp; Li, B. (2023). TinyStories: How Small Can Language Models Be and Still Speak Coherent English? arXiv preprint arXiv:2305.07759.<br/>
+
+<br/>
+
+[9] Karmin, G. (2023). gzip Predicts Data-dependent Scaling Laws. arXiv preprint arXiv:2405.16684.<br/>
+
+<br/>
+
+<br/>
+
+<br/>
+
+</body></html>
