@@ -20,7 +20,8 @@ The architecture of language models has evolved significantly over time. Initial
 
 **The Transformer Wave**. The development of the Transformer architecture [5] has revolutionized language models, leading to significant advancements from BERT [6] to modern LLMs like GPT-3 [7]. Despite these advancements, the core architecture remains remarkably stable. As depicted in Figure 1, Transformer models process sequences of tokens, each represented as a high-dimensional vector (e.g., 12,288 dimensions in GPT-3). During inference, these models operate with a fixed context length (e.g., 2,000 tokens) and consist of multiple Transformer Blocks (96 in GPT-3), with each block's output feeding into the next.
 
-![image](https://hackmd.io/_uploads/Syrn_radC.png)
+<img src="images/llm-part2/transformer-arch.png" alt="image" style="width:100%; height:auto;">
+
 **Figure 1**: Comprehensive view of the Transformer architecture, including tokenization, embedding, and the iterative nature of Transformer blocks.
 
 The process begins with input text and proceeds through the following steps:
@@ -109,9 +110,9 @@ Language models like GPT-3 operate with an embedding dimension of 12,288—over 
 
 **Curse of Dimensionality**: The curse of dimensionality refers to the phenomenon where the volume of space increases so rapidly with the number of dimensions that data points become sparse. In high-dimensional spaces, the concept of distance becomes less informative, making it difficult to meaningfully differentiate between data points. This sparsity can hinder the model's ability to generalize from the training data, leading to inefficiencies and potential overfitting.
 
-![image](https://hackmd.io/_uploads/B1MpMlaqA.png)
+<img src="images/llm-part2/curse-of-high-dim.png" alt="image" style="width:100%; height:auto;">
 
-**Figure**: This chart illustrates two key aspects of the curse of dimensionality. The blue line (left y-axis) shows the exponential growth in the volume of a hypersphere as dimensions increase, calculated as $2^d$. The green line (right y-axis) demonstrates how the proportion of space considered "near" (within 1% of the edge of a unit hypercube) rapidly decreases, calculated as $0.99^d$. These trends highlight why high-dimensional spaces pose challenges for machine learning algorithms, including those used in language models.
+**Figure 2**: This chart illustrates two key aspects of the curse of dimensionality. The blue line (left y-axis) shows the exponential growth in the volume of a hypersphere as dimensions increase, calculated as $2^d$. The green line (right y-axis) demonstrates how the proportion of space considered "near" (within 1% of the edge of a unit hypercube) rapidly decreases, calculated as $0.99^d$. These trends highlight why high-dimensional spaces pose challenges for machine learning algorithms, including those used in language models.
 
 **Low-Rank Approximation and Dimensionality Reduction**: Consider a sequence of tokens represented by an $n$-by-$d_x$ matrix $X$, where $n$ is the number of tokens, and each token is described by a $d_x$-dimensional feature vector (e.g., 12,288 in GPT-3). To capture the relationships between tokens, we can compute the matrix $X X^T$, which shows how each token correlates with others. However, this approach has two major drawbacks: 1) while $X$ as an embedding can be learned, its capacity to adapt contextually is limited, and 2) it quickly encounters the curse of dimensionality, making computation infeasible in high-dimensional spaces.
 
@@ -162,8 +163,10 @@ For instance, revisiting our earlier example, in the sentence "The cat quickly c
 **Skip Connections**: Skip connections, or residual connections, are a crucial component in enabling this deep and iterative refinement. They are applied around both the attention mechanism and the Feed-Forward Network (FFN) within each layer. These connections allow the original input to each layer to be added back to the output, helping to stabilize the training process. They prevent the model from losing important information as it passes through multiple layers, making it possible to build very deep models without suffering from issues like vanishing gradients.
 
 ### Putting it all Together
-![image](https://hackmd.io/_uploads/SJn4XK35R.png)
 
+<img src="images/llm-part2/transformer-all.png" alt="image" style="width:100%; height:auto;">
+
+**Figure 3**: Key elements of the Transformer architecture: dimension reduction and structural learning, fractional learning in subspace, FFN and itereative refinement.
 
 We've covered the core concepts behind the Transformer architecture, but two more critical aspects deserve attention:
 - **Normalization**: Before applying the attention mechanism and the Feed-Forward Networks (FFN), a Layer Normalization stage ensures stability and efficiency during training. By normalizing inputs across features, it prevents internal covariate shift and aids in faster convergence. Normalization is also embedded elsewhere in the Transformer, such as the scaling factor of the square root of the feature size in the attention mechanism, which helps control the magnitude of dot products.
@@ -192,7 +195,9 @@ Earlier in the Key Challenges section, we explored the critical task of learning
 
 **Understanding Kernel Smoothing**:  
 
-![image](https://hackmd.io/_uploads/Sk384sUOA.png)  
+<img src="images/llm-part2/kernel-smoothing.png" alt="image" style="width:100%; height:auto;">
+
+**Figure 4**: Example of kernel smoothing: Each data point is updated based on samples close by, and we can estimate a smooth curve.
 *Example of kernel smoothing: Each data point is updated based on samples close by, and we can estimate a smooth curve.*  
 (from https://www.walker-harrison.com/posts/2021-02-13-visualizing-how-a-kernel-draws-a-smooth-line/)
 
@@ -338,8 +343,12 @@ where $\mathbf{v}_x$ and $\mathbf{v}_y$ are the base vectors along the $x$- and 
 
 **Figure 1** shows the original 2D Gaussian data and how it is transformed by the attention mechanism:
 
-![image](https://hackmd.io/_uploads/ryTVpsE_C.png)
-**Figure 1: Visualizing Dimensionality Reduction**. Blue: Original Data, Red: Transformed Data with $c = 0$ (focus on $y$-axis), Purple: Transformed Data with $c = 0.5$ (balance between $x$ and $y$), Green: Transformed Data with $c = 1$ (focus on $x$-axis).
+
+<img src="images/llm-part2/dim-reduction.png" alt="image" style="width:100%; height:auto;">
+
+**Figure 5: Visualizing Dimensionality Reduction**.
+
+Blue: Original Data, Red: Transformed Data with $c = 0$ (focus on $y$-axis), Purple: Transformed Data with $c = 0.5$ (balance between $x$ and $y$), Green: Transformed Data with $c = 1$ (focus on $x$-axis).
 
 The data starts as a full-rank, zero-centered Gaussian in a 2D space. The results show how the original data is "compressed" along directions determined by the linear combination of the base vectors. In this case, the base vectors are the *eigenvectors* of the data, and the spread of data along these directions are the associated *eigenvalues*. 
 
@@ -409,9 +418,12 @@ The cases are as follows, illustrating that the predominant effects are mean-poo
 - **Both $v_q$ and $v_k$ are Non-Null Eigenvectors with Different Dominance Degrees**: When $v_q$ and $v_k$ are non-null eigenvectors but have different dominance degrees, the attention mechanism will highlight interactions between features captured by these eigenvectors. If $v_q$ is more dominant, tokens aligned with $v_q$ will have higher values, interacting strongly with other tokens in dimensions represented by $v_k$. This results in peaks in the attention map, indicating significant interactions between dominant and secondary features.
 - **$v_q = v_k$ and are Non-Null Eigenvectors**: This is a special case where the peaks are diagonal. This results in a self-attention mechanism where tokens strongly attend to themselves. The distribution will be peaky, highlighting the most significant features captured by the principal eigenvector. Tokens representing key features or high variance will dominate the attention scores, making them stand out prominently.
 
-![image](https://hackmd.io/_uploads/HJJm1EftR.png)
 
-**Visualization**: The heatmaps above visualize the row-wise softmax of the outer product for different eigenvector combinations. We constructed the data to have a rank-2 covariance matrix by assigning specific eigenvalues to orthogonal eigenvectors. In the first case, $v_q$ is a dominant eigenvector and $v_k$ is a null eigenvector, resulting in a flat distribution. In the second case, both $v_q$ and $v_k$ are the same dominant eigenvector, producing diagonal peaks indicating self-attention. The third case shows $v_q$ as the first dominant eigenvector and $v_k$ as the second dominant, highlighting significant interactions between dominant and secondary features.
+<img src="images/llm-part2/eigenvec.png" alt="image" style="width:100%; height:auto;">
+
+**Figure 6**: The heatmaps above visualize the row-wise softmax of the outer product for different eigenvector combinations. 
+
+We constructed the data to have a rank-2 covariance matrix by assigning specific eigenvalues to orthogonal eigenvectors. In the first case, $v_q$ is a dominant eigenvector and $v_k$ is a null eigenvector, resulting in a flat distribution. In the second case, both $v_q$ and $v_k$ are the same dominant eigenvector, producing diagonal peaks indicating self-attention. The third case shows $v_q$ as the first dominant eigenvector and $v_k$ as the second dominant, highlighting significant interactions between dominant and secondary features.
 
 ### Training Dynamics and Convergence
 
@@ -421,15 +433,25 @@ Assume that the rank of the data's covariance matrix is 10% of the original feat
 
 We studied training dynamics of [RoFormer](https://arxiv.org/abs/2104.09864) using 250M tokens from Wikipedia over near 10,000 steps. The model architecture consists of 6 layers, with a feature size of $d=384$ and the number of heads $h=6$. We examine the attention entropy variation of the heads during training and look at dimension-wise entropy distributions. To observe attention distributions, we used 1,000 random segments of length 512 for each checkpoint.
 
-![image](https://hackmd.io/_uploads/Sk4M4gghA.png)
+
+<img src="images/llm-part2/head-attn-change.png" alt="image" style="width:100%; height:auto;">
+
+**Figure 7**: Entropy change of attention heads as training progresses.
 
 It is evident that the attention heads only seek out structure of data after certain steps, and that diversity emerge among them as the training progresses. 
 
-![image](https://hackmd.io/_uploads/HJfnIxgnC.png)
+
+<img src="images/llm-part2/dim-entropy-change.png" alt="image" style="width:100%; height:auto;">
+
+**Figure 8**: dimension-wise attention score entropy change as training progresses.
 
 We also look at dimension-wise entropy distributions, i.e. $\texttt{softmax}(q_i k_i^T/\sqrt d)$. We found they were uniform at the beginning and then approximate a scaling-law distribution (y-axis is log scale). Over 95.4% distributions have entropies higher than 6.21 even after 8k steps (The uniform distribution has an entropy of 6.24).
 
-![image](https://hackmd.io/_uploads/ryQzDel2C.png)
+
+<img src="images/llm-part2/head-vs-dim.png" alt="image" style="width:100%; height:auto;">
+
+**Figure 9**: cumulative effective across dimension leads to low attention head entropy.
+
 Interestingly, for the head with low entropy, we find that dimension-wise attentions exhibiting high entropy (red distribution above). This is due to cumulative effects across dimensions, i.e. all the dimensions have slightly high concentration at the same location: for this particular data instance the attention head focuses on a token at a position in the middle of the sequence. Note softmax (green line) significantly promotes the unnormalized attention score (blue line)
 
 It’s important to note that the input data $X$ itself is not static during training. As gradients propagate through the network, $X$ evolves along with the weight matrices. This dynamic adjustment means that the covariance structure of $X$ can change over time, further influencing the alignment of $W_Q$ and $W_K$. Initially, $X$ may exhibit a covariance structure that is less informative, but as training continues, the network learns to transform $X$ in ways that enhance its alignment with meaningful directions in the data space.
@@ -439,11 +461,15 @@ This interplay between the evolving $X$ and the refining $W_Q$ and $W_K$ leads t
 At convergence, the attention mechanism is highly specialized. It selectively attends to the most informative features of the input, ignoring directions in the data space that contribute little to the overall understanding. This specialization allows the model to efficiently manage the complexity of high-dimensional data, leading to better performance on a wide range of tasks.
 
 In [22], the authors examine the converged behavior of BERT’s attention heads and find distinct patterns (replicated below). Specifically, in the shallow layers of the model, attention tends to be broad, which is indicated by higher entropy in the attention distributions. This means that in these layers, the data distribution has less structures. 
-![image](https://hackmd.io/_uploads/B1_Tr7FY0.png)
+
+<img src="images/llm-part2/attn-layers.png" alt="image" style="width:100%; height:auto;">
+
+**Figure 10**: attention entropy distribution acorss layers, reproduced from [22]
 
 Thus, while the intuitive explanation of the attention mechanism is that the learned feature of the query token seeks out information from contextual tokens via their keys, it’s crucial to understand that, fundamentally, these parameters—$X$'s embedding, $W_q$, and $W_k$—work in tandem to exploit the underlying structure of the data distribution.
 
 <a name="capturing-diverse-relationships"></a>
+
 ## Capturing Diverse Relationships
 
 In language modeling, capturing and understanding the diverse relationships within input text is crucial. These relationships can be syntactic, semantic, positional, or contextual, and a model's ability to grasp these nuances directly impacts its performance. Traditional models often struggled to balance these aspects, focusing too much on one type of relationship or failing to generalize across different contexts.
@@ -484,7 +510,9 @@ As the model trains, attention heads may specialize in capturing specific types 
 - Others might specialize in semantic relationships.
 - Positional information might be captured by particular heads.
 
-![image](https://hackmd.io/_uploads/By-3BmtF0.png)
+<img src="images/llm-part2/attn-pattern.png" alt="image" style="width:100%; height:auto;">
+
+**Figure 11**: attention patterns across heads, reproduced from [22]
 
 Empirical studies, such as the one conducted in [22], show that heads in a model like BERT focus on different patterns. This specialization allows the model to capture both broad and specific patterns, enhancing its ability to understand and generate language effectively.
 
@@ -523,13 +551,15 @@ In GPT-3, $W_1$ and $W_2$ are $(12288 \times 49152)$ and $(49152 \times 12288)$,
 
 This structure, justified by Universal Approximation Theory, allows the FFN to function as a continuous, differentiable key-value store. The expanded hidden layer provides the flexibility needed to approximate complex function mappings, while the compression step retrieves relevant information, acting as a dynamic memory module.
 
-![UAT](https://hackmd.io/_uploads/ryaHKSnsA.png)
+<img src="images/llm-part2/uat.png" alt="image" style="width:100%; height:auto;">
 
-**Figure**: The expand-compress structure of the FFN functions as a key-value store, where the expanded hidden layer allows for rich representation, and the compression layer retrieves relevant information based on the input.
+**Figure 12**: The expand-compress structure of the FFN functions as a key-value store, where the expanded hidden layer allows for rich representation, and the compression layer retrieves relevant information based on the input.
 
 This expand-compress configuration, coupled with ReLU activation, effectively implements a key-value store. The ReLU activation selectively activates certain "memories" stored in $W_2$, allowing the FFN to retrieve information relevant to the task at hand.
 
-![image](https://hackmd.io/_uploads/Bkw_5suuR.png)
+<img src="images/llm-part2/kv.png" alt="image" style="width:100%; height:auto;">
+
+**Figure 13**: conceptual view of how FFN implements KV-store.
 
 In this example, $W_2$ is a 4-by-8 matrix representing memory. The hidden layer output $h$ selectively activates elements, and $W_2h$ retrieves the corresponding information. This process mimics the retrieval of stored information based on the input key.
 
