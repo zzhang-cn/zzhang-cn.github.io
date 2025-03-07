@@ -2,6 +2,8 @@
 #### Email
 zz [at] nyu.edu, zhaz [at] amazon.com
 
+#### CV
+Current version [here](https://hackmd.io/@LFNB9ifoT024aMHXU49sog/rJoOgpp_yg).
 #### Education
 - 1984 - 1987, B.Sci, Electrical Engineering, Fudan University
 - 1990 - 1992, M.Sci, Electrical Engineering, Univ Texas Dallas
