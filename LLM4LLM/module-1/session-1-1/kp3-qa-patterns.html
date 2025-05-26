@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question-Answer Patterns - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .demo-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-icon {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .prediction-demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .demo-column {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .demo-column h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .text-sequence {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+        
+        .predicted-word {
+            background: #667eea;
+            color: white;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .context-words {
+            color: #666;
+        }
+        
+        .probability-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .interactive-demo {
+            background: #e8f2ff;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .demo-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .demo-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        
+        .demo-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .demo-btn.secondary {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 1px solid #e9ecef;
+        }
+        
+        .demo-btn.secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .pattern-viewer {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .pattern-examples {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .pattern-item {
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .pattern-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+        }
+        
+        .pattern-question {
+            color: #dc3545;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .pattern-answer {
+            color: #28a745;
+            font-weight: 500;
+        }
+        
+        .pattern-probability {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        .insights-panel {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .insights-panel h4 {
+            color: #856404;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .insights-panel h4:before {
+            content: "💡";
+            margin-right: 0.5rem;
+        }
+        
+        .insights-list {
+            list-style: none;
+        }
+        
+        .insights-list li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #856404;
+            font-weight: bold;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .comparison-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .comparison-card.traditional {
+            border-color: #dc3545;
+        }
+        
+        .comparison-card.llm {
+            border-color: #28a745;
+        }
+        
+        .comparison-card h4 {
+            margin-bottom: 1rem;
+        }
+        
+        .comparison-card.traditional h4 {
+            color: #dc3545;
+        }
+        
+        .comparison-card.llm h4 {
+            color: #28a745;
+        }
+        
+        @media (max-width: 968px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .prediction-demo {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 1</a> / 
+                Session 1.1
+            </div>
+            <h1>Question-Answer Patterns</h1>
+            <p>See how the same next-word prediction mechanism enables question answering</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="demo-section">
+            <h2 class="section-title">
+                <span class="section-icon">🔄</span>
+                Same Mechanism, Different Tasks
+            </h2>
+            
+            <div class="prediction-demo">
+                <div class="demo-column">
+                    <h3>Text Completion</h3>
+                    <div class="text-sequence">
+                        <span class="context-words">The cat sat on the</span> 
+                        <span class="predicted-word" id="completion-word">mat</span>
+                    </div>
+                    <div class="probability-bar">
+                        <div class="probability-fill" id="completion-prob" style="width: 75%">75%</div>
+                    </div>
+                    <p><small>Predicting the next word in a sentence</small></p>
+                </div>
+                
+                <div class="demo-column">
+                    <h3>Question Answering</h3>
+                    <div class="text-sequence">
+                        <span class="context-words">What is the capital of France?</span> 
+                        <span class="predicted-word" id="answer-word">Paris</span>
+                    </div>
+                    <div class="probability-bar">
+                        <div class="probability-fill" id="answer-prob" style="width: 85%">85%</div>
+                    </div>
+                    <p><small>Predicting the answer after a question</small></p>
+                </div>
+            </div>
+            
+            <div class="insights-panel">
+                <h4>Key Insight</h4>
+                <ul class="insights-list">
+                    <li>Both tasks use <strong>exactly the same</strong> next-word prediction mechanism</li>
+                    <li>The model learns that questions are often followed by answers in training data</li>
+                    <li>No special "question answering" programming - it emerges from patterns!</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">
+                <span class="section-icon">🎮</span>
+                Interactive Pattern Explorer
+            </h2>
+            
+            <div class="interactive-demo">
+                <div class="demo-controls">
+                    <button class="demo-btn" onclick="showPattern('factual')">Factual Questions</button>
+                    <button class="demo-btn" onclick="showPattern('math')">Math Problems</button>
+                    <button class="demo-btn" onclick="showPattern('creative')">Creative Tasks</button>
+                    <button class="demo-btn" onclick="showPattern('instructions')">Instructions</button>
+                    <button class="demo-btn secondary" onclick="showPattern('all')">Show All</button>
+                </div>
+                
+                <div class="pattern-viewer">
+                    <div class="pattern-examples" id="patternExamples">
+                        <!-- Patterns will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">
+                <span class="section-icon">⚖️</span>
+                Traditional vs. Language Model Approach
+            </h2>
+            
+            <div class="comparison-grid">
+                <div class="comparison-card traditional">
+                    <h4>Traditional Programming</h4>
+                    <p><strong>Rule-based systems:</strong></p>
+                    <ul style="text-align: left; margin: 1rem 0;">
+                        <li>Parse question structure</li>
+                        <li>Identify question type</li>
+                        <li>Look up answer in database</li>
+                        <li>Format response</li>
+                    </ul>
+                    <p><small>Requires explicit programming for each question type</small></p>
+                </div>
+                
+                <div class="comparison-card llm">
+                    <h4>Language Model Approach</h4>
+                    <p><strong>Pattern recognition:</strong></p>
+                    <ul style="text-align: left; margin: 1rem 0;">
+                        <li>Observe question → answer patterns</li>
+                        <li>Learn statistical relationships</li>
+                        <li>Predict likely continuation</li>
+                        <li>Generate contextual response</li>
+                    </ul>
+                    <p><small>Emerges naturally from next-word prediction training</small></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">
+                <span class="section-icon">🧠</span>
+                Why This Works: Training Data Patterns
+            </h2>
+            
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                <h4>Common Patterns in Training Data:</h4>
+                <div style="margin: 1rem 0; font-family: monospace;">
+                    <div style="margin: 0.5rem 0;">
+                        <span style="color: #dc3545;">Q: What year did World War II end?</span><br>
+                        <span style="color: #28a745;">A: World War II ended in 1945.</span>
+                    </div>
+                    <div style="margin: 0.5rem 0;">
+                        <span style="color: #dc3545;">Q: How do you calculate the area of a circle?</span><br>
+                        <span style="color: #28a745;">A: The area of a circle is π × r².</span>
+                    </div>
+                    <div style="margin: 0.5rem 0;">
+                        <span style="color: #dc3545;">Q: What is the capital of Japan?</span><br>
+                        <span style="color: #28a745;">A: The capital of Japan is Tokyo.</span>
+                    </div>
+                </div>
+                <p>The model learns that after "Q:" comes a question, and after "A:" comes an answer. It doesn't "understand" questions - it recognizes the pattern!</p>
+            </div>
+            
+            <div class="insights-panel">
+                <h4>Deep Insights</h4>
+                <ul class="insights-list">
+                    <li><strong>No special Q&A programming:</strong> Question answering emerges from general pattern recognition</li>
+                    <li><strong>Context matters:</strong> The model uses surrounding text to determine what kind of response is expected</li>
+                    <li><strong>Probability-based:</strong> Answers with higher probability in similar contexts are more likely</li>
+                    <li><strong>Limitation:</strong> The model can only "know" what was in its training data</li>
+                    <li><strong>Generalization:</strong> Can handle new questions by combining learned patterns</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const patterns = {
+            factual: [
+                {
+                    question: "What is the largest planet in our solar system?",
+                    answer: "Jupiter is the largest planet in our solar system.",
+                    probability: 92
+                },
+                {
+                    question: "Who wrote Romeo and Juliet?",
+                    answer: "William Shakespeare wrote Romeo and Juliet.",
+                    probability: 95
+                },
+                {
+                    question: "What is the chemical symbol for gold?",
+                    answer: "The chemical symbol for gold is Au.",
+                    probability: 88
+                }
+            ],
+            math: [
+                {
+                    question: "What is 15 + 27?",
+                    answer: "15 + 27 = 42",
+                    probability: 99
+                },
+                {
+                    question: "What is the square root of 144?",
+                    answer: "The square root of 144 is 12.",
+                    probability: 96
+                },
+                {
+                    question: "If a train travels 60 mph for 3 hours, how far does it go?",
+                    answer: "The train travels 180 miles (60 × 3 = 180).",
+                    probability: 85
+                }
+            ],
+            creative: [
+                {
+                    question: "Write a haiku about spring.",
+                    answer: "Cherry blossoms bloom\nGentle breeze carries sweet scents\nNew life awakens",
+                    probability: 65
+                },
+                {
+                    question: "Create a short story about a robot.",
+                    answer: "R2-X7 had always wondered what lay beyond the factory walls...",
+                    probability: 45
+                },
+                {
+                    question: "What would you do if you could fly?",
+                    answer: "If I could fly, I would soar above the clouds and explore...",
+                    probability: 55
+                }
+            ],
+            instructions: [
+                {
+                    question: "How do you make a paper airplane?",
+                    answer: "1. Fold a sheet of paper in half lengthwise\n2. Unfold and fold the top corners to the center...",
+                    probability: 78
+                },
+                {
+                    question: "Explain how photosynthesis works.",
+                    answer: "Photosynthesis is the process by which plants convert sunlight, carbon dioxide, and water into glucose and oxygen...",
+                    probability: 82
+                },
+                {
+                    question: "Summarize the main points of this article.",
+                    answer: "The main points are: 1) Language models use pattern recognition, 2) Questions and answers form predictable patterns...",
+                    probability: 70
+                }
+            ]
+        };
+        
+        function showPattern(type) {
+            const container = document.getElementById('patternExamples');
+            let patternsToShow = [];
+            
+            if (type === 'all') {
+                patternsToShow = Object.values(patterns).flat();
+            } else {
+                patternsToShow = patterns[type] || [];
+            }
+            
+            container.innerHTML = patternsToShow.map(pattern => `
+                <div class="pattern-item">
+                    <div class="pattern-question">Q: ${pattern.question}</div>
+                    <div class="pattern-answer">A: ${pattern.answer}</div>
+                    <div class="pattern-probability">Prediction confidence: ${pattern.probability}%</div>
+                </div>
+            `).join('');
+        }
+        
+        function animateCompletion() {
+            const completions = [
+                { word: "mat", prob: 75 },
+                { word: "chair", prob: 45 },
+                { word: "table", prob: 35 },
+                { word: "floor", prob: 55 }
+            ];
+            
+            const answers = [
+                { word: "Paris", prob: 85 },
+                { word: "London", prob: 15 },
+                { word: "Berlin", prob: 10 },
+                { word: "Madrid", prob: 8 }
+            ];
+            
+            let completionIndex = 0;
+            let answerIndex = 0;
+            
+            setInterval(() => {
+                const completion = completions[completionIndex % completions.length];
+                const answer = answers[answerIndex % answers.length];
+                
+                document.getElementById('completion-word').textContent = completion.word;
+                document.getElementById('completion-prob').style.width = completion.prob + '%';
+                document.getElementById('completion-prob').textContent = completion.prob + '%';
+                
+                document.getElementById('answer-word').textContent = answer.word;
+                document.getElementById('answer-prob').style.width = answer.prob + '%';
+                document.getElementById('answer-prob').textContent = answer.prob + '%';
+                
+                completionIndex++;
+                answerIndex++;
+            }, 3000);
+        }
+        
+        // Initialize
+        showPattern('factual');
+        animateCompletion();
+    </script>
+</body>
+</html>

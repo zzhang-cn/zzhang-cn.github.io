@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Frequency Explorer - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .controls-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+        
+        .visualization-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        .text-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+        
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .preset-btn {
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .chart-controls label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .chart-controls input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        
+        .top-words {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .top-words h4 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .word-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.5rem;
+        }
+        
+        .word-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .word-text {
+            font-weight: 500;
+        }
+        
+        .word-count {
+            color: #667eea;
+        }
+        
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .insights-panel ul {
+            list-style: none;
+        }
+        
+        .insights-panel li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-panel li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 1</a> / 
+                Session 1.1
+            </div>
+            <h1>Word Frequency Explorer</h1>
+            <p>Discover how word frequencies in natural language follow predictable power law patterns</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="controls-panel">
+            <h2 class="section-title">Input Text</h2>
+            
+            <div class="control-group">
+                <label class="control-label">Enter or paste text to analyze:</label>
+                <textarea class="text-input" id="textInput" placeholder="Type or paste your text here...">The quick brown fox jumps over the lazy dog. The dog was sleeping peacefully under the old oak tree. The fox was clever and quick, always looking for new adventures. The tree provided shade for many animals during the hot summer days.</textarea>
+            </div>
+            
+            <div class="preset-buttons">
+                <button class="preset-btn" onclick="loadPreset('simple')">Simple Text</button>
+                <button class="preset-btn" onclick="loadPreset('news')">News Article</button>
+                <button class="preset-btn" onclick="loadPreset('literature')">Literature</button>
+                <button class="preset-btn" onclick="loadPreset('technical')">Technical</button>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalWords">0</div>
+                    <div class="stat-label">Total Words</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="uniqueWords">0</div>
+                    <div class="stat-label">Unique Words</div>
+                </div>
+            </div>
+            
+            <div class="top-words">
+                <h4>Most Frequent Words</h4>
+                <div class="word-list" id="topWordsList"></div>
+            </div>
+            
+            <div class="insights-panel">
+                <h4>Key Insights</h4>
+                <ul id="insightsList">
+                    <li>Enter text to see frequency analysis</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="visualization-panel">
+            <h2 class="section-title">Frequency Distribution</h2>
+            
+            <div class="chart-controls">
+                <label>
+                    <input type="checkbox" id="logScale" checked onchange="updateChart()">
+                    Log Scale (shows power law clearly)
+                </label>
+                <label>
+                    <input type="checkbox" id="showTrendline" checked onchange="updateChart()">
+                    Show Power Law Trendline
+                </label>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="frequencyChart"></canvas>
+            </div>
+            
+            <div class="insights-panel">
+                <h4>About Power Laws in Language</h4>
+                <ul>
+                    <li><strong>Zipf's Law:</strong> The nth most frequent word appears roughly 1/n as often as the most frequent word</li>
+                    <li><strong>Long Tail:</strong> A few words are extremely common, while most words are rare</li>
+                    <li><strong>Predictable Pattern:</strong> This distribution is consistent across different languages and texts</li>
+                    <li><strong>ML Implications:</strong> Understanding this helps design better tokenization and model architectures</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        let chart = null;
+        let wordFrequencies = {};
+        
+        const presets = {
+            simple: "The cat sat on the mat. The dog chased the cat. The cat ran up the tree. The bird flew over the tree. The cat and the dog played together in the garden.",
+            
+            news: "The president announced new economic policies today during a press conference at the White House. The policies aim to address inflation and unemployment concerns that have been growing among economists and the general public. Market analysts expect these changes to have significant impact on stock prices and consumer spending patterns.",
+            
+            literature: "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair.",
+            
+            technical: "Machine learning algorithms process large datasets to identify patterns and make predictions. Neural networks use backpropagation to optimize their parameters through gradient descent. Deep learning models require substantial computational resources and training data to achieve optimal performance on complex tasks."
+        };
+        
+        function loadPreset(type) {
+            document.getElementById('textInput').value = presets[type];
+            analyzeText();
+        }
+        
+        function analyzeText() {
+            const text = document.getElementById('textInput').value.toLowerCase();
+            
+            // Tokenize text (simple word extraction)
+            const words = text.match(/\b[a-z]+\b/g) || [];
+            
+            // Count frequencies
+            wordFrequencies = {};
+            words.forEach(word => {
+                wordFrequencies[word] = (wordFrequencies[word] || 0) + 1;
+            });
+            
+            // Update statistics
+            updateStats(words, wordFrequencies);
+            
+            // Update visualizations
+            updateChart();
+            updateTopWords();
+            updateInsights();
+        }
+        
+        function updateStats(words, frequencies) {
+            document.getElementById('totalWords').textContent = words.length;
+            document.getElementById('uniqueWords').textContent = Object.keys(frequencies).length;
+        }
+        
+        function updateChart() {
+            const canvas = document.getElementById('frequencyChart');
+            const ctx = canvas.getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            // Sort words by frequency
+            const sortedWords = Object.entries(wordFrequencies)
+                .sort(([,a], [,b]) => b - a);
+            
+            if (sortedWords.length === 0) {
+                return;
+            }
+            
+            const logScale = document.getElementById('logScale').checked;
+            const showTrendline = document.getElementById('showTrendline').checked;
+            
+            // Prepare data
+            const ranks = sortedWords.map((_, i) => i + 1);
+            const frequencies = sortedWords.map(([, freq]) => freq);
+            
+            // Generate power law trendline (Zipf's law: frequency ∝ 1/rank)
+            const trendlineData = [];
+            if (showTrendline && frequencies.length > 0) {
+                const c = frequencies[0]; // Constant from most frequent word
+                for (let i = 0; i < Math.min(ranks.length, 50); i++) {
+                    trendlineData.push({
+                        x: ranks[i],
+                        y: c / ranks[i]
+                    });
+                }
+            }
+            
+            const datasets = [
+                {
+                    label: 'Word Frequencies',
+                    data: ranks.slice(0, 50).map((rank, i) => ({
+                        x: rank,
+                        y: frequencies[i]
+                    })),
+                    backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 1,
+                    pointRadius: 3
+                }
+            ];
+            
+            if (showTrendline && trendlineData.length > 0) {
+                datasets.push({
+                    label: 'Zipf\'s Law (1/rank)',
+                    data: trendlineData,
+                    type: 'line',
+                    borderColor: 'rgba(220, 38, 127, 1)',
+                    backgroundColor: 'rgba(220, 38, 127, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0
+                });
+            }
+            
+            chart = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: logScale ? 'logarithmic' : 'linear',
+                            title: {
+                                display: true,
+                                text: 'Word Rank'
+                            },
+                            min: 1
+                        },
+                        y: {
+                            type: logScale ? 'logarithmic' : 'linear',
+                            title: {
+                                display: true,
+                                text: 'Frequency'
+                            },
+                            min: logScale ? 1 : 0
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const rank = context.parsed.x;
+                                    const freq = context.parsed.y;
+                                    const word = sortedWords[rank - 1] ? sortedWords[rank - 1][0] : '';
+                                    return `"${word}": Rank ${rank}, Frequency ${freq}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateTopWords() {
+            const sortedWords = Object.entries(wordFrequencies)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 10);
+            
+            const container = document.getElementById('topWordsList');
+            container.innerHTML = sortedWords.map(([word, count]) => 
+                `<div class="word-item">
+                    <span class="word-text">${word}</span>
+                    <span class="word-count">${count}</span>
+                </div>`
+            ).join('');
+        }
+        
+        function updateInsights() {
+            const sortedWords = Object.entries(wordFrequencies)
+                .sort(([,a], [,b]) => b - a);
+            
+            if (sortedWords.length === 0) return;
+            
+            const insights = [];
+            const totalWords = Object.values(wordFrequencies).reduce((a, b) => a + b, 0);
+            const uniqueWords = Object.keys(wordFrequencies).length;
+            
+            // Calculate how much top words dominate
+            const top10Percent = Math.ceil(uniqueWords * 0.1);
+            const top10Coverage = sortedWords.slice(0, top10Percent)
+                .reduce((sum, [, freq]) => sum + freq, 0) / totalWords;
+            
+            insights.push(`Top 10% of words (${top10Percent} words) account for ${(top10Coverage * 100).toFixed(1)}% of all text`);
+            
+            // Check if follows Zipf's law approximately
+            if (sortedWords.length >= 3) {
+                const firstFreq = sortedWords[0][1];
+                const secondFreq = sortedWords[1][1];
+                const thirdFreq = sortedWords[2][1];
+                
+                const zipfRatio1 = firstFreq / secondFreq;
+                const zipfRatio2 = secondFreq / thirdFreq;
+                
+                if (zipfRatio1 > 1.5 && zipfRatio2 > 1.2) {
+                    insights.push('Text roughly follows Zipf\'s Law - each rank appears less frequently than the previous');
+                } else {
+                    insights.push('Text deviates from Zipf\'s Law - may be too short or have unusual word distribution');
+                }
+            }
+            
+            // Vocabulary richness
+            const vocabularyRichness = uniqueWords / totalWords;
+            if (vocabularyRichness > 0.6) {
+                insights.push('High vocabulary richness - many unique words, little repetition');
+            } else if (vocabularyRichness < 0.3) {
+                insights.push('Low vocabulary richness - lots of repeated words, common in simple or technical text');
+            } else {
+                insights.push('Moderate vocabulary richness - typical of natural text');
+            }
+            
+            document.getElementById('insightsList').innerHTML = insights.map(
+                insight => `<li>${insight}</li>`
+            ).join('');
+        }
+        
+        // Event listeners
+        document.getElementById('textInput').addEventListener('input', analyzeText);
+        
+        // Initial analysis
+        analyzeText();
+    </script>
+</body>
+</html>
