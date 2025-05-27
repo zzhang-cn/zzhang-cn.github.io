@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N-gram Builder - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .input-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .ngram-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        .text-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+        
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .preset-btn {
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .ngram-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+        
+        .ngram-toggle {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 0.25rem;
+        }
+        
+        .toggle-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .toggle-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .ngram-display {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .ngram-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+        
+        .ngram-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 4px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .ngram-text {
+            font-family: monospace;
+            font-weight: 500;
+        }
+        
+        .ngram-count {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .prediction-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .prediction-input {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+        
+        .context-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-family: monospace;
+        }
+        
+        .predict-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        
+        .predict-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .predictions-display {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .prediction-word {
+            font-family: monospace;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .prediction-prob {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .prob-bar {
+            width: 100px;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .prob-fill {
+            height: 100%;
+            background: #28a745;
+            transition: width 0.3s ease;
+        }
+        
+        .prob-text {
+            font-size: 0.9rem;
+            color: #666;
+            min-width: 40px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .insights-panel ul {
+            list-style: none;
+        }
+        
+        .insights-panel li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-panel li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .prediction-input {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 1</a> / 
+                Session 1.2
+            </div>
+            <h1>N-gram Builder</h1>
+            <p>Build n-grams from text and see how prediction quality changes with context size</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="main-grid">
+            <div class="input-panel">
+                <h2 class="section-title">Input Text</h2>
+                
+                <label for="textInput" style="display: block; font-weight: 500; margin-bottom: 0.5rem;">Enter text to analyze:</label>
+                <textarea id="textInput" class="text-input" placeholder="Type or paste your text here...">The cat sat on the mat. The dog chased the cat around the yard. The cat ran up the tree and the dog barked below.</textarea>
+                
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="loadPreset('simple')">Simple Story</button>
+                    <button class="preset-btn" onclick="loadPreset('dialogue')">Dialogue</button>
+                    <button class="preset-btn" onclick="loadPreset('news')">News Text</button>
+                    <button class="preset-btn" onclick="loadPreset('poetry')">Poetry</button>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalTokens">0</div>
+                        <div class="stat-label">Total Tokens</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="uniqueTokens">0</div>
+                        <div class="stat-label">Unique Tokens</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="ngramCount">0</div>
+                        <div class="stat-label">N-grams</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ngram-panel">
+                <h2 class="section-title">N-gram Explorer</h2>
+                
+                <div class="ngram-controls">
+                    <span style="font-weight: 500;">N-gram size:</span>
+                    <div class="ngram-toggle">
+                        <button class="toggle-btn active" onclick="setNgramSize(1)">Unigrams</button>
+                        <button class="toggle-btn" onclick="setNgramSize(2)">Bigrams</button>
+                        <button class="toggle-btn" onclick="setNgramSize(3)">Trigrams</button>
+                    </div>
+                </div>
+                
+                <div class="ngram-display">
+                    <div class="ngram-list" id="ngramList">
+                        <p style="color: #666; text-align: center;">Enter text to see n-grams</p>
+                    </div>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>N-gram Insights</h4>
+                    <ul id="ngramInsights">
+                        <li>Enter text to see analysis</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="prediction-section">
+            <h2 class="section-title">Next-Word Prediction</h2>
+            
+            <div class="prediction-input">
+                <input type="text" id="contextInput" class="context-input" placeholder="Enter context words (e.g., 'the cat')" value="the cat">
+                <button class="predict-btn" onclick="makePrediction()">Predict Next Word</button>
+            </div>
+            
+            <div class="predictions-display" id="predictionsDisplay">
+                <p style="color: #666; text-align: center;">Enter context to see predictions</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentNgramSize = 1;
+        let tokens = [];
+        let ngrams = {};
+        
+        const presets = {
+            simple: "The cat sat on the mat. The dog chased the cat around the yard. The cat ran up the tree and the dog barked below. The cat came down when the dog left.",
+            
+            dialogue: '"Hello," said Alice. "Hello," replied Bob. "How are you today?" asked Alice. "I am fine, thank you," said Bob. "That is good to hear," replied Alice.',
+            
+            news: "The president announced new economic policies yesterday. The policies focus on job creation and inflation control. Market analysts expect positive responses from investors. The announcement came after weeks of speculation.",
+            
+            poetry: "Roses are red, violets are blue. Sugar is sweet, and so are you. The sun shines bright, the moon glows white. Stars twinkle high throughout the night."
+        };
+        
+        function loadPreset(type) {
+            document.getElementById('textInput').value = presets[type];
+            analyzeText();
+        }
+        
+        function tokenize(text) {
+            // Simple tokenization - split on whitespace and punctuation
+            return text.toLowerCase()
+                      .replace(/[.,!?;:"()]/g, ' $& ')
+                      .split(/\s+/)
+                      .filter(token => token.length > 0);
+        }
+        
+        function generateNgrams(tokens, n) {
+            const ngrams = {};
+            
+            for (let i = 0; i <= tokens.length - n; i++) {
+                const ngram = tokens.slice(i, i + n).join(' ');
+                ngrams[ngram] = (ngrams[ngram] || 0) + 1;
+            }
+            
+            return ngrams;
+        }
+        
+        function analyzeText() {
+            const text = document.getElementById('textInput').value;
+            tokens = tokenize(text);
+            
+            // Update statistics
+            document.getElementById('totalTokens').textContent = tokens.length;
+            document.getElementById('uniqueTokens').textContent = new Set(tokens).size;
+            
+            // Generate and display n-grams
+            updateNgramDisplay();
+        }
+        
+        function setNgramSize(n) {
+            currentNgramSize = n;
+            
+            // Update button states
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            updateNgramDisplay();
+        }
+        
+        function updateNgramDisplay() {
+            if (tokens.length === 0) return;
+            
+            ngrams = generateNgrams(tokens, currentNgramSize);
+            
+            // Update n-gram count
+            document.getElementById('ngramCount').textContent = Object.keys(ngrams).length;
+            
+            // Sort n-grams by frequency
+            const sortedNgrams = Object.entries(ngrams)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 20); // Show top 20
+            
+            // Display n-grams
+            const ngramList = document.getElementById('ngramList');
+            ngramList.innerHTML = sortedNgrams.map(([ngram, count]) => 
+                `<div class="ngram-item">
+                    <span class="ngram-text">"${ngram}"</span>
+                    <span class="ngram-count">${count}</span>
+                </div>`
+            ).join('');
+            
+            // Update insights
+            updateInsights(sortedNgrams);
+        }
+        
+        function updateInsights(sortedNgrams) {
+            const insights = [];
+            const totalNgrams = Object.keys(ngrams).length;
+            const totalOccurrences = Object.values(ngrams).reduce((a, b) => a + b, 0);
+            
+            if (currentNgramSize === 1) {
+                insights.push(`Found ${totalNgrams} unique words from ${totalOccurrences} total words`);
+                if (sortedNgrams.length > 0) {
+                    insights.push(`Most common word: "${sortedNgrams[0][0]}" appears ${sortedNgrams[0][1]} times`);
+                }
+            } else if (currentNgramSize === 2) {
+                insights.push(`Found ${totalNgrams} unique word pairs (bigrams)`);
+                insights.push(`Bigrams help predict the next word based on the previous word`);
+                if (sortedNgrams.length > 0) {
+                    insights.push(`Most common bigram: "${sortedNgrams[0][0]}" appears ${sortedNgrams[0][1]} times`);
+                }
+            } else if (currentNgramSize === 3) {
+                insights.push(`Found ${totalNgrams} unique word triplets (trigrams)`);
+                insights.push(`Trigrams provide more context but become sparse quickly`);
+                if (sortedNgrams.length > 0) {
+                    insights.push(`Most common trigram: "${sortedNgrams[0][0]}" appears ${sortedNgrams[0][1]} times`);
+                }
+            }
+            
+            // Calculate sparsity
+            const uniqueRatio = totalNgrams / totalOccurrences;
+            if (uniqueRatio > 0.8) {
+                insights.push(`High sparsity: ${(uniqueRatio * 100).toFixed(1)}% of n-grams appear only once`);
+            }
+            
+            document.getElementById('ngramInsights').innerHTML = insights.map(
+                insight => `<li>${insight}</li>`
+            ).join('');
+        }
+        
+        function makePrediction() {
+            const context = document.getElementById('contextInput').value.toLowerCase().trim();
+            if (!context || tokens.length === 0) return;
+            
+            const contextTokens = tokenize(context);
+            const contextLength = contextTokens.length;
+            
+            // Find all n-grams that start with the context
+            const predictions = {};
+            
+            // Generate n-grams of size (context length + 1)
+            const predictionNgrams = generateNgrams(tokens, contextLength + 1);
+            
+            // Find matches
+            Object.entries(predictionNgrams).forEach(([ngram, count]) => {
+                const ngramTokens = ngram.split(' ');
+                const ngramContext = ngramTokens.slice(0, contextLength).join(' ');
+                
+                if (ngramContext === contextTokens.join(' ')) {
+                    const nextWord = ngramTokens[contextLength];
+                    predictions[nextWord] = (predictions[nextWord] || 0) + count;
+                }
+            });
+            
+            // Calculate probabilities
+            const totalPredictions = Object.values(predictions).reduce((a, b) => a + b, 0);
+            const predictionList = Object.entries(predictions)
+                .map(([word, count]) => ({
+                    word,
+                    count,
+                    probability: count / totalPredictions
+                }))
+                .sort((a, b) => b.probability - a.probability)
+                .slice(0, 5);
+            
+            // Display predictions
+            const predictionsDisplay = document.getElementById('predictionsDisplay');
+            
+            if (predictionList.length === 0) {
+                predictionsDisplay.innerHTML = '<p style="color: #666; text-align: center;">No predictions found for this context</p>';
+                return;
+            }
+            
+            predictionsDisplay.innerHTML = predictionList.map(pred => 
+                `<div class="prediction-item">
+                    <span class="prediction-word">${pred.word}</span>
+                    <div class="prediction-prob">
+                        <div class="prob-bar">
+                            <div class="prob-fill" style="width: ${pred.probability * 100}%"></div>
+                        </div>
+                        <span class="prob-text">${(pred.probability * 100).toFixed(1)}%</span>
+                    </div>
+                </div>`
+            ).join('');
+        }
+        
+        // Event listeners
+        document.getElementById('textInput').addEventListener('input', analyzeText);
+        document.getElementById('contextInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                makePrediction();
+            }
+        });
+        
+        // Initial analysis
+        analyzeText();
+    </script>
+</body>
+</html>
