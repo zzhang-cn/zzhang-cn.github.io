@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bengio Neural Language Model - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .model-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .controls-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        .model-canvas {
+            width: 100%;
+            height: 650px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        .word-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .word-option {
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .word-option:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .word-option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #5a6fd8;
+        }
+        
+        .softmax-detail {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .softmax-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .softmax-equation {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            text-align: center;
+        }
+        
+        .step-display {
+            font-size: 0.8rem;
+            color: #666;
+            margin: 0.5rem 0;
+        }
+        
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .insights-panel ul {
+            list-style: none;
+        }
+        
+        .insights-panel li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-panel li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        
+        .flow-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .flow-btn {
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        
+        .flow-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .flow-btn.active {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .model-canvas {
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 1</a> / 
+                Session 1.3
+            </div>
+            <h1>Bengio Neural Language Model</h1>
+            <p>Explore the complete neural network architecture from input words to probability distributions</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="main-grid">
+            <div class="model-panel">
+                <h2 class="section-title">Interactive Neural Language Model</h2>
+                
+                <canvas class="model-canvas" id="modelCanvas" width="800" height="650"></canvas>
+            </div>
+            
+            <div class="controls-panel">
+                <h2 class="section-title">Interactive Controls</h2>
+                
+                <div class="control-group">
+                    <div class="control-label">Animation Flow</div>
+                    <div class="flow-controls">
+                        <button class="flow-btn" onclick="showStep('input')">Input Words</button>
+                        <button class="flow-btn" onclick="showStep('embedding')">Embeddings</button>
+                        <button class="flow-btn" onclick="showStep('concat')">Concatenation</button>
+                        <button class="flow-btn" onclick="showStep('hidden')">Hidden Layer</button>
+                        <button class="flow-btn" onclick="showStep('output')">Output</button>
+                        <button class="flow-btn" onclick="showStep('all')">Show All</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">Change Input Words</div>
+                    <div style="margin-bottom: 0.5rem; font-size: 0.9rem; color: #666;">Position 1 (w₁):</div>
+                    <div class="word-selector">
+                        <div class="word-option selected" onclick="changeWord(0, 'The')">The</div>
+                        <div class="word-option" onclick="changeWord(0, 'A')">A</div>
+                        <div class="word-option" onclick="changeWord(0, 'My')">My</div>
+                    </div>
+                    
+                    <div style="margin: 1rem 0 0.5rem 0; font-size: 0.9rem; color: #666;">Position 2 (w₂):</div>
+                    <div class="word-selector">
+                        <div class="word-option selected" onclick="changeWord(1, 'cat')">cat</div>
+                        <div class="word-option" onclick="changeWord(1, 'dog')">dog</div>
+                        <div class="word-option" onclick="changeWord(1, 'bird')">bird</div>
+                    </div>
+                    
+                    <div style="margin: 1rem 0 0.5rem 0; font-size: 0.9rem; color: #666;">Position 3 (w₃):</div>
+                    <div class="word-selector">
+                        <div class="word-option selected" onclick="changeWord(2, 'sat')">sat</div>
+                        <div class="word-option" onclick="changeWord(2, 'ran')">ran</div>
+                        <div class="word-option" onclick="changeWord(2, 'jumped')">jumped</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">Softmax Details</div>
+                    <div class="softmax-detail">
+                        <div class="softmax-title">How Softmax Works:</div>
+                        <div class="softmax-equation">P(wᵢ) = exp(zᵢ) / Σ exp(zⱼ)</div>
+                        
+                        <div class="step-display" id="softmaxSteps">
+                            <div>1. Raw scores (logits): [2.1, 1.8, 0.9, 0.3, ...]</div>
+                            <div>2. Exponentials: [8.17, 6.05, 2.46, 1.35, ...]</div>
+                            <div>3. Sum: 18.03</div>
+                            <div>4. Probabilities: [0.45, 0.34, 0.14, 0.07, ...]</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Key Architecture Insights</h4>
+                    <ul id="insightsList">
+                        <li>Each word is converted to a dense vector (embedding)</li>
+                        <li>Embeddings are concatenated to form the input to the neural network</li>
+                        <li>Hidden layer learns complex patterns from the concatenated embeddings</li>
+                        <li>Output layer generates scores for each word in the vocabulary</li>
+                        <li>Softmax converts raw scores to probabilities that sum to 1</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let canvas, ctx;
+        let currentWords = ['The', 'cat', 'sat'];
+        let currentStep = 'all';
+        let animationProgress = 0;
+        
+        // Colors matching the SVG
+        const colors = {
+            input: { fill: '#E3F2FD', stroke: '#1976D2' },
+            embedding: { fill: '#E8F5E9', stroke: '#4CAF50' },
+            concat: { fill: '#FFF3E0', stroke: '#FF9800' },
+            hidden: { fill: '#F3E5F5', stroke: '#9C27B0' },
+            output: { fill: '#FFEBEE', stroke: '#F44336' },
+            connection: '#999'
+        };
+        
+        // Prediction data (same as before)
+        const predictionData = {
+            'The-cat-sat': { 'on': 0.45, 'down': 0.34, 'up': 0.14, 'quietly': 0.07 },
+            'The-cat-ran': { 'quickly': 0.52, 'away': 0.28, 'home': 0.15, 'fast': 0.05 },
+            'The-dog-sat': { 'down': 0.48, 'on': 0.31, 'still': 0.16, 'quietly': 0.05 },
+            'A-bird-flew': { 'away': 0.55, 'high': 0.25, 'overhead': 0.15, 'quickly': 0.05 }
+        };
+        
+        function initCanvas() {
+            canvas = document.getElementById('modelCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Set up high DPI rendering
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            drawModel();
+        }
+        
+        function drawModel() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Title
+            ctx.font = 'bold 20px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText("Bengio's Neural Language Model", 400, 30);
+            
+            // Draw each layer based on current step
+            if (currentStep === 'all' || currentStep === 'input') {
+                drawInputLayer();
+            }
+            
+            if (currentStep === 'all' || currentStep === 'embedding') {
+                drawEmbeddingLayer();
+                if (currentStep === 'all' || currentStep === 'input') {
+                    drawConnections('input-embedding');
+                }
+            }
+            
+            if (currentStep === 'all' || currentStep === 'concat') {
+                drawConcatenationLayer();
+                if (currentStep === 'all' || currentStep === 'embedding') {
+                    drawConnections('embedding-concat');
+                }
+            }
+            
+            if (currentStep === 'all' || currentStep === 'hidden') {
+                drawHiddenLayer();
+                if (currentStep === 'all' || currentStep === 'concat') {
+                    drawConnections('concat-hidden');
+                }
+            }
+            
+            if (currentStep === 'all' || currentStep === 'output') {
+                drawOutputLayer();
+                if (currentStep === 'all' || currentStep === 'hidden') {
+                    drawConnections('hidden-output');
+                }
+            }
+            
+            // Draw dimensions key
+            drawDimensionsKey();
+        }
+        
+        function drawInputLayer() {
+            const y = 70;
+            const positions = [120, 270, 420]; // Aligned with embeddings
+            
+            // Title - moved further left to avoid overlap
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'left';
+            ctx.fillText('Input Words', 20, y + 20); // Moved from 50 to 20
+            
+            currentWords.forEach((word, i) => {
+                const x = positions[i];
+                
+                // Word box
+                ctx.fillStyle = colors.input.fill;
+                ctx.strokeStyle = colors.input.stroke;
+                ctx.lineWidth = 2;
+                roundRect(ctx, x, y, 60, 40, 5); // Same width as embeddings
+                ctx.fill();
+                ctx.stroke();
+                
+                // Word text
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#333';
+                ctx.textAlign = 'center';
+                ctx.fillText(word, x + 30, y + 20);
+                
+                // Position label
+                ctx.font = '11px Arial';
+                ctx.fillStyle = '#666';
+                ctx.fillText(`w(t-${2-i})`, x + 30, y + 35);
+            });
+        }
+        
+        function drawEmbeddingLayer() {
+            const y = 150;
+            const positions = [120, 270, 420]; // Aligned with input
+            
+            // Title - moved further left to avoid overlap
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'left';
+            ctx.fillText('Embeddings', 20, y + 40); // Moved from 50 to 20
+            
+            positions.forEach((x, i) => {
+                // Embedding box
+                ctx.fillStyle = colors.embedding.fill;
+                ctx.strokeStyle = colors.embedding.stroke;
+                ctx.lineWidth = 2;
+                roundRect(ctx, x, y, 60, 80, 3);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Label
+                ctx.font = '12px Arial';
+                ctx.fillStyle = '#333';
+                ctx.textAlign = 'center';
+                ctx.fillText(`C(w${i+1})`, x + 30, y + 15);
+                
+                // Vector dots
+                for (let j = 0; j < 3; j++) {
+                    ctx.fillStyle = '#333';
+                    ctx.beginPath();
+                    ctx.arc(x + 30, y + 30 + j * 10, 2, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+                
+                // Ellipsis
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('⋮', x + 30, y + 65);
+                
+                // Dimension label
+                ctx.font = '10px Arial';
+                ctx.fillStyle = '#666';
+                ctx.fillText('[d]', x + 30, y + 75);
+            });
+        }
+        
+        function drawConcatenationLayer() {
+            const x = 250;
+            const y = 260;
+            
+            // Title - horizontally aligned with the block
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'left';
+            ctx.fillText('Concatenation', x - 100, y + 30); // Aligned with center of block
+            
+            // Concatenation box
+            ctx.fillStyle = colors.concat.fill;
+            ctx.strokeStyle = colors.concat.stroke;
+            ctx.lineWidth = 2;
+            roundRect(ctx, x, y, 200, 60, 3);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Label
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Concatenated', x + 100, y + 20);
+            ctx.font = '10px Arial';
+            ctx.fillText('[C(w₁); C(w₂); C(w₃)]', x + 100, y + 35);
+            
+            // Dimension box
+            ctx.fillStyle = '#FFE0B2';
+            ctx.strokeStyle = '#F57C00';
+            ctx.lineWidth = 1;
+            roundRect(ctx, x + 20, y + 40, 160, 15, 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.font = '10px Arial';
+            ctx.fillStyle = '#333';
+            ctx.fillText('n×d dimensions', x + 100, y + 50);
+        }
+        
+        function drawHiddenLayer() {
+            const y = 360; // Moved up to avoid overlap
+            const positions = [150, 220, 290, 380];
+            
+            // Title - moved further left to avoid overlap with neurons
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'left';
+            ctx.fillText('Hidden Layer', 20, y); // Moved from 50 to 20
+            
+            positions.forEach((x, i) => {
+                if (i === positions.length - 1) {
+                    // Last neuron (hₕ)
+                    ctx.fillStyle = colors.hidden.fill;
+                    ctx.strokeStyle = colors.hidden.stroke;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 20, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.font = '12px Arial';
+                    ctx.fillStyle = '#333';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('hₕ', x, y + 4);
+                } else if (i === positions.length - 2) {
+                    // Ellipsis
+                    ctx.font = '12px Arial';
+                    ctx.fillStyle = '#666';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('⋯', x, y + 4);
+                } else {
+                    // Regular neurons
+                    ctx.fillStyle = colors.hidden.fill;
+                    ctx.strokeStyle = colors.hidden.stroke;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 20, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    ctx.font = '12px Arial';
+                    ctx.fillStyle = '#333';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`h${i+1}`, x, y + 4);
+                }
+            });
+            
+            // Activation function label - moved to align better
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'left';
+            ctx.fillText('tanh(Wx + b)', 450, y + 4);
+        }
+        
+        function drawOutputLayer() {
+            const x = 120;
+            const y = 470; // Adjusted for new layout
+            
+            // Output box - even taller to accommodate proper spacing
+            ctx.fillStyle = colors.output.fill;
+            ctx.strokeStyle = colors.output.stroke;
+            ctx.lineWidth = 2;
+            roundRect(ctx, x, y, 550, 150, 3); // Made even taller (150px)
+            ctx.fill();
+            ctx.stroke();
+            
+            // Title - adjusted for taller box
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Output Layer', x + 275, y + 170); // Adjusted for taller box
+            
+            // Title
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Softmax Transformation', x + 275, y + 15); // Centered in wider box
+            
+            // Get prediction data
+            const key = currentWords.join('-');
+            const predictions = predictionData[key] || { 'word1': 0.4, 'word2': 0.3, 'word3': 0.2, 'word4': 0.1 };
+            const words = Object.keys(predictions);
+            const probs = Object.values(predictions);
+            
+            // Use different logits with wider ranges for better demonstration
+            // These should show more dramatic softmax peaking effect
+            const logitSets = {
+                'The-cat-sat': [2.5, 0.1, -1.2, -2.8],
+                'The-cat-ran': [1.8, -0.5, 0.3, -1.9],
+                'The-dog-sat': [0.9, 2.1, -0.8, -1.5],
+                'A-cat-sat': [2.2, 0.3, -0.9, -2.1],
+                'My-bird-jumped': [-0.2, -1.1, 2.4, -1.8]
+            };
+            const logits = logitSets[key] || [2.5, 0.1, -1.2, -2.8];
+            const exps = logits.map(l => Math.exp(l));
+            const sum = exps.reduce((a, b) => a + b, 0);
+            const finalProbs = exps.map(e => e / sum);
+            
+            // Find max values for scaling bars
+            const maxLogitAbs = Math.max(...logits.map(Math.abs)); // For symmetric scaling around 0
+            const maxExp = Math.max(...exps);
+            
+            // Draw before and after bars with proper spacing to avoid overlaps
+            const barWidth = 35;
+            const barSpacing = 50;
+            const startX = x + 30;
+            
+            // Section headers moved to very top of box
+            ctx.font = '11px Arial';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'center';
+            ctx.fillText('Raw Scores (logits)', startX + 90, y + 15); // Very top
+            ctx.fillText('After exp() - Peaking!', startX + 350, y + 15); // Very top
+            
+            // Bars positioned in middle with proper spacing
+            const barBaseline = y + 70; // Baseline for zero line
+            
+            logits.forEach((logit, i) => {
+                const barHeight = Math.abs(logit / maxLogitAbs) * 35;
+                const isNegative = logit < 0;
+                const barY = isNegative ? barBaseline : barBaseline - barHeight;
+                
+                ctx.fillStyle = `hsl(${220 + i * 30}, 70%, ${isNegative ? 80 : 60}%)`;
+                ctx.fillRect(startX + i * barSpacing, barY, barWidth, barHeight);
+                
+                // Value labels positioned to avoid overlap
+                ctx.font = '10px Arial';
+                ctx.fillStyle = '#333';
+                ctx.textAlign = 'center';
+                
+                if (isNegative) {
+                    // For negative bars: place value BELOW the bar
+                    ctx.fillText(logit.toFixed(1), startX + i * barSpacing + barWidth/2, barY + barHeight + 15);
+                } else {
+                    // For positive bars: place value ABOVE the bar  
+                    ctx.fillText(logit.toFixed(1), startX + i * barSpacing + barWidth/2, barY - 8);
+                }
+            });
+            
+            // Draw zero line
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2, 2]);
+            ctx.beginPath();
+            ctx.moveTo(startX - 10, barBaseline);
+            ctx.lineTo(startX + 200, barBaseline);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Arrow positioned in middle
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(startX + 220, barBaseline - 10);
+            ctx.lineTo(startX + 260, barBaseline - 10);
+            ctx.stroke();
+            
+            // Arrow head
+            ctx.beginPath();
+            ctx.moveTo(startX + 260, barBaseline - 10);
+            ctx.lineTo(startX + 255, barBaseline - 15);
+            ctx.moveTo(startX + 260, barBaseline - 10);
+            ctx.lineTo(startX + 255, barBaseline - 5);
+            ctx.stroke();
+            
+            ctx.font = '11px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('exp()', startX + 240, barBaseline - 20);
+            
+            // After exponential bars (all positive)
+            const afterStartX = startX + 280;
+            exps.forEach((exp, i) => {
+                const barHeight = (exp / maxExp) * 35;
+                const barY = barBaseline - barHeight;
+                
+                ctx.fillStyle = `hsl(${220 + i * 30}, 70%, ${i === 0 ? 40 : 70}%)`;
+                ctx.fillRect(afterStartX + i * barSpacing, barY, barWidth, barHeight);
+                
+                // Value labels above bars (all positive)
+                ctx.font = '10px Arial';
+                ctx.fillStyle = '#333';
+                ctx.textAlign = 'center';
+                ctx.fillText(exp.toFixed(2), afterStartX + i * barSpacing + barWidth/2, barY - 8);
+            });
+            
+            // Word labels at bottom with plenty of space
+            ctx.font = '10px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            words.forEach((word, i) => {
+                // Left side (logits)
+                ctx.fillText(word, startX + i * barSpacing + barWidth/2, y + 110);
+                // Right side (after exp)
+                ctx.fillText(word, afterStartX + i * barSpacing + barWidth/2, y + 110);
+            });
+            
+            // Final probabilities at very bottom
+            ctx.font = '11px Arial';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'left';
+            ctx.fillText('Final: ', x + 30, y + 135);
+            
+            let probX = x + 80;
+            finalProbs.forEach((prob, i) => {
+                ctx.fillStyle = `hsl(${220 + i * 30}, 70%, 50%)`;
+                ctx.fillText(`${words[i]}:${(prob * 100).toFixed(0)}%`, probX, y + 135);
+                probX += 90;
+            });
+            
+            // Softmax label
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'right';
+            ctx.fillText('softmax(z)', x + 540, y + 135);
+        }
+        
+        function drawConnections(type) {
+            ctx.strokeStyle = colors.connection;
+            ctx.lineWidth = 1;
+            
+            switch (type) {
+                case 'input-embedding':
+                    // Input to embeddings - now perfectly aligned
+                    const inputY = 110;
+                    const embeddingY = 150;
+                    [150, 300, 450].forEach((x, i) => {
+                        ctx.beginPath();
+                        ctx.moveTo(x, inputY);
+                        ctx.lineTo(x, embeddingY);
+                        ctx.stroke();
+                    });
+                    break;
+                    
+                case 'embedding-concat':
+                    // Embeddings to concatenation
+                    [150, 300, 450].forEach(x => {
+                        ctx.beginPath();
+                        ctx.moveTo(x, 230);
+                        ctx.lineTo(350, 260);
+                        ctx.stroke();
+                    });
+                    break;
+                    
+                case 'concat-hidden':
+                    // Concatenation to hidden
+                    [150, 220, 290, 380].forEach(x => {
+                        ctx.beginPath();
+                        ctx.moveTo(350, 320);
+                        ctx.lineTo(x, 340);
+                        ctx.stroke();
+                    });
+                    break;
+                    
+                case 'hidden-output':
+                    // Hidden to output - adjusted for wider output box
+                    [150, 220, 290, 380].forEach(x => {
+                        ctx.beginPath();
+                        ctx.moveTo(x, 380);
+                        ctx.lineTo(395, 470); // Centered on wider box
+                        ctx.stroke();
+                    });
+                    break;
+            }
+        }
+        
+        function drawDimensionsKey() {
+            const x = 600;
+            const y = 100;
+            
+            ctx.font = '11px Arial';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'left';
+            
+            const labels = [
+                'n = context size',
+                'd = embedding dim',
+                'h = hidden dim',
+                '|V| = vocab size'
+            ];
+            
+            labels.forEach((label, i) => {
+                ctx.fillText(label, x, y + i * 20);
+            });
+        }
+        
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+        
+        function showStep(step) {
+            currentStep = step;
+            
+            // Update button states
+            document.querySelectorAll('.flow-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            drawModel();
+        }
+        
+        function changeWord(position, word) {
+            currentWords[position] = word;
+            
+            // Update word selector highlighting
+            const selectors = document.querySelectorAll('.word-selector');
+            selectors[position].querySelectorAll('.word-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            drawModel();
+            updateSoftmaxSteps();
+            updateInsights();
+        }
+        
+        function updateSoftmaxSteps() {
+            const key = currentWords.join('-');
+            
+            // Use the same corrected logit sets as in the visualization
+            const logitSets = {
+                'The-cat-sat': [1.2, 0.8, -0.3, -1.1],
+                'The-cat-ran': [1.5, 0.2, 0.1, -0.8],
+                'The-cat-jumped': [0.7, 0.9, -0.1, -0.5],
+                'The-dog-sat': [0.9, 1.3, -0.5, -0.7],
+                'The-dog-ran': [1.4, 0.1, 0.2, -0.6],
+                'The-dog-jumped': [0.6, 0.7, 0.1, -0.2],
+                'The-bird-sat': [0.4, -0.1, 1.1, -0.7],
+                'The-bird-ran': [0.8, -0.2, 0.6, -0.1],
+                'The-bird-jumped': [0.3, 0.0, 1.3, -0.4],
+                'A-cat-sat': [1.1, 0.6, -0.1, -1.0],
+                'A-cat-ran': [1.3, 0.1, 0.3, -0.7],
+                'A-cat-jumped': [0.5, 0.8, 0.1, -0.4],
+                'A-dog-sat': [0.8, 1.1, -0.3, -0.6],
+                'A-dog-ran': [1.2, 0.0, 0.4, -0.5],
+                'A-dog-jumped': [0.4, 0.6, 0.3, -0.1],
+                'A-bird-sat': [0.2, -0.2, 1.2, -0.6],
+                'A-bird-ran': [0.6, -0.3, 0.8, 0.0],
+                'A-bird-jumped': [0.1, -0.1, 1.4, -0.3],
+                'My-cat-sat': [1.0, 0.5, 0.0, -0.9],
+                'My-cat-ran': [1.2, 0.0, 0.4, -0.6],
+                'My-cat-jumped': [0.4, 0.7, 0.2, -0.3],
+                'My-dog-sat': [0.7, 1.0, -0.2, -0.5],
+                'My-dog-ran': [1.1, -0.1, 0.5, -0.4],
+                'My-dog-jumped': [0.3, 0.5, 0.4, 0.0],
+                'My-bird-sat': [0.1, -0.3, 1.3, -0.5],
+                'My-bird-ran': [0.5, -0.4, 0.9, 0.1],
+                'My-bird-jumped': [0.0, -0.2, 1.5, -0.2]
+            };
+            
+            const logits = logitSets[key] || [1.2, 0.8, -0.3, -1.1];
+            const exps = logits.map(l => Math.exp(l));
+            const sum = exps.reduce((a, b) => a + b, 0);
+            const finalProbs = exps.map(e => e / sum);
+            
+            const stepsContainer = document.getElementById('softmaxSteps');
+            stepsContainer.innerHTML = `
+                <div>1. Raw scores (logits): [${logits.join(', ')}, ...]</div>
+                <div>2. Exponentials: [${exps.map(e => e.toFixed(2)).join(', ')}, ...] ← Peaking effect!</div>
+                <div>3. Sum: ${sum.toFixed(2)}</div>
+                <div>4. Probabilities: [${finalProbs.map(p => p.toFixed(3)).join(', ')}, ...]</div>
+                <div style="margin-top: 0.5rem; color: #667eea; font-weight: 500;">
+                    Notice: exp() amplifies differences & makes all values positive!
+                </div>
+                <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #888;">
+                    Current sequence: "${currentWords.join(' ')}" | Logits can be negative (tanh: -1 to 1)
+                </div>
+            `;
+        }
+        
+        function updateInsights() {
+            const insights = [
+                `Current input: "${currentWords.join(' ')}" → predict next word`,
+                'Each word is converted to a dense vector (embedding)',
+                'Embeddings are concatenated to form the input to the neural network',
+                'Hidden layer learns complex patterns from the concatenated embeddings',
+                'Output layer generates scores for each word in the vocabulary',
+                'Softmax converts raw scores to probabilities that sum to 1',
+                'This architecture enables learning from word sequences vs. n-gram counting'
+            ];
+            
+            document.getElementById('insightsList').innerHTML = insights.map(
+                insight => `<li>${insight}</li>`
+            ).join('');
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            initCanvas();
+            updateSoftmaxSteps();
+            updateInsights();
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            setTimeout(initCanvas, 100);
+        });
+    </script>
+</body>
+</html>
