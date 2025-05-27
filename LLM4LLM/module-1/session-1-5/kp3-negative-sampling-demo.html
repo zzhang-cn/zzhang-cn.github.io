@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Negative Sampling Demo - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .visualization-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .controls-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        .canvas-container {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            margin-bottom: 1rem;
+        }
+        
+        .context-window {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .window-tokens {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .token {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            background: white;
+            border: 1px solid #e9ecef;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+        
+        .token.center {
+            background: #667eea;
+            color: white;
+            border-color: #5a6fd8;
+            font-weight: bold;
+        }
+        
+        .token.context {
+            background: #28a745;
+            color: white;
+            border-color: #1e7e34;
+        }
+        
+        .token.negative {
+            background: #dc3545;
+            color: white;
+            border-color: #c82333;
+            position: relative;
+        }
+        
+        .token.negative::after {
+            content: '✗';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #dc3545;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .training-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .control-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            flex: 1;
+        }
+        
+        .control-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .control-btn.secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #e9ecef;
+        }
+        
+        .control-btn.secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .parameter-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .parameter-group {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .parameter-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .parameter-value {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e9ecef;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .text-display {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            margin-bottom: 1.5rem;
+            height: 100px;
+            overflow-y: auto;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .comparison-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .comparison-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .comparison-title.negative {
+            color: #dc3545;
+        }
+        
+        .comparison-title.positive {
+            color: #28a745;
+        }
+        
+        .comparison-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        
+        .comparison-icon.negative {
+            background: #dc3545;
+        }
+        
+        .comparison-icon.positive {
+            background: #28a745;
+        }
+        
+        .math-formula {
+            background: white;
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Times New Roman', Times, serif;
+            margin: 1rem 0;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .insights-panel ul {
+            list-style: none;
+        }
+        
+        .insights-panel li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-panel li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        
+        .word-dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .word-label {
+            position: absolute;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 2px 6px;
+            border-radius: 4px;
+            transform: translate(-50%, -100%);
+            margin-top: -8px;
+            white-space: nowrap;
+            font-weight: 500;
+            z-index: 1;
+        }
+        
+        .probability-arrow {
+            position: absolute;
+            height: 2px;
+            transform-origin: 0 0;
+            z-index: 0;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .parameter-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 1</a> / 
+                Session 1.5
+            </div>
+            <h1>Negative Sampling for Efficient Word Embedding Training</h1>
+            <p>Explore how negative sampling makes training Word2Vec dramatically more efficient</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="visualization-panel full-width">
+            <h2 class="section-title">Context Windows and Negative Sampling</h2>
+            
+            <div class="context-window">
+                <h3 style="margin-bottom: 1rem;">Training Example with Context Window</h3>
+                <div class="window-tokens" id="contextTokens">
+                    <div class="token">the</div>
+                    <div class="token context">quick</div>
+                    <div class="token center">brown</div>
+                    <div class="token context">fox</div>
+                    <div class="token">jumps</div>
+                </div>
+                <div style="margin-top: 1rem; color: #666;">
+                    <span style="color: #28a745; font-weight: 500;">Green:</span> Context words (positive samples)
+                    <span style="margin-left: 1rem; color: #dc3545; font-weight: 500;">Red:</span> Random words (negative samples)
+                </div>
+            </div>
+            
+            <div class="main-grid">
+                <div class="canvas-container" id="trainingCanvas"></div>
+                
+                <div class="controls-panel">
+                    <div class="training-controls">
+                        <button class="control-btn" id="trainBtn" onclick="runTrainingStep()">Run Training Step</button>
+                        <button class="control-btn secondary" id="resetBtn" onclick="resetSimulation()">Reset</button>
+                    </div>
+                    
+                    <div class="parameter-controls">
+                        <div class="parameter-group">
+                            <div class="parameter-label">
+                                <span>Context Window Size</span>
+                                <span class="parameter-value" id="windowSizeValue">2</span>
+                            </div>
+                            <input type="range" min="1" max="5" value="2" class="slider" id="windowSizeSlider" onchange="updateParameters()">
+                        </div>
+                        
+                        <div class="parameter-group">
+                            <div class="parameter-label">
+                                <span>Negative Samples</span>
+                                <span class="parameter-value" id="negativeSamplesValue">5</span>
+                            </div>
+                            <input type="range" min="1" max="20" value="5" class="slider" id="negativeSamplesSlider" onchange="updateParameters()">
+                        </div>
+                    </div>
+                    
+                    <div class="text-display" id="trainingLog">
+                        <div>// Training log will appear here</div>
+                        <div>// Adjust parameters and click "Run Training Step"</div>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="vocabSizeValue">10,000</div>
+                            <div class="stat-label">Vocabulary Size</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="comparisonValue">0.05%</div>
+                            <div class="stat-label">vs. Full Softmax</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="timeValue">20x</div>
+                            <div class="stat-label">Speed Increase</div>
+                        </div>
+                    </div>
+                    
+                    <div class="insights-panel">
+                        <h4>Negative Sampling Benefits</h4>
+                        <ul>
+                            <li>Dramatically reduces computation by sampling only a few negative examples</li>
+                            <li>Makes training on billions of words practical with limited resources</li>
+                            <li>Produces high-quality embeddings despite simplified objective</li>
+                            <li>Scales efficiently with vocabulary size (critical for language models)</li>
+                            <li>Preserves semantic relationships in the resulting word vectors</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="comparison-grid">
+            <div class="comparison-card">
+                <div class="comparison-title negative">
+                    <div class="comparison-icon negative">❌</div>
+                    <span>Traditional Softmax Approach</span>
+                </div>
+                <p>For each center word, calculate a probability for <strong>every word</strong> in the vocabulary:</p>
+                <div class="math-formula">
+                    P(c|w) = <span style="font-size: 1.2rem;">${\large\frac{e^{v_c \cdot v_w}}{\sum_{c' \in V} e^{v_{c'} \cdot v_w}}}$</span>
+                </div>
+                <p>This requires:</p>
+                <ul style="margin-left: 1.5rem;">
+                    <li>Dot product with <strong>every word vector</strong> in vocabulary</li>
+                    <li>Sum over all vocabulary (often 100,000+ words)</li>
+                    <li>Computational complexity: <strong>O(V)</strong> where V is vocabulary size</li>
+                </ul>
+                <p style="margin-top: 1rem; color: #dc3545;">Extremely computationally expensive for large vocabularies!</p>
+            </div>
+            
+            <div class="comparison-card">
+                <div class="comparison-title positive">
+                    <div class="comparison-icon positive">✓</div>
+                    <span>Negative Sampling Approach</span>
+                </div>
+                <p>For each center word, train on:</p>
+                <ul style="margin-left: 1.5rem;">
+                    <li>Actual context words (positive samples)</li>
+                    <li>A few random words (negative samples)</li>
+                </ul>
+                <div class="math-formula">
+                    <span style="font-size: 1.1rem;">${\log \sigma(v_c \cdot v_w) + \sum_{i=1}^{k} \mathbb{E}_{c_i \sim P_n(w)} [\log \sigma(-v_{c_i} \cdot v_w)]}$</span>
+                </div>
+                <p>This requires:</p>
+                <ul style="margin-left: 1.5rem;">
+                    <li>Dot product with only <strong>k</strong> negative samples (usually 5-20)</li>
+                    <li>No summation over entire vocabulary</li>
+                    <li>Computational complexity: <strong>O(k)</strong> where k is number of negative samples</li>
+                </ul>
+                <p style="margin-top: 1rem; color: #28a745;">Makes training on billions of words practical!</p>
+            </div>
+        </div>
+        
+        <div class="insights-panel full-width">
+            <h4>How Negative Sampling Works</h4>
+            <ul>
+                <li><strong>Positive Sampling:</strong> For a center word, its context words (within window) are positive examples</li>
+                <li><strong>Negative Sampling:</strong> Randomly sample words from vocabulary as negative examples</li>
+                <li><strong>Simplified Objective:</strong> Binary classification instead of multi-class prediction</li>
+                <li><strong>Unigram Distribution:</strong> Sample according to word frequency (raised to power 3/4) for better performance</li>
+                <li><strong>Mathematical Foundation:</strong> Approximates the NCE (Noise Contrastive Estimation) approach</li>
+                <li><strong>Bridge to Next Module:</strong> This efficiency enables training on vast text corpora, setting the stage for larger models</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Canvas setup
+        const canvas = document.createElement('canvas');
+        const container = document.getElementById('trainingCanvas');
+        container.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        
+        // Simulation parameters
+        let windowSize = 2;
+        let negativeSamples = 5;
+        let trainingStep = 0;
+        let vocabSize = 10000;
+        
+        // Sample sentences
+        const sentences = [
+            "the quick brown fox jumps over the lazy dog",
+            "a fast red fox runs through the forest",
+            "the dog barks at the mailman",
+            "brown bears and black bears are different species",
+            "she quickly jumped over the fence"
+        ];
+        
+        // Current center word and context
+        let currentSentence = sentences[0].split(" ");
+        let centerIndex = 2; // "brown"
+        
+        // Negative samples
+        let currentNegatives = [];
+        
+        // Word coordinates in 2D space (for visualization)
+        const wordCoordinates = {
+            "the": {x: 150, y: 150},
+            "quick": {x: 200, y: 100},
+            "brown": {x: 250, y: 150},
+            "fox": {x: 300, y: 200},
+            "jumps": {x: 350, y: 150},
+            "over": {x: 400, y: 100},
+            "lazy": {x: 450, y: 150},
+            "dog": {x: 500, y: 200},
+            "a": {x: 150, y: 250},
+            "fast": {x: 200, y: 300},
+            "red": {x: 250, y: 250},
+            "runs": {x: 300, y: 300},
+            "through": {x: 350, y: 250},
+            "forest": {x: 400, y: 300},
+            "barks": {x: 450, y: 250},
+            "at": {x: 500, y: 300},
+            "mailman": {x: 150, y: 350},
+            "black": {x: 200, y: 400},
+            "bears": {x: 250, y: 350},
+            "and": {x: 300, y: 400},
+            "are": {x: 350, y: 350},
+            "different": {x: 400, y: 400},
+            "species": {x: 450, y: 350},
+            "she": {x: 500, y: 400},
+            "quickly": {x: 200, y: 200},
+            "jumped": {x: 400, y: 200},
+            "fence": {x: 450, y: 400}
+        };
+        
+        // Random words for negative sampling
+        const randomWords = [
+            "computer", "apple", "banana", "car", "desk", 
+            "elephant", "flower", "guitar", "house", "island",
+            "jacket", "keyboard", "lamp", "mountain", "notebook",
+            "ocean", "pencil", "queen", "river", "sun"
+        ];
+        
+        function resizeCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            
+            ctx.scale(dpr, dpr);
+            
+            // Reset CSS size
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            
+            drawVisualization();
+        }
+        
+        function drawVisualization() {
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw 2D embedding space visualization
+            drawEmbeddingSpace(width, height);
+        }
+        
+        function drawEmbeddingSpace(width, height) {
+            // Draw background grid
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            
+            // Vertical lines
+            for (let x = 50; x < width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let y = 50; y < height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // Draw title
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Word Vector Space Visualization (2D Projection)', width / 2, 20);
+            
+            // Draw center word
+            const centerWord = currentSentence[centerIndex];
+            
+            if (centerWord in wordCoordinates) {
+                const centerX = wordCoordinates[centerWord].x;
+                const centerY = wordCoordinates[centerWord].y;
+                
+                // Draw center word dot
+                ctx.fillStyle = '#667eea';
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Draw center word label
+                ctx.font = 'bold 14px Arial';
+                ctx.fillStyle = '#667eea';
+                ctx.textAlign = 'center';
+                ctx.fillText(centerWord, centerX, centerY - 15);
+                
+                // Get context words
+                const contextWords = [];
+                for (let i = Math.max(0, centerIndex - windowSize); i < centerIndex; i++) {
+                    contextWords.push(currentSentence[i]);
+                }
+                for (let i = centerIndex + 1; i <= Math.min(currentSentence.length - 1, centerIndex + windowSize); i++) {
+                    contextWords.push(currentSentence[i]);
+                }
+                
+                // Draw context words
+                contextWords.forEach(word => {
+                    if (word in wordCoordinates) {
+                        const wordX = wordCoordinates[word].x;
+                        const wordY = wordCoordinates[word].y;
+                        
+                        // Draw connection line (positive sample)
+                        ctx.strokeStyle = '#28a745';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(centerX, centerY);
+                        ctx.lineTo(wordX, wordY);
+                        ctx.stroke();
+                        
+                        // Draw word dot
+                        ctx.fillStyle = '#28a745';
+                        ctx.beginPath();
+                        ctx.arc(wordX, wordY, 6, 0, 2 * Math.PI);
+                        ctx.fill();
+                        
+                        // Draw word label
+                        ctx.font = '12px Arial';
+                        ctx.fillStyle = '#28a745';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(word, wordX, wordY - 12);
+                        
+                        // Draw "Maximize" label on line
+                        const midX = (centerX + wordX) / 2;
+                        const midY = (centerY + wordY) / 2;
+                        
+                        ctx.font = '10px Arial';
+                        ctx.fillStyle = '#28a745';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('maximize similarity', midX, midY - 5);
+                    }
+                });
+                
+                // Draw negative samples
+                currentNegatives.forEach(word => {
+                    if (word in wordCoordinates) {
+                        const wordX = wordCoordinates[word].x;
+                        const wordY = wordCoordinates[word].y;
+                        
+                        // Draw connection line (negative sample)
+                        ctx.strokeStyle = '#dc3545';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([3, 2]);
+                        ctx.beginPath();
+                        ctx.moveTo(centerX, centerY);
+                        ctx.lineTo(wordX, wordY);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        
+                        // Draw word dot
+                        ctx.fillStyle = '#dc3545';
+                        ctx.beginPath();
+                        ctx.arc(wordX, wordY, 6, 0, 2 * Math.PI);
+                        ctx.fill();
+                        
+                        // Draw word label
+                        ctx.font = '12px Arial';
+                        ctx.fillStyle = '#dc3545';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(word, wordX, wordY - 12);
+                        
+                        // Draw "Minimize" label on line
+                        const midX = (centerX + wordX) / 2;
+                        const midY = (centerY + wordY) / 2;
+                        
+                        ctx.font = '10px Arial';
+                        ctx.fillStyle = '#dc3545';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('minimize similarity', midX, midY - 5);
+                    }
+                });
+            }
+            
+            // Draw legend
+            const legendX = width - 150;
+            const legendY = height - 80;
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillRect(legendX - 10, legendY - 10, 160, 90);
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(legendX - 10, legendY - 10, 160, 90);
+            
+            // Center word
+            ctx.fillStyle = '#667eea';
+            ctx.beginPath();
+            ctx.arc(legendX, legendY, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'left';
+            ctx.fillText('Center Word', legendX + 15, legendY + 4);
+            
+            // Context word
+            ctx.fillStyle = '#28a745';
+            ctx.beginPath();
+            ctx.arc(legendX, legendY + 25, 6, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'left';
+            ctx.fillText('Context Word (+)', legendX + 15, legendY + 25 + 4);
+            
+            // Negative sample
+            ctx.fillStyle = '#dc3545';
+            ctx.beginPath();
+            ctx.arc(legendX, legendY + 50, 6, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'left';
+            ctx.fillText('Negative Sample (-)', legendX + 15, legendY + 50 + 4);
+        }
+        
+        function updateContextWindow() {
+            const container = document.getElementById('contextTokens');
+            let html = '';
+            
+            currentSentence.forEach((word, i) => {
+                if (i === centerIndex) {
+                    html += `<div class="token center">${word}</div>`;
+                } else if (
+                    (i >= centerIndex - windowSize && i < centerIndex) ||
+                    (i > centerIndex && i <= centerIndex + windowSize)
+                ) {
+                    html += `<div class="token context">${word}</div>`;
+                } else {
+                    html += `<div class="token">${word}</div>`;
+                }
+            });
+            
+            // Add negative samples
+            currentNegatives.forEach(word => {
+                html += `<div class="token negative">${word}</div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function updateParameters() {
+            // Update window size
+            windowSize = parseInt(document.getElementById('windowSizeSlider').value);
+            document.getElementById('windowSizeValue').textContent = windowSize;
+            
+            // Update negative samples
+            negativeSamples = parseInt(document.getElementById('negativeSamplesSlider').value);
+            document.getElementById('negativeSamplesValue').textContent = negativeSamples;
+            
+            // Update stats
+            updateStats();
+            
+            // Update context window visualization
+            updateContextWindow();
+            
+            // Redraw visualization
+            drawVisualization();
+        }
+        
+        function updateStats() {
+            // Calculate comparison with full softmax
+            const comparisonPercent = ((negativeSamples / vocabSize) * 100).toFixed(2);
+            document.getElementById('comparisonValue').textContent = comparisonPercent + '%';
+            
+            // Calculate speed increase (approximate)
+            const speedUp = Math.round(vocabSize / (negativeSamples + 1));
+            document.getElementById('timeValue').textContent = speedUp + 'x';
+            
+            // Update vocab size (with commas)
+            document.getElementById('vocabSizeValue').textContent = vocabSize.toLocaleString();
+        }
+        
+        function sampleNegatives() {
+            // Clear current negatives
+            currentNegatives = [];
+            
+            // Get context words (to avoid sampling them)
+            const contextWords = new Set();
+            for (let i = Math.max(0, centerIndex - windowSize); i < centerIndex; i++) {
+                contextWords.add(currentSentence[i]);
+            }
+            for (let i = centerIndex + 1; i <= Math.min(currentSentence.length - 1, centerIndex + windowSize); i++) {
+                contextWords.add(currentSentence[i]);
+            }
+            contextWords.add(currentSentence[centerIndex]); // Also exclude center word
+            
+            // Sample random words that aren't in the context
+            while (currentNegatives.length < negativeSamples) {
+                const randomWord = randomWords[Math.floor(Math.random() * randomWords.length)];
+                if (!contextWords.has(randomWord) && !currentNegatives.includes(randomWord)) {
+                    currentNegatives.push(randomWord);
+                }
+            }
+            
+            // Update visualization
+            updateContextWindow();
+        }
+        
+        function runTrainingStep() {
+            // Increment step counter
+            trainingStep++;
+            
+            // Sample new negatives
+            sampleNegatives();
+            
+            // Update log
+            updateTrainingLog();
+            
+            // Redraw visualization
+            drawVisualization();
+        }
+        
+        function updateTrainingLog() {
+            const log = document.getElementById('trainingLog');
+            
+            // Get context words
+            const contextWords = [];
+            for (let i = Math.max(0, centerIndex - windowSize); i < centerIndex; i++) {
+                contextWords.push(currentSentence[i]);
+            }
+            for (let i = centerIndex + 1; i <= Math.min(currentSentence.length - 1, centerIndex + windowSize); i++) {
+                contextWords.push(currentSentence[i]);
+            }
+            
+            // Format log entry
+            const centerWord = currentSentence[centerIndex];
+            const entry = `// Step ${trainingStep}: Training center word "${centerWord}"
+// Positive samples: ${contextWords.join(', ')}
+// Negative samples: ${currentNegatives.join(', ')}
+// Processed ${contextWords.length} positive and ${currentNegatives.length} negative examples
+// (vs. ${vocabSize} comparisons with full softmax)`;
+            
+            log.innerHTML = entry;
+        }
+        
+        function resetSimulation() {
+            // Reset step counter
+            trainingStep = 0;
+            
+            // Pick a random sentence
+            const sentenceIndex = Math.floor(Math.random() * sentences.length);
+            currentSentence = sentences[sentenceIndex].split(" ");
+            
+            // Pick a random center word (not first or last)
+            centerIndex = Math.floor(Math.random() * (currentSentence.length - 2)) + 1;
+            
+            // Sample new negatives
+            sampleNegatives();
+            
+            // Update context window
+            updateContextWindow();
+            
+            // Clear log
+            document.getElementById('trainingLog').innerHTML = "// Training reset with new example";
+            
+            // Redraw visualization
+            drawVisualization();
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            updateParameters();
+            sampleNegatives();
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+            });
+        });
+    </script>
+</body>
+</html>
