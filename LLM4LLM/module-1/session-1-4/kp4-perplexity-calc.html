@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perplexity Calculator - LLM4LLM (Test Version)</title>
+    
+    <!-- Inline shared styles for testing -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        /* Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        /* Panels */
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        /* Control Groups */
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        /* Form Elements */
+        .text-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+        
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        /* Buttons */
+        .demo-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            margin: 0.25rem;
+        }
+        
+        .demo-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .demo-btn.secondary {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 1px solid #e9ecef;
+        }
+        
+        .demo-btn.secondary:hover {
+            background: #e9ecef;
+        }
+        
+        /* Preset buttons */
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .preset-btn {
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        /* Statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        /* Model comparison */
+        .model-comparison {
+            display: grid;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .model-result {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .model-info {
+            flex: 1;
+        }
+        
+        .model-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .model-details {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .model-metrics {
+            text-align: right;
+        }
+        
+        .perplexity-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .performance-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        /* Charts */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+        
+        /* Insights Panel */
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .insights-panel ul {
+            list-style: none;
+        }
+        
+        .insights-panel li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-panel li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        
+        /* Calculation display */
+        .calculation-display {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .calculation-step {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .step-label {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        /* Interactive demo */
+        .interactive-demo {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .interactive-demo h4 {
+            color: #856404;
+            margin-bottom: 1rem;
+        }
+        
+        /* Word-by-word analysis */
+        .word-analysis {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .word-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.25rem 0;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .word-item:last-child {
+            border-bottom: none;
+        }
+        
+        .word-text {
+            font-family: monospace;
+            font-weight: 500;
+        }
+        
+        .word-probability {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .preset-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auto-generated header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 1</a> / 
+                Session 1.4
+            </div>
+            <h1>Perplexity Calculator</h1>
+            <p>Calculate and compare perplexity scores across different language models</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="main-grid">
+            <div class="panel">
+                <h2 class="section-title">Test Text Input</h2>
+                
+                <div class="control-group">
+                    <label class="control-label">Enter test text to evaluate:</label>
+                    <textarea class="text-input" id="testText" placeholder="Type or paste text here...">The cat sat on the mat. The dog chased the cat around the yard.</textarea>
+                </div>
+                
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="loadPreset('simple')">Simple Text</button>
+                    <button class="preset-btn" onclick="loadPreset('complex')">Complex Text</button>
+                    <button class="preset-btn" onclick="loadPreset('technical')">Technical Text</button>
+                    <button class="preset-btn" onclick="loadPreset('poetry')">Poetry</button>
+                </div>
+                
+                <div class="control-group">
+                    <button class="demo-btn" onclick="calculatePerplexity()">Calculate Perplexity</button>
+                    <button class="demo-btn secondary" onclick="resetCalculation()">Reset</button>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalTokens">0</div>
+                        <div class="stat-label">Total Tokens</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgLogProb">0.00</div>
+                        <div class="stat-label">Avg Log Prob</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="crossEntropy">0.00</div>
+                        <div class="stat-label">Cross-Entropy</div>
+                    </div>
+                </div>
+                
+                <div class="calculation-display" id="calculationSteps" style="display: none;">
+                    <h4 style="margin-bottom: 1rem;">Calculation Steps</h4>
+                    <div id="calculationContent">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Key Insights</h4>
+                    <ul id="insightsList">
+                        <li>Enter text to see perplexity calculations</li>
+                        <li>Lower perplexity indicates better language modeling</li>
+                        <li>Compare different models on the same test text</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2 class="section-title">Model Comparison</h2>
+                
+                <div class="model-comparison" id="modelComparison">
+                    <!-- Populated by JavaScript -->
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="perplexityChart"></canvas>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Understanding Perplexity</h4>
+                    <ul>
+                        <li><strong>Definition:</strong> 2^(cross-entropy) - measures model uncertainty</li>
+                        <li><strong>Interpretation:</strong> Average number of equally likely next words</li>
+                        <li><strong>Lower is better:</strong> Less confused by the text</li>
+                        <li><strong>Typical ranges:</strong> N-grams: 50-200, Neural: 20-50, Modern LLMs: &lt;10</li>
+                        <li><strong>Comparison tool:</strong> Use same test set for fair evaluation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel full-width">
+            <h2 class="section-title">Word-by-Word Analysis</h2>
+            
+            <div class="interactive-demo">
+                <h4>How Perplexity is Calculated</h4>
+                <p><strong>Step 1:</strong> For each word, the model assigns a probability P(word | context)</p>
+                <p><strong>Step 2:</strong> Calculate log probability: log₂(P(word | context))</p>
+                <p><strong>Step 3:</strong> Average all log probabilities across the text</p>
+                <p><strong>Step 4:</strong> Perplexity = 2^(-average_log_probability)</p>
+            </div>
+            
+            <div class="word-analysis" id="wordAnalysis">
+                <div style="text-align: center; color: #666; padding: 2rem;">
+                    Calculate perplexity to see word-by-word breakdown
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- External Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <script>
+        // Inline shared utilities for testing
+        function formatNumber(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(0) + 'k';
+            return num.toString();
+        }
+        
+        function destroyChart(chart) {
+            if (chart && typeof chart.destroy === 'function') {
+                chart.destroy();
+            }
+        }
+        
+        function tokenize(text) {
+            return text.toLowerCase().trim().split(/\s+/).filter(token => token.length > 0);
+        }
+        
+        // Page-specific code
+        let chart = null;
+        let modelResults = {};
+        
+        const presets = {
+            simple: "The cat sat on the mat. The dog chased the cat. The cat ran up the tree.",
+            complex: "Despite the unprecedented economic challenges facing contemporary society, innovative technological solutions continue to emerge from multidisciplinary research collaborations.",
+            technical: "Neural networks utilize backpropagation algorithms to optimize weight parameters through gradient descent optimization techniques in high-dimensional parameter spaces.",
+            poetry: "Shall I compare thee to a summer's day? Thou art more lovely and more temperate."
+        };
+        
+        // Simulated model probabilities (in practice, these would come from trained models)
+        const modelConfigs = {
+            'N-gram (Trigram)': {
+                color: '#dc3545',
+                getWordProbability: (word, context) => {
+                    // Simulate trigram probabilities
+                    const commonWords = ['the', 'and', 'a', 'to', 'of', 'in', 'is', 'it', 'on', 'that'];
+                    if (commonWords.includes(word)) {
+                        return 0.1 + Math.random() * 0.1; // 10-20% for common words
+                    } else {
+                        return 0.01 + Math.random() * 0.05; // 1-6% for others
+                    }
+                }
+            },
+            'Simple Neural': {
+                color: '#ffc107',
+                getWordProbability: (word, context) => {
+                    // Simulate neural model probabilities (better than n-gram)
+                    const commonWords = ['the', 'and', 'a', 'to', 'of', 'in', 'is', 'it', 'on', 'that'];
+                    if (commonWords.includes(word)) {
+                        return 0.15 + Math.random() * 0.15; // 15-30% for common words
+                    } else {
+                        return 0.02 + Math.random() * 0.08; // 2-10% for others
+                    }
+                }
+            },
+            'Bengio Model': {
+                color: '#28a745',
+                getWordProbability: (word, context) => {
+                    // Simulate Bengio model (even better with more context)
+                    const commonWords = ['the', 'and', 'a', 'to', 'of', 'in', 'is', 'it', 'on', 'that'];
+                    if (commonWords.includes(word)) {
+                        return 0.2 + Math.random() * 0.2; // 20-40% for common words
+                    } else {
+                        return 0.03 + Math.random() * 0.12; // 3-15% for others
+                    }
+                }
+            },
+            'Large Model': {
+                color: '#667eea',
+                getWordProbability: (word, context) => {
+                    // Simulate large model (best performance)
+                    const commonWords = ['the', 'and', 'a', 'to', 'of', 'in', 'is', 'it', 'on', 'that'];
+                    if (commonWords.includes(word)) {
+                        return 0.25 + Math.random() * 0.25; // 25-50% for common words
+                    } else {
+                        return 0.05 + Math.random() * 0.15; // 5-20% for others
+                    }
+                }
+            }
+        };
+        
+        function loadPreset(type) {
+            document.getElementById('testText').value = presets[type];
+            resetCalculation();
+        }
+        
+        function calculatePerplexity() {
+            const text = document.getElementById('testText').value.trim();
+            if (!text) {
+                alert('Please enter some test text first.');
+                return;
+            }
+            
+            const tokens = tokenize(text);
+            if (tokens.length === 0) {
+                alert('No valid tokens found in the text.');
+                return;
+            }
+            
+            // Calculate perplexity for each model
+            modelResults = {};
+            const wordAnalysisData = [];
+            
+            Object.entries(modelConfigs).forEach(([modelName, config]) => {
+                let totalLogProb = 0;
+                const wordProbs = [];
+                
+                tokens.forEach((token, index) => {
+                    const context = tokens.slice(Math.max(0, index - 2), index); // Use 2 words of context
+                    const probability = config.getWordProbability(token, context);
+                    const logProb = Math.log2(probability);
+                    
+                    totalLogProb += logProb;
+                    wordProbs.push({ word: token, probability, logProb });
+                });
+                
+                const avgLogProb = totalLogProb / tokens.length;
+                const crossEntropy = -avgLogProb;
+                const perplexity = Math.pow(2, crossEntropy);
+                
+                modelResults[modelName] = {
+                    perplexity,
+                    crossEntropy,
+                    avgLogProb,
+                    wordProbs,
+                    color: config.color
+                };
+                
+                // Store word analysis for the best model (lowest perplexity)
+                if (wordAnalysisData.length === 0 || perplexity < Math.min(...Object.values(modelResults).map(r => r.perplexity))) {
+                    wordAnalysisData.splice(0, wordAnalysisData.length, ...wordProbs);
+                }
+            });
+            
+            // Update displays
+            updateStats(tokens.length);
+            updateModelComparison();
+            updateChart();
+            updateWordAnalysis(wordAnalysisData);
+            updateCalculationSteps(tokens);
+            updateInsights();
+        }
+        
+        function updateStats(tokenCount) {
+            document.getElementById('totalTokens').textContent = tokenCount;
+            
+            // Use the best model's results for main stats
+            const bestModel = Object.entries(modelResults).reduce((best, [name, result]) => 
+                !best || result.perplexity < best[1].perplexity ? [name, result] : best, null);
+            
+            if (bestModel) {
+                const [, result] = bestModel;
+                document.getElementById('avgLogProb').textContent = result.avgLogProb.toFixed(3);
+                document.getElementById('crossEntropy').textContent = result.crossEntropy.toFixed(3);
+            }
+        }
+        
+        function updateModelComparison() {
+            const container = document.getElementById('modelComparison');
+            
+            // Sort models by perplexity (best first)
+            const sortedModels = Object.entries(modelResults).sort(([,a], [,b]) => a.perplexity - b.perplexity);
+            
+            container.innerHTML = sortedModels.map(([modelName, result], index) => {
+                const performance = index === 0 ? 'Best' : index === sortedModels.length - 1 ? 'Worst' : 'Good';
+                const performanceColor = index === 0 ? '#28a745' : index === sortedModels.length - 1 ? '#dc3545' : '#ffc107';
+                
+                return `
+                    <div class="model-result">
+                        <div class="model-info">
+                            <div class="model-name">${modelName}</div>
+                            <div class="model-details">Cross-entropy: ${result.crossEntropy.toFixed(3)}</div>
+                        </div>
+                        <div class="model-metrics">
+                            <div class="perplexity-value">${result.perplexity.toFixed(1)}</div>
+                            <div class="performance-label" style="color: ${performanceColor}">${performance}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateChart() {
+            const canvas = document.getElementById('perplexityChart');
+            const ctx = canvas.getContext('2d');
+            
+            destroyChart(chart);
+            
+            if (Object.keys(modelResults).length === 0) return;
+            
+            const modelNames = Object.keys(modelResults);
+            const perplexities = modelNames.map(name => modelResults[name].perplexity);
+            const colors = modelNames.map(name => modelResults[name].color);
+            
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: modelNames,
+                    datasets: [{
+                        label: 'Perplexity',
+                        data: perplexities,
+                        backgroundColor: colors,
+                        borderColor: colors.map(color => color.replace('0.6', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Perplexity (lower is better)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Perplexity: ${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateWordAnalysis(wordProbs) {
+            const container = document.getElementById('wordAnalysis');
+            
+            if (wordProbs.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #666; padding: 2rem;">Calculate perplexity to see word-by-word breakdown</div>';
+                return;
+            }
+            
+            container.innerHTML = wordProbs.map(item => `
+                <div class="word-item">
+                    <span class="word-text">"${item.word}"</span>
+                    <span class="word-probability">P = ${(item.probability * 100).toFixed(1)}%</span>
+                </div>
+            `).join('');
+        }
+        
+        function updateCalculationSteps(tokens) {
+            const container = document.getElementById('calculationSteps');
+            const content = document.getElementById('calculationContent');
+            
+            if (Object.keys(modelResults).length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            // Use the best model for demonstration
+            const bestModel = Object.entries(modelResults).reduce((best, [name, result]) => 
+                !best || result.perplexity < best[1].perplexity ? [name, result] : best, null);
+            
+            if (!bestModel) return;
+            
+            const [modelName, result] = bestModel;
+            
+            content.innerHTML = `
+                <div class="calculation-step">
+                    <span class="step-label">Model:</span> ${modelName}
+                </div>
+                <div class="calculation-step">
+                    <span class="step-label">Tokens:</span> ${tokens.length} words
+                </div>
+                <div class="calculation-step">
+                    <span class="step-label">Average log₂ probability:</span> ${result.avgLogProb.toFixed(4)}
+                </div>
+                <div class="calculation-step">
+                    <span class="step-label">Cross-entropy:</span> -${result.avgLogProb.toFixed(4)} = ${result.crossEntropy.toFixed(4)}
+                </div>
+                <div class="calculation-step">
+                    <span class="step-label">Perplexity:</span> 2^${result.crossEntropy.toFixed(4)} = ${result.perplexity.toFixed(2)}
+                </div>
+            `;
+            
+            container.style.display = 'block';
+        }
+        
+        function updateInsights() {
+            const insights = [];
+            
+            if (Object.keys(modelResults).length === 0) {
+                insights.push('Enter text to see perplexity calculations');
+                insights.push('Lower perplexity indicates better language modeling');
+                insights.push('Compare different models on the same test text');
+            } else {
+                const modelNames = Object.keys(modelResults);
+                const perplexities = modelNames.map(name => modelResults[name].perplexity);
+                const bestPerplexity = Math.min(...perplexities);
+                const worstPerplexity = Math.max(...perplexities);
+                const bestModel = modelNames[perplexities.indexOf(bestPerplexity)];
+                const worstModel = modelNames[perplexities.indexOf(worstPerplexity)];
+                
+                insights.push(`${bestModel} performs best with perplexity ${bestPerplexity.toFixed(1)}`);
+                insights.push(`${worstModel} performs worst with perplexity ${worstPerplexity.toFixed(1)}`);
+                
+                if (bestPerplexity < 20) {
+                    insights.push('Excellent performance - low perplexity indicates good language modeling');
+                } else if (bestPerplexity < 50) {
+                    insights.push('Good performance - reasonable perplexity for neural models');
+                } else if (bestPerplexity < 100) {
+                    insights.push('Moderate performance - typical for n-gram models');
+                } else {
+                    insights.push('Poor performance - high perplexity suggests weak language modeling');
+                }
+                
+                const improvement = ((worstPerplexity - bestPerplexity) / worstPerplexity * 100);
+                insights.push(`Best model is ${improvement.toFixed(1)}% better than worst`);
+            }
+            
+            document.getElementById('insightsList').innerHTML = insights.map(
+                insight => `<li>${insight}</li>`
+            ).join('');
+        }
+        
+        function resetCalculation() {
+            modelResults = {};
+            
+            // Reset displays
+            document.getElementById('totalTokens').textContent = '0';
+            document.getElementById('avgLogProb').textContent = '0.00';
+            document.getElementById('crossEntropy').textContent = '0.00';
+            document.getElementById('modelComparison').innerHTML = '';
+            document.getElementById('calculationSteps').style.display = 'none';
+            
+            updateWordAnalysis([]);
+            destroyChart(chart);
+            updateInsights();
+        }
+        
+        // Initialize
+        window.addEventListener('load', function() {
+            updateInsights();
+        });
+    </script>
+</body>
+</html>
