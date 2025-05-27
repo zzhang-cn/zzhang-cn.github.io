@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polysemy Problem - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .visualization-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .controls-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        .canvas-container {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            margin-bottom: 1rem;
+        }
+        
+        .word-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .word-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            background: #f8f9fa;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .word-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .word-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #5a6fd8;
+        }
+        
+        .context-examples {
+            margin-bottom: 1.5rem;
+        }
+        
+        .context-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .context-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .context-text {
+            font-family: 'Georgia', serif;
+            color: #555;
+        }
+        
+        .context-text .highlight {
+            background: #ffeb3b;
+            padding: 0 3px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        
+        .problem-explanation {
+            background: #fff3e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .problem-explanation h4 {
+            color: #e65100;
+            margin-bottom: 1rem;
+        }
+        
+        .problem-explanation p {
+            margin-bottom: 1rem;
+        }
+        
+        .word-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .word-label {
+            position: absolute;
+            font-size: 0.8rem;
+            color: #333;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 2px 6px;
+            border-radius: 4px;
+            transform: translate(-50%, -100%);
+            margin-top: -10px;
+            white-space: nowrap;
+            border: 1px solid #e9ecef;
+            font-weight: 500;
+        }
+        
+        .cluster-circle {
+            position: absolute;
+            border: 2px dashed #ccc;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+        
+        .cluster-label {
+            position: absolute;
+            font-size: 0.8rem;
+            color: #666;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1px 5px;
+            border-radius: 3px;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            font-style: italic;
+        }
+        
+        .static-embedding {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #dc3545;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+        }
+        
+        .contextual-embedding {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+        
+        .embedding-label {
+            position: absolute;
+            font-size: 0.8rem;
+            color: #333;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 6px;
+            border-radius: 4px;
+            transform: translate(-50%, -100%);
+            margin-top: -10px;
+            white-space: nowrap;
+            border: 1px solid #e9ecef;
+            font-weight: 500;
+            z-index: 4;
+        }
+        
+        .connecting-line {
+            position: absolute;
+            height: 2px;
+            background: #ccc;
+            transform-origin: 0 0;
+            z-index: 1;
+        }
+        
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .insights-panel ul {
+            list-style: none;
+        }
+        
+        .insights-panel li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-panel li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            padding: 0.75rem;
+            border: 1px solid #e9ecef;
+            text-align: left;
+        }
+        
+        .comparison-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .comparison-table .highlight {
+            background: #fff3e0;
+        }
+        
+        .toggle-switch {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 0.25rem;
+            width: fit-content;
+            margin-bottom: 1rem;
+        }
+        
+        .toggle-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .toggle-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 1</a> / 
+                Session 1.5
+            </div>
+            <h1>Polysemy Problem with Static Embeddings</h1>
+            <p>Explore how traditional word embeddings struggle with words that have multiple meanings</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="main-grid">
+            <div class="visualization-panel">
+                <h2 class="section-title">Visualization of the Polysemy Problem</h2>
+                
+                <div class="toggle-switch">
+                    <button class="toggle-btn active" id="staticBtn" onclick="switchView('static')">Static Embeddings</button>
+                    <button class="toggle-btn" id="contextualBtn" onclick="switchView('contextual')">Contextual Embeddings</button>
+                </div>
+                
+                <div class="canvas-container" id="embeddingCanvas"></div>
+                
+                <div class="problem-explanation">
+                    <h4>The Polysemy Problem</h4>
+                    <p>Traditional word embeddings (Word2Vec, GloVe) assign a <strong>single vector</strong> to each word in the vocabulary. This causes problems for words with multiple meanings, as the embedding becomes an "average" of all senses.</p>
+                    
+                    <p>For example, the word <strong>"bank"</strong> can refer to a financial institution or the side of a river. These meanings are quite different, but in static embeddings, they get merged into one representation.</p>
+                    
+                    <p>More advanced models in Module 2 (like BERT) use <strong>contextual embeddings</strong> where each word gets a different vector depending on its surrounding context, addressing this limitation.</p>
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <h2 class="section-title">Words with Multiple Meanings</h2>
+                
+                <div class="word-selector">
+                    <button class="word-btn active" onclick="selectWord('bank')">bank</button>
+                    <button class="word-btn" onclick="selectWord('spring')">spring</button>
+                    <button class="word-btn" onclick="selectWord('light')">light</button>
+                    <button class="word-btn" onclick="selectWord('bat')">bat</button>
+                </div>
+                
+                <div class="context-examples" id="contextExamples">
+                    <div class="context-card">
+                        <h3>Financial Sense</h3>
+                        <div class="context-text">I deposited money in the <span class="highlight">bank</span> yesterday.</div>
+                    </div>
+                    
+                    <div class="context-card">
+                        <h3>River Sense</h3>
+                        <div class="context-text">We had a picnic on the <span class="highlight">bank</span> of the river.</div>
+                    </div>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Key Insights</h4>
+                    <ul id="insightsList">
+                        <li>Static embeddings create a single vector for each word, regardless of context</li>
+                        <li>Words with multiple meanings (polysemous) are poorly represented by static embeddings</li>
+                        <li>The embedding becomes an "average" of all meanings, which can be problematic</li>
+                        <li>This limitation is addressed by contextual embeddings in more advanced models</li>
+                        <li>Contextual models (covered in Module 2) generate different vectors based on context</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="visualization-panel">
+            <h2 class="section-title">Static vs. Contextual Embeddings Comparison</h2>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Static Embeddings</th>
+                        <th>Contextual Embeddings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="highlight">
+                        <td><strong>Word Representation</strong></td>
+                        <td>One vector per word</td>
+                        <td>Different vectors based on context</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Handles Multiple Meanings</strong></td>
+                        <td>❌ Poor (blends meanings)</td>
+                        <td>✅ Well (distinguishes meanings)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Computational Cost</strong></td>
+                        <td>Low (efficient)</td>
+                        <td>High (more intensive)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Storage Requirements</strong></td>
+                        <td>Low (one vector per word)</td>
+                        <td>High (many vectors per word)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Examples</strong></td>
+                        <td>Word2Vec, GloVe, FastText</td>
+                        <td>BERT, GPT, ELMo, T5</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Out-of-Vocabulary Words</strong></td>
+                        <td>❌ Cannot handle</td>
+                        <td>✅ Can handle via subword tokenization</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sentence-Level Understanding</strong></td>
+                        <td>Limited</td>
+                        <td>Strong</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="insights-panel">
+                <h4>Bridge to Module 2: Transformer Architectures</h4>
+                <ul>
+                    <li>In Module 2, we'll explore transformer architectures that use contextual embeddings</li>
+                    <li>Transformers use attention mechanisms to generate context-dependent representations</li>
+                    <li>This addresses the polysemy problem by creating different vectors for different contexts</li>
+                    <li>The same word can have very different representations based on its usage</li>
+                    <li>This enables more sophisticated language understanding, especially for ambiguous text</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Current state
+        let currentWord = 'bank';
+        let currentView = 'static';
+        
+        // Canvas setup
+        const canvas = document.createElement('canvas');
+        const container = document.getElementById('embeddingCanvas');
+        container.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        
+        // Word definitions and example contexts
+        const wordData = {
+            bank: {
+                meanings: [
+                    {
+                        sense: 'financial',
+                        examples: [
+                            'I deposited money in the <span class="highlight">bank</span> yesterday.',
+                            'The <span class="highlight">bank</span> approved my loan application.',
+                            'She works at a <span class="highlight">bank</span> downtown.'
+                        ],
+                        relatedWords: ['money', 'loan', 'account', 'deposit', 'financial', 'savings', 'credit'],
+                        position: { x: 250, y: 150 },
+                        color: '#0d47a1'
+                    },
+                    {
+                        sense: 'river',
+                        examples: [
+                            'We had a picnic on the <span class="highlight">bank</span> of the river.',
+                            'The boat washed up on the <span class="highlight">bank</span>.',
+                            'Flowers grew along the <span class="highlight">bank</span>.'
+                        ],
+                        relatedWords: ['river', 'shore', 'stream', 'water', 'grass', 'slope', 'edge'],
+                        position: { x: 450, y: 250 },
+                        color: '#1b5e20'
+                    }
+                ],
+                staticPosition: { x: 350, y: 200 }
+            },
+            spring: {
+                meanings: [
+                    {
+                        sense: 'season',
+                        examples: [
+                            'Flowers bloom in <span class="highlight">spring</span>.',
+                            'We go hiking every <span class="highlight">spring</span>.',
+                            '<span class="highlight">Spring</span> is my favorite time of year.'
+                        ],
+                        relatedWords: ['summer', 'winter', 'season', 'flowers', 'bloom', 'warm', 'fresh'],
+                        position: { x: 200, y: 150 },
+                        color: '#0d47a1'
+                    },
+                    {
+                        sense: 'water source',
+                        examples: [
+                            'The natural <span class="highlight">spring</span> provides fresh water.',
+                            'We found a <span class="highlight">spring</span> in the mountains.',
+                            'The village gets water from a <span class="highlight">spring</span>.'
+                        ],
+                        relatedWords: ['water', 'source', 'fountain', 'well', 'fresh', 'flow', 'natural'],
+                        position: { x: 400, y: 150 },
+                        color: '#1b5e20'
+                    },
+                    {
+                        sense: 'coil',
+                        examples: [
+                            'The <span class="highlight">spring</span> in my mattress is broken.',
+                            'The toy has a metal <span class="highlight">spring</span> inside.',
+                            'The mechanism uses a <span class="highlight">spring</span> to function.'
+                        ],
+                        relatedWords: ['coil', 'metal', 'bounce', 'elastic', 'tension', 'mechanism', 'compress'],
+                        position: { x: 300, y: 300 },
+                        color: '#e65100'
+                    }
+                ],
+                staticPosition: { x: 300, y: 200 }
+            },
+            light: {
+                meanings: [
+                    {
+                        sense: 'illumination',
+                        examples: [
+                            'Turn on the <span class="highlight">light</span> please.',
+                            'Sunlight is a natural <span class="highlight">light</span> source.',
+                            'The room is filled with <span class="highlight">light</span>.'
+                        ],
+                        relatedWords: ['bright', 'lamp', 'sun', 'shine', 'dark', 'bulb', 'shadow'],
+                        position: { x: 200, y: 150 },
+                        color: '#0d47a1'
+                    },
+                    {
+                        sense: 'weight',
+                        examples: [
+                            'The package is very <span class="highlight">light</span>.',
+                            'She packed a <span class="highlight">light</span> bag for the trip.',
+                            'Feathers are <span class="highlight">light</span> compared to rocks.'
+                        ],
+                        relatedWords: ['heavy', 'weight', 'feather', 'easy', 'carry', 'portable', 'mass'],
+                        position: { x: 450, y: 200 },
+                        color: '#1b5e20'
+                    },
+                    {
+                        sense: 'color',
+                        examples: [
+                            'I prefer <span class="highlight">light</span> colors for the walls.',
+                            'She has <span class="highlight">light</span> blue eyes.',
+                            'The paint is a <span class="highlight">light</span> shade of green.'
+                        ],
+                        relatedWords: ['dark', 'color', 'shade', 'pale', 'pastel', 'bright', 'hue'],
+                        position: { x: 350, y: 300 },
+                        color: '#e65100'
+                    }
+                ],
+                staticPosition: { x: 350, y: 200 }
+            },
+            bat: {
+                meanings: [
+                    {
+                        sense: 'animal',
+                        examples: [
+                            'The <span class="highlight">bat</span> flew into the cave.',
+                            '<span class="highlight">Bats</span> are nocturnal mammals.',
+                            'We saw <span class="highlight">bats</span> hanging upside down.'
+                        ],
+                        relatedWords: ['animal', 'wing', 'cave', 'nocturnal', 'mammal', 'flying', 'sonar'],
+                        position: { x: 200, y: 150 },
+                        color: '#0d47a1'
+                    },
+                    {
+                        sense: 'baseball',
+                        examples: [
+                            'He hit the ball with the <span class="highlight">bat</span>.',
+                            'The wooden <span class="highlight">bat</span> broke during the game.',
+                            'She swung the <span class="highlight">bat</span> and hit a home run.'
+                        ],
+                        relatedWords: ['baseball', 'hit', 'swing', 'ball', 'game', 'sport', 'wooden'],
+                        position: { x: 400, y: 250 },
+                        color: '#1b5e20'
+                    }
+                ],
+                staticPosition: { x: 300, y: 200 }
+            }
+        };
+        
+        function resizeCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = container.getBoundingClientRect();
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            
+            ctx.scale(dpr, dpr);
+            
+            // Reset CSS size
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            
+            drawVisualization();
+        }
+        
+        function drawVisualization() {
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw grid
+            drawGrid(width, height);
+            
+            // Get current word data
+            const data = wordData[currentWord];
+            
+            if (currentView === 'static') {
+                // Draw static embedding view
+                drawStaticEmbedding(data, width, height);
+            } else {
+                // Draw contextual embedding view
+                drawContextualEmbedding(data, width, height);
+            }
+        }
+        
+        function drawGrid(width, height) {
+            // Draw grid lines
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            
+            // Vertical lines
+            for (let x = 50; x < width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            
+            // Horizontal lines
+            for (let y = 50; y < height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+        }
+        
+        function drawStaticEmbedding(data, width, height) {
+            // Draw clusters for each meaning
+            data.meanings.forEach(meaning => {
+                // Draw cluster circle
+                const radius = 80;
+                ctx.strokeStyle = meaning.color;
+                ctx.setLineDash([5, 3]);
+                ctx.beginPath();
+                ctx.arc(meaning.position.x, meaning.position.y, radius, 0, 2 * Math.PI);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Draw cluster label
+                ctx.font = '12px Arial';
+                ctx.fillStyle = meaning.color;
+                ctx.textAlign = 'center';
+                ctx.fillText(meaning.sense + ' sense', meaning.position.x, meaning.position.y - radius - 10);
+                
+                // Draw related words
+                const wordCount = meaning.relatedWords.length;
+                const angleStep = (2 * Math.PI) / wordCount;
+                
+                meaning.relatedWords.forEach((word, i) => {
+                    const angle = i * angleStep;
+                    const wordRadius = radius * 0.7;
+                    const x = meaning.position.x + wordRadius * Math.cos(angle);
+                    const y = meaning.position.y + wordRadius * Math.sin(angle);
+                    
+                    // Draw word dot
+                    ctx.fillStyle = meaning.color;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // Draw word label
+                    ctx.font = '11px Arial';
+                    ctx.fillStyle = '#333';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(word, x, y - 10);
+                });
+            });
+            
+            // Draw static embedding dot (larger and red)
+            ctx.fillStyle = '#dc3545';
+            ctx.beginPath();
+            ctx.arc(data.staticPosition.x, data.staticPosition.y, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw static embedding label
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#dc3545';
+            ctx.textAlign = 'center';
+            ctx.fillText(`"${currentWord}" (static)`, data.staticPosition.x, data.staticPosition.y - 20);
+            
+            // Draw connecting lines from static embedding to cluster centers
+            data.meanings.forEach(meaning => {
+                ctx.strokeStyle = '#aaa';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(data.staticPosition.x, data.staticPosition.y);
+                ctx.lineTo(meaning.position.x, meaning.position.y);
+                ctx.stroke();
+                
+                // Add distance label
+                const midX = (data.staticPosition.x + meaning.position.x) / 2;
+                const midY = (data.staticPosition.y + meaning.position.y) / 2;
+                const distance = Math.sqrt(
+                    (data.staticPosition.x - meaning.position.x) ** 2 + 
+                    (data.staticPosition.y - meaning.position.y) ** 2
+                );
+                
+                ctx.font = '10px Arial';
+                ctx.fillStyle = '#666';
+                ctx.textAlign = 'center';
+                ctx.fillText(`Meaning lost`, midX, midY - 5);
+            });
+            
+            // Add static embedding explanation
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Static Embedding Problem: One vector must represent all meanings', width / 2, height - 30);
+            ctx.fillText('The embedding becomes an "average" that doesn\'t represent any meaning well', width / 2, height - 10);
+        }
+        
+        function drawContextualEmbedding(data, width, height) {
+            // Draw clusters for each meaning
+            data.meanings.forEach(meaning => {
+                // Draw cluster circle
+                const radius = 80;
+                ctx.strokeStyle = meaning.color;
+                ctx.setLineDash([5, 3]);
+                ctx.beginPath();
+                ctx.arc(meaning.position.x, meaning.position.y, radius, 0, 2 * Math.PI);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Draw cluster label
+                ctx.font = '12px Arial';
+                ctx.fillStyle = meaning.color;
+                ctx.textAlign = 'center';
+                ctx.fillText(meaning.sense + ' sense', meaning.position.x, meaning.position.y - radius - 10);
+                
+                // Draw contextual embedding for this meaning
+                ctx.fillStyle = meaning.color;
+                ctx.beginPath();
+                ctx.arc(meaning.position.x, meaning.position.y, 8, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Draw contextual embedding label
+                ctx.font = 'bold 14px Arial';
+                ctx.fillStyle = meaning.color;
+                ctx.textAlign = 'center';
+                ctx.fillText(`"${currentWord}" (${meaning.sense})`, meaning.position.x, meaning.position.y - 20);
+                
+                // Draw related words
+                const wordCount = meaning.relatedWords.length;
+                const angleStep = (2 * Math.PI) / wordCount;
+                
+                meaning.relatedWords.forEach((word, i) => {
+                    const angle = i * angleStep;
+                    const wordRadius = radius * 0.7;
+                    const x = meaning.position.x + wordRadius * Math.cos(angle);
+                    const y = meaning.position.y + wordRadius * Math.sin(angle);
+                    
+                    // Draw word dot
+                    ctx.fillStyle = meaning.color;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // Draw word label
+                    ctx.font = '11px Arial';
+                    ctx.fillStyle = '#333';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(word, x, y - 10);
+                });
+            });
+            
+            // Add contextual embedding explanation
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Contextual Embedding Solution: Different vectors for different contexts', width / 2, height - 30);
+            ctx.fillText('Each usage gets its own representation, preserving distinct meanings', width / 2, height - 10);
+        }
+        
+        function selectWord(word) {
+            currentWord = word;
+            
+            // Update buttons
+            document.querySelectorAll('.word-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update context examples
+            updateContextExamples(word);
+            
+            // Redraw
+            drawVisualization();
+        }
+        
+        function switchView(view) {
+            currentView = view;
+            
+            // Update buttons
+            document.getElementById('staticBtn').classList.toggle('active', view === 'static');
+            document.getElementById('contextualBtn').classList.toggle('active', view === 'contextual');
+            
+            // Redraw
+            drawVisualization();
+        }
+        
+        function updateContextExamples(word) {
+            const container = document.getElementById('contextExamples');
+            const data = wordData[word];
+            
+            let html = '';
+            data.meanings.forEach(meaning => {
+                html += `
+                    <div class="context-card">
+                        <h3>${meaning.sense.charAt(0).toUpperCase() + meaning.sense.slice(1)} Sense</h3>
+                        <div class="context-text">${meaning.examples[0]}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            updateContextExamples(currentWord);
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+            });
+        });
+    </script>
+</body>
+</html>
