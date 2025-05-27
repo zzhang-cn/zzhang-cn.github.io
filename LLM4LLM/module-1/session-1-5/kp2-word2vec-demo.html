@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word2Vec Architecture Comparison - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        .model-toggle {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 0.25rem;
+            width: fit-content;
+            margin-bottom: 1rem;
+        }
+        
+        .toggle-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .toggle-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .visualization-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .models-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .model-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .model-card.active {
+            box-shadow: 0 0 0 2px #667eea;
+        }
+        
+        .model-card.active::before {
+            content: "Active";
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .model-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .model-title span {
+            display: inline-block;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .skipgram-icon {
+            background: #28a745;
+        }
+        
+        .cbow-icon {
+            background: #fd7e14;
+        }
+        
+        .canvas-container {
+            width: 100%;
+            height: 300px;
+            position: relative;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            margin-bottom: 1rem;
+        }
+        
+        .controls-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .control-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .example-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .sentence-display {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-family: monospace;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .word-token {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            margin: 0 0.25rem;
+            background: white;
+            border: 1px solid #e9ecef;
+        }
+        
+        .word-token.center {
+            background: #667eea;
+            color: white;
+            border-color: #5a6fd8;
+        }
+        
+        .word-token.context {
+            background: #28a745;
+            color: white;
+            border-color: #218838;
+        }
+        
+        .button-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            background: #667eea;
+            color: white;
+            flex: 1;
+        }
+        
+        .action-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .secondary-btn {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #e9ecef;
+        }
+        
+        .secondary-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .slider-container {
+            margin: 1.5rem 0;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .slider-label span {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e9ecef;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .insights-panel ul {
+            list-style: none;
+        }
+        
+        .insights-panel li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-panel li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            padding: 1rem;
+            text-align: left;
+            border: 1px solid #e9ecef;
+        }
+        
+        .comparison-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .compare-row {
+            background: #e8f2ff !important;
+        }
+        
+        .skipgram-row {
+            background: rgba(40, 167, 69, 0.1) !important;
+        }
+        
+        .cbow-row {
+            background: rgba(253, 126, 20, 0.1) !important;
+        }
+        
+        @media (max-width: 1200px) {
+            .models-container, .controls-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .canvas-container {
+                height: 250px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 1</a> / 
+                Session 1.5
+            </div>
+            <h1>Word2Vec Architecture Comparison</h1>
+            <p>Explore the differences between Skip-gram and CBOW architectures</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="visualization-panel">
+            <h2 class="section-title">Word2Vec Model Architectures</h2>
+            
+            <div class="model-toggle">
+                <button class="toggle-btn active" onclick="switchModel('skipgram')">Skip-gram</button>
+                <button class="toggle-btn" onclick="switchModel('cbow')">CBOW</button>
+            </div>
+            
+            <div class="models-container">
+                <div class="model-card active" id="skipgram-card">
+                    <h3 class="model-title"><span class="skipgram-icon">S</span>Skip-gram Architecture</h3>
+                    <div class="canvas-container">
+                        <canvas id="skipgramCanvas" width="500" height="300"></canvas>
+                    </div>
+                    <p><strong>Objective:</strong> Predict context words from center word</p>
+                    <p>Given "cat" in "The <u>cat</u> sat on the mat", predict surrounding words: "The", "sat", "on", etc.</p>
+                    <p><small>Better for rare words and larger datasets</small></p>
+                </div>
+                
+                <div class="model-card" id="cbow-card">
+                    <h3 class="model-title"><span class="cbow-icon">C</span>CBOW Architecture</h3>
+                    <div class="canvas-container">
+                        <canvas id="cbowCanvas" width="500" height="300"></canvas>
+                    </div>
+                    <p><strong>Objective:</strong> Predict center word from context words</p>
+                    <p>Given "The", "sat", "on", etc. in "The ___ sat on the mat", predict the center word "cat"</p>
+                    <p><small>Trains faster, better for frequent words</small></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls-section">
+            <div class="control-panel">
+                <h2 class="section-title">Interactive Controls</h2>
+                
+                <div class="sentence-display" id="sentenceDisplay">
+                    <span class="word-token">The</span>
+                    <span class="word-token center">cat</span>
+                    <span class="word-token">sat</span>
+                    <span class="word-token">on</span>
+                    <span class="word-token">the</span>
+                    <span class="word-token">mat</span>
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Context Window Size</span>
+                        <span id="windowSizeDisplay">2</span>
+                    </div>
+                    <input type="range" min="1" max="5" value="2" class="slider" id="windowSizeSlider">
+                </div>
+                
+                <div class="button-row">
+                    <button class="action-btn" onclick="updateVisualization()">Run One Iteration</button>
+                    <button class="action-btn secondary" onclick="changeSentence()">Change Sentence</button>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Key Insights</h4>
+                    <ul id="insightsList">
+                        <li>Skip-gram: predicts context from center words (better for rare words)</li>
+                        <li>CBOW: predicts center from context words (faster training)</li>
+                        <li>Both produce high-quality word vectors with less computation than full language models</li>
+                        <li>Negative sampling dramatically increases training efficiency</li>
+                        <li>Vectors capture semantic relationships through shared statistical patterns</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="example-panel">
+                <h2 class="section-title">Architecture Comparison</h2>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr class="compare-row">
+                            <th>Feature</th>
+                            <th>Skip-gram</th>
+                            <th>CBOW</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Prediction Task</strong></td>
+                            <td>Center → Context</td>
+                            <td>Context → Center</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Input</strong></td>
+                            <td>Single word</td>
+                            <td>Multiple words</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Output</strong></td>
+                            <td>Multiple predictions</td>
+                            <td>Single prediction</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Training Speed</strong></td>
+                            <td>Slower</td>
+                            <td>Faster</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Best For</strong></td>
+                            <td>Rare words, Large datasets</td>
+                            <td>Frequent words, Smaller datasets</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Accuracy on Analogy Tasks</strong></td>
+                            <td>Higher</td>
+                            <td>Lower</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mathematical Formulation</strong></td>
+                            <td>Maximize P(context|center)</td>
+                            <td>Maximize P(center|context)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="insights-panel" style="margin-top: 2rem;">
+                    <h4>The Word2Vec Innovation</h4>
+                    <ul>
+                        <li>Created by Tomas Mikolov at Google in 2013</li>
+                        <li>Focuses only on learning good word vectors, not prediction</li>
+                        <li>Processes billions of words much faster than neural LMs</li>
+                        <li>Negative sampling avoids expensive softmax computation</li>
+                        <li>Produces embeddings that capture semantic relationships</li>
+                        <li>Example of a specialized unsupervised embedding technique</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Canvas variables
+        let skipgramCanvas, skipgramCtx;
+        let cbowCanvas, cbowCtx;
+        
+        // Configuration
+        let currentModel = 'skipgram';
+        let windowSize = 2;
+        let animationFrame;
+        let animationProgress = 0;
+        
+        // Sample sentences
+        const sentences = [
+            ['The', 'cat', 'sat', 'on', 'the', 'mat'],
+            ['A', 'dog', 'chased', 'the', 'squirrel', 'quickly'],
+            ['Birds', 'fly', 'high', 'in', 'the', 'sky'],
+            ['Machine', 'learning', 'models', 'process', 'text', 'data']
+        ];
+        
+        let currentSentence = sentences[0];
+        let centerWordIndex = 1; // Index of "cat"
+        
+        // Colors
+        const colors = {
+            skipgram: {
+                centerWord: '#28a745',
+                contextWord: '#6f42c1',
+                embeddings: '#007bff',
+                predictions: '#fd7e14'
+            },
+            cbow: {
+                centerWord: '#fd7e14',
+                contextWord: '#6f42c1',
+                embeddings: '#007bff',
+                predictions: '#28a745'
+            },
+            connection: '#adb5bd',
+            background: {
+                input: '#e9f7ef',
+                embedding: '#e8f4f8',
+                output: '#fff3e6'
+            }
+        };
+        
+        function initializeCanvases() {
+            // Skip-gram canvas
+            skipgramCanvas = document.getElementById('skipgramCanvas');
+            skipgramCtx = skipgramCanvas.getContext('2d');
+            
+            // CBOW canvas
+            cbowCanvas = document.getElementById('cbowCanvas');
+            cbowCtx = cbowCanvas.getContext('2d');
+            
+            // Set up high DPI rendering
+            setupCanvas(skipgramCanvas, skipgramCtx);
+            setupCanvas(cbowCanvas, cbowCtx);
+            
+            // Initial drawing
+            drawSkipgram();
+            drawCBOW();
+        }
+        
+        function setupCanvas(canvas, ctx) {
+            // Get the DPR and size of the canvas
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            
+            // Set the canvas size to match display size * DPR
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            
+            // Scale the context by DPR
+            ctx.scale(dpr, dpr);
+            
+            // Reset CSS size to ensure it displays correctly
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+        }
+        
+        function drawSkipgram() {
+            const ctx = skipgramCtx;
+            const width = skipgramCanvas.width / (window.devicePixelRatio || 1);
+            const height = skipgramCanvas.height / (window.devicePixelRatio || 1);
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw title
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Skip-gram: Predict context from center word', width / 2, 20);
+            
+            // Draw layers
+            const centerX = width / 2;
+            const layerPositions = {
+                input: {x: width * 0.25, y: height * 0.4},
+                embeddings: {x: width * 0.5, y: height * 0.4},
+                output: {x: width * 0.75, y: height * 0.4}
+            };
+            
+            // Draw input layer (center word)
+            const inputRect = {
+                x: layerPositions.input.x - 50,
+                y: layerPositions.input.y - 30,
+                width: 100,
+                height: 60
+            };
+            
+            // Input layer background
+            ctx.fillStyle = colors.background.input;
+            ctx.fillRect(inputRect.x, inputRect.y, inputRect.width, inputRect.height);
+            
+            // Input layer border
+            ctx.strokeStyle = colors.skipgram.centerWord;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(inputRect.x, inputRect.y, inputRect.width, inputRect.height);
+            
+            // Input layer label
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Input Layer', layerPositions.input.x, inputRect.y - 10);
+            
+            // Center word
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = colors.skipgram.centerWord;
+            ctx.textAlign = 'center';
+            ctx.fillText(`"${currentSentence[centerWordIndex]}"`, layerPositions.input.x, layerPositions.input.y + 5);
+            
+            // Center word label
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#666';
+            ctx.fillText('Center Word', layerPositions.input.x, layerPositions.input.y + 25);
+            
+            // Draw embedding layer
+            const embeddingRect = {
+                x: layerPositions.embeddings.x - 60,
+                y: layerPositions.embeddings.y - 40,
+                width: 120,
+                height: 80
+            };
+            
+            // Embedding layer background
+            ctx.fillStyle = colors.background.embedding;
+            ctx.fillRect(embeddingRect.x, embeddingRect.y, embeddingRect.width, embeddingRect.height);
+            
+            // Embedding layer border
+            ctx.strokeStyle = colors.skipgram.embeddings;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(embeddingRect.x, embeddingRect.y, embeddingRect.width, embeddingRect.height);
+            
+            // Embedding layer label
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Embedding Layer', layerPositions.embeddings.x, embeddingRect.y - 10);
+            
+            // Embedding representation
+            ctx.font = '12px Arial';
+            ctx.fillStyle = colors.skipgram.embeddings;
+            ctx.textAlign = 'center';
+            ctx.fillText('Word Vector', layerPositions.embeddings.x, layerPositions.embeddings.y - 10);
+            
+            // Draw embedding dimensions as boxes
+            const dimWidth = 15;
+            const dimHeight = 15;
+            const dimSpacing = 5;
+            const dimCount = 5;
+            const dimTotalWidth = dimCount * dimWidth + (dimCount - 1) * dimSpacing;
+            let dimStartX = layerPositions.embeddings.x - dimTotalWidth / 2;
+            
+            for (let i = 0; i < dimCount; i++) {
+                const x = dimStartX + i * (dimWidth + dimSpacing);
+                const y = layerPositions.embeddings.y + 5;
+                
+                ctx.fillStyle = colors.skipgram.embeddings;
+                ctx.fillRect(x, y, dimWidth, dimHeight);
+                
+                // Add value inside box
+                ctx.font = '10px Arial';
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.fillText((Math.random() * 2 - 1).toFixed(1), x + dimWidth / 2, y + dimHeight / 2 + 3);
+            }
+            
+            // Dimension size label
+            ctx.font = '10px Arial';
+            ctx.fillStyle = '#666';
+            ctx.fillText('[d dimensions]', layerPositions.embeddings.x, layerPositions.embeddings.y + 35);
+            
+            // Draw output layer (context predictions)
+            const numPredictions = Math.min(windowSize * 2, currentSentence.length - 1);
+            const outputWidth = 200;
+            const outputHeight = 30 * numPredictions + 20;
+            
+            const outputRect = {
+                x: layerPositions.output.x - outputWidth / 2,
+                y: layerPositions.output.y - outputHeight / 2,
+                width: outputWidth,
+                height: outputHeight
+            };
+            
+            // Output layer background
+            ctx.fillStyle = colors.background.output;
+            ctx.fillRect(outputRect.x, outputRect.y, outputRect.width, outputRect.height);
+            
+            // Output layer border
+            ctx.strokeStyle = colors.skipgram.predictions;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(outputRect.x, outputRect.y, outputRect.width, outputRect.height);
+            
+            // Output layer label
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Output Layer', layerPositions.output.x, outputRect.y - 10);
+            
+            // Context word predictions
+            ctx.font = 'bold 12px Arial';
+            ctx.fillStyle = colors.skipgram.predictions;
+            ctx.textAlign = 'center';
+            
+            // Get context words
+            let contextWords = [];
+            
+            for (let i = Math.max(0, centerWordIndex - windowSize); i < centerWordIndex; i++) {
+                contextWords.push({word: currentSentence[i], position: i - centerWordIndex});
+            }
+            
+            for (let i = centerWordIndex + 1; i <= Math.min(currentSentence.length - 1, centerWordIndex + windowSize); i++) {
+                contextWords.push({word: currentSentence[i], position: i - centerWordIndex});
+            }
+            
+            // Display context words
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Predict Context Words:', outputRect.x + 10, outputRect.y + 20);
+            
+            contextWords.forEach((context, i) => {
+                const y = outputRect.y + 45 + i * 25;
+                
+                // Word with position
+                ctx.font = 'bold 12px Arial';
+                ctx.fillStyle = colors.skipgram.predictions;
+                ctx.textAlign = 'left';
+                ctx.fillText(`"${context.word}"`, outputRect.x + 20, y);
+                
+                // Position label
+                ctx.font = '10px Arial';
+                ctx.fillStyle = '#666';
+                ctx.textAlign = 'left';
+                ctx.fillText(`(position ${context.position > 0 ? '+' : ''}${context.position})`, outputRect.x + 90, y);
+                
+                // Probability
+                ctx.font = '12px Arial';
+                ctx.fillStyle = '#333';
+                ctx.textAlign = 'right';
+                ctx.fillText(`${(Math.random() * 0.4 + 0.3).toFixed(2)}`, outputRect.x + outputWidth - 20, y);
+            });
+            
+            // Draw connections between layers
+            ctx.strokeStyle = colors.connection;
+            ctx.lineWidth = 1;
+            
+            // Input to Embedding
+            ctx.beginPath();
+            ctx.moveTo(inputRect.x + inputRect.width, layerPositions.input.y);
+            ctx.lineTo(embeddingRect.x, layerPositions.embeddings.y);
+            ctx.stroke();
+            
+            // Embedding to Output
+            ctx.beginPath();
+            ctx.moveTo(embeddingRect.x + embeddingRect.width, layerPositions.embeddings.y);
+            ctx.lineTo(outputRect.x, layerPositions.output.y);
+            ctx.stroke();
+            
+            // Draw data flow arrows
+            drawArrow(ctx, inputRect.x + inputRect.width + 10, layerPositions.input.y, embeddingRect.x - 10, layerPositions.embeddings.y);
+            drawArrow(ctx, embeddingRect.x + embeddingRect.width + 10, layerPositions.embeddings.y, outputRect.x - 10, layerPositions.output.y);
+        }
+        
+        function drawCBOW() {
+            const ctx = cbowCtx;
+            const width = cbowCanvas.width / (window.devicePixelRatio || 1);
+            const height = cbowCanvas.height / (window.devicePixelRatio || 1);
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw title
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('CBOW: Predict center word from context', width / 2, 20);
+            
+            // Draw layers
+            const centerX = width / 2;
+            const layerPositions = {
+                input: {x: width * 0.25, y: height * 0.4},
+                embeddings: {x: width * 0.5, y: height * 0.4},
+                output: {x: width * 0.75, y: height * 0.4}
+            };
+            
+            // Draw input layer (context words)
+            const numContextWords = Math.min(windowSize * 2, currentSentence.length - 1);
+            const inputWidth = 200;
+            const inputHeight = 30 * numContextWords + 20;
+            
+            const inputRect = {
+                x: layerPositions.input.x - inputWidth / 2,
+                y: layerPositions.input.y - inputHeight / 2,
+                width: inputWidth,
+                height: inputHeight
+            };
+            
+            // Input layer background
+            ctx.fillStyle = colors.background.input;
+            ctx.fillRect(inputRect.x, inputRect.y, inputRect.width, inputRect.height);
+            
+            // Input layer border
+            ctx.strokeStyle = colors.cbow.contextWord;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(inputRect.x, inputRect.y, inputRect.width, inputRect.height);
+            
+            // Input layer label
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Input Layer', layerPositions.input.x, inputRect.y - 10);
+            
+            // Get context words
+            let contextWords = [];
+            
+            for (let i = Math.max(0, centerWordIndex - windowSize); i < centerWordIndex; i++) {
+                contextWords.push({word: currentSentence[i], position: i - centerWordIndex});
+            }
+            
+            for (let i = centerWordIndex + 1; i <= Math.min(currentSentence.length - 1, centerWordIndex + windowSize); i++) {
+                contextWords.push({word: currentSentence[i], position: i - centerWordIndex});
+            }
+            
+            // Display context words
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Context Words:', inputRect.x + 10, inputRect.y + 20);
+            
+            contextWords.forEach((context, i) => {
+                const y = inputRect.y + 45 + i * 25;
+                
+                // Word with position
+                ctx.font = 'bold 12px Arial';
+                ctx.fillStyle = colors.cbow.contextWord;
+                ctx.textAlign = 'left';
+                ctx.fillText(`"${context.word}"`, inputRect.x + 20, y);
+                
+                // Position label
+                ctx.font = '10px Arial';
+                ctx.fillStyle = '#666';
+                ctx.textAlign = 'left';
+                ctx.fillText(`(position ${context.position > 0 ? '+' : ''}${context.position})`, inputRect.x + 90, y);
+            });
+            
+            // Draw embedding layer
+            const embeddingRect = {
+                x: layerPositions.embeddings.x - 60,
+                y: layerPositions.embeddings.y - 40,
+                width: 120,
+                height: 80
+            };
+            
+            // Embedding layer background
+            ctx.fillStyle = colors.background.embedding;
+            ctx.fillRect(embeddingRect.x, embeddingRect.y, embeddingRect.width, embeddingRect.height);
+            
+            // Embedding layer border
+            ctx.strokeStyle = colors.cbow.embeddings;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(embeddingRect.x, embeddingRect.y, embeddingRect.width, embeddingRect.height);
+            
+            // Embedding layer label
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Embedding Layer', layerPositions.embeddings.x, embeddingRect.y - 10);
+            
+            // Embedding representation
+            ctx.font = '12px Arial';
+            ctx.fillStyle = colors.cbow.embeddings;
+            ctx.textAlign = 'center';
+            ctx.fillText('Average Vector', layerPositions.embeddings.x, layerPositions.embeddings.y - 10);
+            
+            // Draw embedding dimensions as boxes
+            const dimWidth = 15;
+            const dimHeight = 15;
+            const dimSpacing = 5;
+            const dimCount = 5;
+            const dimTotalWidth = dimCount * dimWidth + (dimCount - 1) * dimSpacing;
+            let dimStartX = layerPositions.embeddings.x - dimTotalWidth / 2;
+            
+            for (let i = 0; i < dimCount; i++) {
+                const x = dimStartX + i * (dimWidth + dimSpacing);
+                const y = layerPositions.embeddings.y + 5;
+                
+                ctx.fillStyle = colors.cbow.embeddings;
+                ctx.fillRect(x, y, dimWidth, dimHeight);
+                
+                // Add value inside box
+                ctx.font = '10px Arial';
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.fillText((Math.random() * 2 - 1).toFixed(1), x + dimWidth / 2, y + dimHeight / 2 + 3);
+            }
+            
+            // Dimension size label
+            ctx.font = '10px Arial';
+            ctx.fillStyle = '#666';
+            ctx.fillText('[d dimensions]', layerPositions.embeddings.x, layerPositions.embeddings.y + 35);
+            
+            // Draw output layer (center word prediction)
+            const outputRect = {
+                x: layerPositions.output.x - 50,
+                y: layerPositions.output.y - 30,
+                width: 100,
+                height: 60
+            };
+            
+            // Output layer background
+            ctx.fillStyle = colors.background.output;
+            ctx.fillRect(outputRect.x, outputRect.y, outputRect.width, outputRect.height);
+            
+            // Output layer border
+            ctx.strokeStyle = colors.cbow.centerWord;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(outputRect.x, outputRect.y, outputRect.width, outputRect.height);
+            
+            // Output layer label
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.fillText('Output Layer', layerPositions.output.x, outputRect.y - 10);
+            
+            // Center word prediction
+            ctx.font = 'bold 14px Arial';
+            ctx.fillStyle = colors.cbow.centerWord;
+            ctx.textAlign = 'center';
+            ctx.fillText(`"${currentSentence[centerWordIndex]}"`, layerPositions.output.x, layerPositions.output.y + 5);
+            
+            // Center word label
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#666';
+            ctx.fillText('Center Word', layerPositions.output.x, layerPositions.output.y + 25);
+            
+            // Draw connections between layers
+            ctx.strokeStyle = colors.connection;
+            ctx.lineWidth = 1;
+            
+            // Input to Embedding
+            ctx.beginPath();
+            ctx.moveTo(inputRect.x + inputRect.width, layerPositions.input.y);
+            ctx.lineTo(embeddingRect.x, layerPositions.embeddings.y);
+            ctx.stroke();
+            
+            // Embedding to Output
+            ctx.beginPath();
+            ctx.moveTo(embeddingRect.x + embeddingRect.width, layerPositions.embeddings.y);
+            ctx.lineTo(outputRect.x, layerPositions.output.y);
+            ctx.stroke();
+            
+            // Draw data flow arrows
+            drawArrow(ctx, inputRect.x + inputRect.width + 10, layerPositions.input.y, embeddingRect.x - 10, layerPositions.embeddings.y);
+            drawArrow(ctx, embeddingRect.x + embeddingRect.width + 10, layerPositions.embeddings.y, outputRect.x - 10, layerPositions.output.y);
+        }
+        
+        function drawArrow(ctx, fromX, fromY, toX, toY) {
+            const headLength = 10;
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+            
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+            
+            // Draw arrowhead
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), toY - headLength * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), toY - headLength * Math.sin(angle + Math.PI / 6));
+            ctx.stroke();
+        }
+        
+        function switchModel(model) {
+            currentModel = model;
+            
+            // Update button states
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update card states
+            document.getElementById('skipgram-card').classList.toggle('active', model === 'skipgram');
+            document.getElementById('cbow-card').classList.toggle('active', model === 'cbow');
+            
+            // Update sentence display to match the model
+            updateSentenceDisplay();
+        }
+        
+        function updateSentenceDisplay() {
+            const sentenceDisplay = document.getElementById('sentenceDisplay');
+            let html = '';
+            
+            currentSentence.forEach((word, i) => {
+                if (i === centerWordIndex) {
+                    html += `<span class="word-token center">${word}</span>`;
+                } else if (
+                    (i >= centerWordIndex - windowSize && i < centerWordIndex) ||
+                    (i > centerWordIndex && i <= centerWordIndex + windowSize)
+                ) {
+                    html += `<span class="word-token context">${word}</span>`;
+                } else {
+                    html += `<span class="word-token">${word}</span>`;
+                }
+            });
+            
+            sentenceDisplay.innerHTML = html;
+        }
+        
+        function updateWindowSize() {
+            windowSize = parseInt(document.getElementById('windowSizeSlider').value);
+            document.getElementById('windowSizeDisplay').textContent = windowSize;
+            
+            // Update sentence display
+            updateSentenceDisplay();
+            
+            // Redraw visualizations
+            drawSkipgram();
+            drawCBOW();
+        }
+        
+        function changeSentence() {
+            // Choose a random sentence
+            const randomIndex = Math.floor(Math.random() * sentences.length);
+            currentSentence = sentences[randomIndex];
+            
+            // Choose a random center word (not first or last)
+            centerWordIndex = Math.floor(Math.random() * (currentSentence.length - 2)) + 1;
+            
+            // Update visualizations
+            updateSentenceDisplay();
+            drawSkipgram();
+            drawCBOW();
+        }
+        
+        function updateVisualization() {
+            // Simulate one training iteration
+            if (currentModel === 'skipgram') {
+                // Reset previous animation
+                if (animationFrame) {
+                    cancelAnimationFrame(animationFrame);
+                }
+                
+                // Create a simple animation effect
+                animationProgress = 0;
+                function animate() {
+                    animationProgress += 0.05;
+                    
+                    if (animationProgress >= 1) {
+                        animationProgress = 0;
+                        cancelAnimationFrame(animationFrame);
+                        
+                        // Update visualization
+                        drawSkipgram();
+                        return;
+                    }
+                    
+                    // Redraw with animation
+                    drawSkipgram();
+                    animationFrame = requestAnimationFrame(animate);
+                }
+                
+                animate();
+            } else {
+                // Reset previous animation
+                if (animationFrame) {
+                    cancelAnimationFrame(animationFrame);
+                }
+                
+                // Create a simple animation effect
+                animationProgress = 0;
+                function animate() {
+                    animationProgress += 0.05;
+                    
+                    if (animationProgress >= 1) {
+                        animationProgress = 0;
+                        cancelAnimationFrame(animationFrame);
+                        
+                        // Update visualization
+                        drawCBOW();
+                        return;
+                    }
+                    
+                    // Redraw with animation
+                    drawCBOW();
+                    animationFrame = requestAnimationFrame(animate);
+                }
+                
+                animate();
+            }
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            initializeCanvases();
+            updateSentenceDisplay();
+            
+            // Add event listeners
+            document.getElementById('windowSizeSlider').addEventListener('input', updateWindowSize);
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                // Re-initialize canvases with new dimensions
+                initializeCanvases();
+            });
+        });
+    </script>
+</body>
+</html>
