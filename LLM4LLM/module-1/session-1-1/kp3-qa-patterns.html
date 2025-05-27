@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Question-Answer Patterns - LLM4LLM</title>
+    <title>Instruction Following Patterns - LLM4LLM</title>
     <style>
         * {
             margin: 0;
@@ -131,6 +131,16 @@
             color: #666;
         }
         
+        .human-text {
+            color: #dc3545;
+            font-weight: 500;
+        }
+        
+        .ai-text {
+            color: #28a745;
+            font-weight: 500;
+        }
+        
         .probability-bar {
             width: 100%;
             height: 20px;
@@ -215,15 +225,25 @@
             box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
         }
         
-        .pattern-question {
+        .pattern-instruction {
             color: #dc3545;
             font-weight: 500;
             margin-bottom: 0.5rem;
         }
         
-        .pattern-answer {
+        .pattern-response {
             color: #28a745;
             font-weight: 500;
+        }
+        
+        .pattern-type {
+            background: #f8f9fa;
+            color: #667eea;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            display: inline-block;
         }
         
         .pattern-probability {
@@ -305,6 +325,52 @@
             color: #28a745;
         }
         
+        .instruction-flow {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+        
+        .step-description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
         @media (max-width: 968px) {
             .container {
                 padding: 1rem;
@@ -332,21 +398,21 @@
                 <a href="../">Module 1</a> / 
                 Session 1.1
             </div>
-            <h1>Question-Answer Patterns</h1>
-            <p>See how the same next-word prediction mechanism enables question answering</p>
+            <h1>Instruction Following Patterns</h1>
+            <p>Discover how next-word prediction enables AI to follow human instructions</p>
         </div>
     </div>
     
     <div class="container">
         <div class="demo-section">
             <h2 class="section-title">
-                <span class="section-icon">🔄</span>
-                Same Mechanism, Different Tasks
+                <span class="section-icon">🎯</span>
+                Same Mechanism: Prediction → Instruction Following
             </h2>
             
             <div class="prediction-demo">
                 <div class="demo-column">
-                    <h3>Text Completion</h3>
+                    <h3>Simple Text Completion</h3>
                     <div class="text-sequence">
                         <span class="context-words">The cat sat on the</span> 
                         <span class="predicted-word" id="completion-word">mat</span>
@@ -358,24 +424,24 @@
                 </div>
                 
                 <div class="demo-column">
-                    <h3>Question Answering</h3>
+                    <h3>Instruction Following</h3>
                     <div class="text-sequence">
-                        <span class="context-words">What is the capital of France?</span> 
-                        <span class="predicted-word" id="answer-word">Paris</span>
+                        <span class="human-text">Human: Write a haiku about rain</span><br>
+                        <span class="ai-text">AI:</span> <span class="predicted-word" id="instruction-word">Gentle drops falling...</span>
                     </div>
                     <div class="probability-bar">
-                        <div class="probability-fill" id="answer-prob" style="width: 85%">85%</div>
+                        <div class="probability-fill" id="instruction-prob" style="width: 85%">85%</div>
                     </div>
-                    <p><small>Predicting the answer after a question</small></p>
+                    <p><small>Predicting the appropriate response to an instruction</small></p>
                 </div>
             </div>
             
             <div class="insights-panel">
                 <h4>Key Insight</h4>
                 <ul class="insights-list">
-                    <li>Both tasks use <strong>exactly the same</strong> next-word prediction mechanism</li>
-                    <li>The model learns that questions are often followed by answers in training data</li>
-                    <li>No special "question answering" programming - it emerges from patterns!</li>
+                    <li>Both use <strong>exactly the same</strong> next-word prediction mechanism</li>
+                    <li>Instruction following emerges from seeing instruction→response patterns in training data</li>
+                    <li>The model learns that certain contexts (instructions) should be followed by specific types of responses</li>
                 </ul>
             </div>
         </div>
@@ -383,21 +449,62 @@
         <div class="demo-section">
             <h2 class="section-title">
                 <span class="section-icon">🎮</span>
-                Interactive Pattern Explorer
+                Interactive Instruction Pattern Explorer
             </h2>
             
             <div class="interactive-demo">
                 <div class="demo-controls">
-                    <button class="demo-btn" onclick="showPattern('factual')">Factual Questions</button>
-                    <button class="demo-btn" onclick="showPattern('math')">Math Problems</button>
-                    <button class="demo-btn" onclick="showPattern('creative')">Creative Tasks</button>
-                    <button class="demo-btn" onclick="showPattern('instructions')">Instructions</button>
+                    <button class="demo-btn" onclick="showPattern('direct')">Direct Instructions</button>
+                    <button class="demo-btn" onclick="showPattern('creative')">Creative Instructions</button>
+                    <button class="demo-btn" onclick="showPattern('analytical')">Analytical Instructions</button>
+                    <button class="demo-btn" onclick="showPattern('code')">Code Instructions</button>
                     <button class="demo-btn secondary" onclick="showPattern('all')">Show All</button>
                 </div>
                 
                 <div class="pattern-viewer">
                     <div class="pattern-examples" id="patternExamples">
                         <!-- Patterns will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">
+                <span class="section-icon">🧠</span>
+                How Instruction Following Emerges
+            </h2>
+            
+            <div class="instruction-flow">
+                <div class="flow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-title">Pattern Observation</div>
+                        <div class="step-description">Model sees millions of examples: "Human gives instruction" → "Helpful response follows"</div>
+                    </div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-title">Statistical Learning</div>
+                        <div class="step-description">Model learns that after instruction-like text, appropriate responses have high probability</div>
+                    </div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-title">Pattern Generalization</div>
+                        <div class="step-description">Model applies learned patterns to new instructions not seen during training</div>
+                    </div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <div class="step-title">Instruction Following</div>
+                        <div class="step-description">When given a new instruction, model predicts the type of response that should follow</div>
                     </div>
                 </div>
             </div>
@@ -414,22 +521,22 @@
                     <h4>Traditional Programming</h4>
                     <p><strong>Rule-based systems:</strong></p>
                     <ul style="text-align: left; margin: 1rem 0;">
-                        <li>Parse question structure</li>
-                        <li>Identify question type</li>
-                        <li>Look up answer in database</li>
-                        <li>Format response</li>
+                        <li>Parse instruction structure</li>
+                        <li>Map to specific functions</li>
+                        <li>Execute programmed responses</li>
+                        <li>Limited to pre-coded instructions</li>
                     </ul>
-                    <p><small>Requires explicit programming for each question type</small></p>
+                    <p><small>Each instruction type requires explicit programming</small></p>
                 </div>
                 
                 <div class="comparison-card llm">
                     <h4>Language Model Approach</h4>
                     <p><strong>Pattern recognition:</strong></p>
                     <ul style="text-align: left; margin: 1rem 0;">
-                        <li>Observe question → answer patterns</li>
+                        <li>Observe instruction → response patterns</li>
                         <li>Learn statistical relationships</li>
-                        <li>Predict likely continuation</li>
-                        <li>Generate contextual response</li>
+                        <li>Predict contextually appropriate responses</li>
+                        <li>Generalize to new instruction types</li>
                     </ul>
                     <p><small>Emerges naturally from next-word prediction training</small></p>
                 </div>
@@ -438,37 +545,38 @@
         
         <div class="demo-section">
             <h2 class="section-title">
-                <span class="section-icon">🧠</span>
-                Why This Works: Training Data Patterns
+                <span class="section-icon">📚</span>
+                Training Data: The Foundation of Instruction Following
             </h2>
             
             <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
-                <h4>Common Patterns in Training Data:</h4>
+                <h4>Common Instruction→Response Patterns in Training Data:</h4>
                 <div style="margin: 1rem 0; font-family: monospace;">
                     <div style="margin: 0.5rem 0;">
-                        <span style="color: #dc3545;">Q: What year did World War II end?</span><br>
-                        <span style="color: #28a745;">A: World War II ended in 1945.</span>
+                        <span style="color: #dc3545;">Human: Explain photosynthesis</span><br>
+                        <span style="color: #28a745;">AI: Photosynthesis is the process by which plants convert sunlight into energy...</span>
                     </div>
                     <div style="margin: 0.5rem 0;">
-                        <span style="color: #dc3545;">Q: How do you calculate the area of a circle?</span><br>
-                        <span style="color: #28a745;">A: The area of a circle is π × r².</span>
+                        <span style="color: #dc3545;">Human: Write a Python function to sort a list</span><br>
+                        <span style="color: #28a745;">AI: def sort_list(items): return sorted(items)</span>
                     </div>
                     <div style="margin: 0.5rem 0;">
-                        <span style="color: #dc3545;">Q: What is the capital of Japan?</span><br>
-                        <span style="color: #28a745;">A: The capital of Japan is Tokyo.</span>
+                        <span style="color: #dc3545;">Human: Summarize this article</span><br>
+                        <span style="color: #28a745;">AI: This article discusses three main points: 1) ...</span>
                     </div>
                 </div>
-                <p>The model learns that after "Q:" comes a question, and after "A:" comes an answer. It doesn't "understand" questions - it recognizes the pattern!</p>
+                <p>The model learns these patterns without understanding what "instruction following" means - it simply recognizes that certain text patterns are typically followed by helpful responses.</p>
             </div>
             
             <div class="insights-panel">
-                <h4>Deep Insights</h4>
+                <h4>Deep Insights About Instruction Following</h4>
                 <ul class="insights-list">
-                    <li><strong>No special Q&A programming:</strong> Question answering emerges from general pattern recognition</li>
-                    <li><strong>Context matters:</strong> The model uses surrounding text to determine what kind of response is expected</li>
-                    <li><strong>Probability-based:</strong> Answers with higher probability in similar contexts are more likely</li>
-                    <li><strong>Limitation:</strong> The model can only "know" what was in its training data</li>
-                    <li><strong>Generalization:</strong> Can handle new questions by combining learned patterns</li>
+                    <li><strong>Emergent Capability:</strong> No explicit "instruction following" programming - emerges from pattern recognition</li>
+                    <li><strong>Context Sensitivity:</strong> The same words can be instructions or statements depending on context</li>
+                    <li><strong>Role Conditioning:</strong> Model learns different response patterns for different roles (assistant, teacher, programmer)</li>
+                    <li><strong>Limitation:</strong> Only as good as the instruction→response patterns in training data</li>
+                    <li><strong>Generalization:</strong> Can handle new instructions by combining learned patterns</li>
+                    <li><strong>Necessary but not sufficient:</strong> Pure prediction needs additional training (SFT, RLHF) for reliable instruction following</li>
                 </ul>
             </div>
         </div>
@@ -476,72 +584,84 @@
     
     <script>
         const patterns = {
-            factual: [
+            direct: [
                 {
-                    question: "What is the largest planet in our solar system?",
-                    answer: "Jupiter is the largest planet in our solar system.",
+                    type: "Information Request",
+                    instruction: "Explain how neural networks work",
+                    response: "Neural networks are computational models inspired by biological neurons. They consist of interconnected nodes that process information through weighted connections...",
                     probability: 92
                 },
                 {
-                    question: "Who wrote Romeo and Juliet?",
-                    answer: "William Shakespeare wrote Romeo and Juliet.",
+                    type: "Definition Request",
+                    instruction: "Define artificial intelligence",
+                    response: "Artificial intelligence (AI) refers to computer systems that can perform tasks typically requiring human intelligence, such as learning, reasoning, and problem-solving.",
                     probability: 95
                 },
                 {
-                    question: "What is the chemical symbol for gold?",
-                    answer: "The chemical symbol for gold is Au.",
-                    probability: 88
-                }
-            ],
-            math: [
-                {
-                    question: "What is 15 + 27?",
-                    answer: "15 + 27 = 42",
-                    probability: 99
-                },
-                {
-                    question: "What is the square root of 144?",
-                    answer: "The square root of 144 is 12.",
-                    probability: 96
-                },
-                {
-                    question: "If a train travels 60 mph for 3 hours, how far does it go?",
-                    answer: "The train travels 180 miles (60 × 3 = 180).",
-                    probability: 85
+                    type: "Factual Question",
+                    instruction: "What is the capital of Australia?",
+                    response: "The capital of Australia is Canberra.",
+                    probability: 98
                 }
             ],
             creative: [
                 {
-                    question: "Write a haiku about spring.",
-                    answer: "Cherry blossoms bloom\nGentle breeze carries sweet scents\nNew life awakens",
-                    probability: 65
+                    type: "Creative Writing",
+                    instruction: "Write a haiku about machine learning",
+                    response: "Algorithms learn\nFrom patterns in endless data\nWisdom emerges",
+                    probability: 75
                 },
                 {
-                    question: "Create a short story about a robot.",
-                    answer: "R2-X7 had always wondered what lay beyond the factory walls...",
-                    probability: 45
+                    type: "Story Generation",
+                    instruction: "Create a short story about a helpful robot",
+                    response: "ARIA-7 noticed the elderly woman struggling with her groceries. Without hesitation, the robot's helpful programming activated...",
+                    probability: 68
                 },
                 {
-                    question: "What would you do if you could fly?",
-                    answer: "If I could fly, I would soar above the clouds and explore...",
-                    probability: 55
+                    type: "Creative Problem Solving",
+                    instruction: "Invent a new use for neural networks",
+                    response: "Neural networks could be used to translate animal behaviors into understandable patterns, helping us better communicate with pets...",
+                    probability: 60
                 }
             ],
-            instructions: [
+            analytical: [
                 {
-                    question: "How do you make a paper airplane?",
-                    answer: "1. Fold a sheet of paper in half lengthwise\n2. Unfold and fold the top corners to the center...",
-                    probability: 78
+                    type: "Analysis Task",
+                    instruction: "Compare supervised and unsupervised learning",
+                    response: "Supervised learning uses labeled data to learn input-output mappings, while unsupervised learning finds patterns in unlabeled data. Key differences include...",
+                    probability: 88
                 },
                 {
-                    question: "Explain how photosynthesis works.",
-                    answer: "Photosynthesis is the process by which plants convert sunlight, carbon dioxide, and water into glucose and oxygen...",
-                    probability: 82
+                    type: "Reasoning Task",
+                    instruction: "Why might larger language models perform better?",
+                    response: "Larger language models typically perform better due to increased capacity for storing patterns, better generalization abilities, and improved few-shot learning...",
+                    probability: 85
                 },
                 {
-                    question: "Summarize the main points of this article.",
-                    answer: "The main points are: 1) Language models use pattern recognition, 2) Questions and answers form predictable patterns...",
-                    probability: 70
+                    type: "Evaluation Task",
+                    instruction: "List pros and cons of AI in healthcare",
+                    response: "Pros: Faster diagnosis, 24/7 availability, pattern recognition in medical imaging. Cons: Privacy concerns, potential bias, need for human oversight...",
+                    probability: 90
+                }
+            ],
+            code: [
+                {
+                    type: "Code Generation",
+                    instruction: "Write a Python function to calculate factorial",
+                    response: "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n-1)",
+                    probability: 94
+                },
+                {
+                    type: "Code Explanation",
+                    instruction: "Explain this code: for i in range(len(lst)):",
+                    response: "This creates a for loop that iterates through indices of the list 'lst'. The range(len(lst)) generates numbers from 0 to the length of the list minus 1.",
+                    probability: 92
+                },
+                {
+                    type: "Debugging Help",
+                    instruction: "Fix this code: print('Hello World'",
+                    response: "The code is missing a closing parenthesis. It should be: print('Hello World')",
+                    probability: 96
                 }
             ]
         };
@@ -558,8 +678,9 @@
             
             container.innerHTML = patternsToShow.map(pattern => `
                 <div class="pattern-item">
-                    <div class="pattern-question">Q: ${pattern.question}</div>
-                    <div class="pattern-answer">A: ${pattern.answer}</div>
+                    <div class="pattern-type">${pattern.type}</div>
+                    <div class="pattern-instruction">Human: ${pattern.instruction}</div>
+                    <div class="pattern-response">AI: ${pattern.response}</div>
                     <div class="pattern-probability">Prediction confidence: ${pattern.probability}%</div>
                 </div>
             `).join('');
@@ -573,35 +694,35 @@
                 { word: "floor", prob: 55 }
             ];
             
-            const answers = [
-                { word: "Paris", prob: 85 },
-                { word: "London", prob: 15 },
-                { word: "Berlin", prob: 10 },
-                { word: "Madrid", prob: 8 }
+            const instructions = [
+                { word: "Gentle drops falling...", prob: 85 },
+                { word: "Summer rain begins...", prob: 70 },
+                { word: "Soft patter on leaves...", prob: 65 },
+                { word: "Clouds release their gift...", prob: 60 }
             ];
             
             let completionIndex = 0;
-            let answerIndex = 0;
+            let instructionIndex = 0;
             
             setInterval(() => {
                 const completion = completions[completionIndex % completions.length];
-                const answer = answers[answerIndex % answers.length];
+                const instruction = instructions[instructionIndex % instructions.length];
                 
                 document.getElementById('completion-word').textContent = completion.word;
                 document.getElementById('completion-prob').style.width = completion.prob + '%';
                 document.getElementById('completion-prob').textContent = completion.prob + '%';
                 
-                document.getElementById('answer-word').textContent = answer.word;
-                document.getElementById('answer-prob').style.width = answer.prob + '%';
-                document.getElementById('answer-prob').textContent = answer.prob + '%';
+                document.getElementById('instruction-word').textContent = instruction.word;
+                document.getElementById('instruction-prob').style.width = instruction.prob + '%';
+                document.getElementById('instruction-prob').textContent = instruction.prob + '%';
                 
                 completionIndex++;
-                answerIndex++;
+                instructionIndex++;
             }, 3000);
         }
         
         // Initialize
-        showPattern('factual');
+        showPattern('direct');
         animateCompletion();
     </script>
 </body>
