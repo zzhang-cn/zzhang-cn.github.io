@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Progress Visualizer - LLM4LLM (Test Version)</title>
+    
+    <!-- Inline shared styles for testing -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        /* Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        /* Panels */
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        /* Control Groups */
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        /* Charts */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+        
+        .chart-container.large {
+            height: 400px;
+        }
+        
+        /* Buttons */
+        .demo-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            margin: 0.25rem;
+        }
+        
+        .demo-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .demo-btn.secondary {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 1px solid #e9ecef;
+        }
+        
+        .demo-btn.secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .demo-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        /* Demo controls */
+        .demo-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        /* Statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        /* Training status */
+        .training-status {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        
+        .training-status.training {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+        
+        .training-status.stopped {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .status-text {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        /* Model selector */
+        .model-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .model-option {
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .model-option:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .model-option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #5a6fd8;
+        }
+        
+        .model-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .model-details {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        /* Insights Panel */
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .insights-panel ul {
+            list-style: none;
+        }
+        
+        .insights-panel li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-panel li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        
+        /* Comparison table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .comparison-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .model-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auto-generated header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 1</a> / 
+                Session 1.4
+            </div>
+            <h1>Training Progress Visualizer</h1>
+            <p>Monitor neural language model training with real-time loss and accuracy metrics</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="main-grid">
+            <div class="panel">
+                <h2 class="section-title">Training Configuration</h2>
+                
+                <div class="control-group">
+                    <label class="control-label">Choose Model Architecture</label>
+                    <div class="model-selector">
+                        <div class="model-option selected" onclick="selectModel('simple')" data-model="simple">
+                            <div class="model-title">Simple Model</div>
+                            <div class="model-details">1 context word, 50 hidden units</div>
+                        </div>
+                        <div class="model-option" onclick="selectModel('bengio')" data-model="bengio">
+                            <div class="model-title">Bengio Model</div>
+                            <div class="model-details">3 context words, 100 hidden units</div>
+                        </div>
+                        <div class="model-option" onclick="selectModel('large')" data-model="large">
+                            <div class="model-title">Large Model</div>
+                            <div class="model-details">5 context words, 200 hidden units</div>
+                        </div>
+                        <div class="model-option" onclick="selectModel('ngram')" data-model="ngram">
+                            <div class="model-title">N-gram Baseline</div>
+                            <div class="model-details">Trigram with smoothing</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Training Controls</label>
+                    <div class="demo-controls">
+                        <button class="demo-btn" id="startTrainingBtn" onclick="startTraining()">Start Training</button>
+                        <button class="demo-btn secondary" id="pauseTrainingBtn" onclick="pauseTraining()" disabled>Pause</button>
+                        <button class="demo-btn secondary" onclick="resetTraining()">Reset</button>
+                        <button class="demo-btn secondary" onclick="fastForward()">Fast Forward</button>
+                    </div>
+                </div>
+                
+                <div class="training-status" id="trainingStatus">
+                    <div class="status-text">Ready to train</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%">0%</div>
+                    </div>
+                    <div style="font-size: 0.9rem; margin-top: 0.5rem;">
+                        Epoch <span id="currentEpoch">0</span> / <span id="totalEpochs">100</span>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="currentLoss">0.00</div>
+                        <div class="stat-label">Current Loss</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="currentAccuracy">0%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="currentPerplexity">∞</div>
+                        <div class="stat-label">Perplexity</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="trainingTime">0s</div>
+                        <div class="stat-label">Training Time</div>
+                    </div>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Training Insights</h4>
+                    <ul id="trainingInsights">
+                        <li>Select a model architecture to begin</li>
+                        <li>Neural models typically train for many epochs</li>
+                        <li>Watch loss decrease and accuracy increase over time</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2 class="section-title">Loss & Accuracy Curves</h2>
+                
+                <div class="chart-container large">
+                    <canvas id="trainingChart"></canvas>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Understanding Training Curves</h4>
+                    <ul>
+                        <li><strong>Loss:</strong> How wrong the model's predictions are (lower is better)</li>
+                        <li><strong>Accuracy:</strong> Percentage of correct next-word predictions</li>
+                        <li><strong>Perplexity:</strong> Exponential of loss (lower means less confused)</li>
+                        <li><strong>Convergence:</strong> When curves flatten, training can stop</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel full-width">
+            <h2 class="section-title">Model Comparison</h2>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Context Size</th>
+                        <th>Parameters</th>
+                        <th>Final Loss</th>
+                        <th>Final Accuracy</th>
+                        <th>Training Time</th>
+                        <th>Convergence</th>
+                    </tr>
+                </thead>
+                <tbody id="comparisonTableBody">
+                    <tr>
+                        <td>N-gram Baseline</td>
+                        <td>2 words</td>
+                        <td>-</td>
+                        <td id="ngramLoss">-</td>
+                        <td id="ngramAccuracy">-</td>
+                        <td id="ngramTime">-</td>
+                        <td id="ngramConvergence">-</td>
+                    </tr>
+                    <tr>
+                        <td>Simple Neural</td>
+                        <td>1 word</td>
+                        <td>~5K</td>
+                        <td id="simpleLoss">-</td>
+                        <td id="simpleAccuracy">-</td>
+                        <td id="simpleTime">-</td>
+                        <td id="simpleConvergence">-</td>
+                    </tr>
+                    <tr>
+                        <td>Bengio Model</td>
+                        <td>3 words</td>
+                        <td>~15K</td>
+                        <td id="bengioLoss">-</td>
+                        <td id="bengioAccuracy">-</td>
+                        <td id="bengioTime">-</td>
+                        <td id="bengioConvergence">-</td>
+                    </tr>
+                    <tr>
+                        <td>Large Model</td>
+                        <td>5 words</td>
+                        <td>~50K</td>
+                        <td id="largeLoss">-</td>
+                        <td id="largeAccuracy">-</td>
+                        <td id="largeTime">-</td>
+                        <td id="largeConvergence">-</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="insights-panel">
+                <h4>Key Observations</h4>
+                <ul id="comparisonInsights">
+                    <li>Train different models to see performance comparisons</li>
+                    <li>Larger context generally improves performance</li>
+                    <li>More parameters can lead to better accuracy but slower training</li>
+                    <li>Neural models typically outperform n-gram baselines</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- External Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <script>
+        // Inline shared utilities for testing
+        function formatNumber(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(0) + 'k';
+            return num.toString();
+        }
+        
+        function destroyChart(chart) {
+            if (chart && typeof chart.destroy === 'function') {
+                chart.destroy();
+            }
+        }
+        
+        // Page-specific code
+        let chart = null;
+        let isTraining = false;
+        let currentModel = 'simple';
+        let trainingData = {
+            epochs: [],
+            loss: [],
+            accuracy: [],
+            perplexity: []
+        };
+        let currentEpoch = 0;
+        let totalEpochs = 100;
+        let trainingStartTime = 0;
+        let animationId = null;
+        
+        // Model configurations
+        const modelConfigs = {
+            simple: {
+                name: 'Simple Model',
+                contextSize: 1,
+                hiddenUnits: 50,
+                parameters: 5000,
+                learningCurve: {
+                    initialLoss: 6.5,
+                    finalLoss: 3.2,
+                    convergenceRate: 0.05,
+                    noiseLevel: 0.1
+                }
+            },
+            bengio: {
+                name: 'Bengio Model',
+                contextSize: 3,
+                hiddenUnits: 100,
+                parameters: 15000,
+                learningCurve: {
+                    initialLoss: 6.8,
+                    finalLoss: 2.1,
+                    convergenceRate: 0.03,
+                    noiseLevel: 0.08
+                }
+            },
+            large: {
+                name: 'Large Model',
+                contextSize: 5,
+                hiddenUnits: 200,
+                parameters: 50000,
+                learningCurve: {
+                    initialLoss: 7.0,
+                    finalLoss: 1.8,
+                    convergenceRate: 0.02,
+                    noiseLevel: 0.06
+                }
+            },
+            ngram: {
+                name: 'N-gram Baseline',
+                contextSize: 2,
+                hiddenUnits: 0,
+                parameters: 0,
+                learningCurve: {
+                    initialLoss: 4.5,
+                    finalLoss: 4.5,
+                    convergenceRate: 1.0,
+                    noiseLevel: 0.02
+                }
+            }
+        };
+        
+        // Training results storage
+        const trainingResults = {};
+        
+        function selectModel(modelType) {
+            currentModel = modelType;
+            
+            // Update UI
+            document.querySelectorAll('.model-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`[data-model="${modelType}"]`).classList.add('selected');
+            
+            updateTrainingInsights();
+        }
+        
+        function generateTrainingCurve(config, epoch) {
+            const { initialLoss, finalLoss, convergenceRate, noiseLevel } = config.learningCurve;
+            
+            // Exponential decay with noise
+            const progress = 1 - Math.exp(-convergenceRate * epoch);
+            const baseLoss = initialLoss - (initialLoss - finalLoss) * progress;
+            const noise = (Math.random() - 0.5) * noiseLevel;
+            const loss = Math.max(baseLoss + noise, finalLoss * 0.9);
+            
+            // Calculate accuracy and perplexity
+            const accuracy = Math.min(95, Math.max(5, 100 * (1 - loss / initialLoss)));
+            const perplexity = Math.exp(loss);
+            
+            return { loss, accuracy, perplexity };
+        }
+        
+        function startTraining() {
+            if (isTraining) return;
+            
+            isTraining = true;
+            currentEpoch = 0;
+            trainingStartTime = Date.now();
+            trainingData = { epochs: [], loss: [], accuracy: [], perplexity: [] };
+            
+            // Update UI
+            document.getElementById('startTrainingBtn').disabled = true;
+            document.getElementById('pauseTrainingBtn').disabled = false;
+            
+            const statusElement = document.getElementById('trainingStatus');
+            statusElement.className = 'training-status training';
+            statusElement.querySelector('.status-text').textContent = 'Training in progress...';
+            
+            // Start animation
+            trainStep();
+        }
+        
+        function trainStep() {
+            if (!isTraining || currentEpoch >= totalEpochs) {
+                completeTraining();
+                return;
+            }
+            
+            const config = modelConfigs[currentModel];
+            const metrics = generateTrainingCurve(config, currentEpoch);
+            
+            // Update data
+            trainingData.epochs.push(currentEpoch);
+            trainingData.loss.push(metrics.loss);
+            trainingData.accuracy.push(metrics.accuracy);
+            trainingData.perplexity.push(metrics.perplexity);
+            
+            // Update displays
+            updateStats(metrics);
+            updateProgress();
+            updateChart();
+            updateTrainingInsights(metrics);
+            
+            currentEpoch++;
+            
+            // Continue training
+            const delay = currentModel === 'ngram' ? 50 : 100; // N-gram trains faster
+            animationId = setTimeout(trainStep, delay);
+        }
+        
+        function pauseTraining() {
+            isTraining = false;
+            if (animationId) {
+                clearTimeout(animationId);
+            }
+            
+            document.getElementById('startTrainingBtn').disabled = false;
+            document.getElementById('pauseTrainingBtn').disabled = true;
+            
+            const statusElement = document.getElementById('trainingStatus');
+            statusElement.className = 'training-status stopped';
+            statusElement.querySelector('.status-text').textContent = 'Training paused';
+        }
+        
+        function completeTraining() {
+            isTraining = false;
+            
+            // Store results
+            const finalMetrics = {
+                loss: trainingData.loss[trainingData.loss.length - 1],
+                accuracy: trainingData.accuracy[trainingData.accuracy.length - 1],
+                perplexity: trainingData.perplexity[trainingData.perplexity.length - 1],
+                trainingTime: (Date.now() - trainingStartTime) / 1000,
+                convergenceEpoch: findConvergenceEpoch()
+            };
+            
+            trainingResults[currentModel] = finalMetrics;
+            
+            // Update UI
+            document.getElementById('startTrainingBtn').disabled = false;
+            document.getElementById('pauseTrainingBtn').disabled = true;
+            
+            const statusElement = document.getElementById('trainingStatus');
+            statusElement.className = 'training-status';
+            statusElement.querySelector('.status-text').textContent = 'Training completed!';
+            
+            updateComparisonTable();
+            updateComparisonInsights();
+        }
+        
+        function resetTraining() {
+            pauseTraining();
+            currentEpoch = 0;
+            trainingData = { epochs: [], loss: [], accuracy: [], perplexity: [] };
+            
+            // Reset displays
+            updateStats({ loss: 0, accuracy: 0, perplexity: Infinity });
+            updateProgress();
+            updateChart();
+            
+            const statusElement = document.getElementById('trainingStatus');
+            statusElement.className = 'training-status';
+            statusElement.querySelector('.status-text').textContent = 'Ready to train';
+        }
+        
+        function fastForward() {
+            if (!isTraining) return;
+            
+            // Complete training in fast mode
+            while (currentEpoch < totalEpochs && isTraining) {
+                const config = modelConfigs[currentModel];
+                const metrics = generateTrainingCurve(config, currentEpoch);
+                
+                trainingData.epochs.push(currentEpoch);
+                trainingData.loss.push(metrics.loss);
+                trainingData.accuracy.push(metrics.accuracy);
+                trainingData.perplexity.push(metrics.perplexity);
+                
+                currentEpoch++;
+            }
+            
+            // Update final state
+            const finalMetrics = {
+                loss: trainingData.loss[trainingData.loss.length - 1],
+                accuracy: trainingData.accuracy[trainingData.accuracy.length - 1],
+                perplexity: trainingData.perplexity[trainingData.perplexity.length - 1]
+            };
+            
+            updateStats(finalMetrics);
+            updateProgress();
+            updateChart();
+            completeTraining();
+        }
+        
+        function updateStats(metrics) {
+            document.getElementById('currentLoss').textContent = metrics.loss.toFixed(3);
+            document.getElementById('currentAccuracy').textContent = Math.round(metrics.accuracy) + '%';
+            document.getElementById('currentPerplexity').textContent = 
+                isFinite(metrics.perplexity) ? metrics.perplexity.toFixed(1) : '∞';
+            
+            const elapsed = isTraining ? (Date.now() - trainingStartTime) / 1000 : 0;
+            document.getElementById('trainingTime').textContent = elapsed.toFixed(0) + 's';
+        }
+        
+        function updateProgress() {
+            const progress = (currentEpoch / totalEpochs) * 100;
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = progress + '%';
+            progressFill.textContent = Math.round(progress) + '%';
+            
+            document.getElementById('currentEpoch').textContent = currentEpoch;
+            document.getElementById('totalEpochs').textContent = totalEpochs;
+        }
+        
+        function updateChart() {
+            const canvas = document.getElementById('trainingChart');
+            const ctx = canvas.getContext('2d');
+            
+            destroyChart(chart);
+            
+            if (trainingData.epochs.length === 0) return;
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trainingData.epochs,
+                    datasets: [
+                        {
+                            label: 'Loss',
+                            data: trainingData.loss,
+                            borderColor: '#dc3545',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Accuracy (%)',
+                            data: trainingData.accuracy,
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Epoch'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Loss'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Accuracy (%)'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        },
+                    },
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateTrainingInsights(metrics = null) {
+            const insights = [];
+            const config = modelConfigs[currentModel];
+            
+            insights.push(`Training ${config.name} with ${formatNumber(config.parameters)} parameters`);
+            
+            if (metrics) {
+                if (metrics.loss > 5) {
+                    insights.push('High loss - model is still learning basic patterns');
+                } else if (metrics.loss > 3) {
+                    insights.push('Moderate loss - model is making progress');
+                } else if (metrics.loss > 2) {
+                    insights.push('Good progress - loss is decreasing steadily');
+                } else {
+                    insights.push('Excellent! Model is converging to low loss');
+                }
+                
+                if (metrics.accuracy > 80) {
+                    insights.push('High accuracy - model predicts well');
+                } else if (metrics.accuracy > 50) {
+                    insights.push('Moderate accuracy - better than random guessing');
+                } else {
+                    insights.push('Low accuracy - model needs more training');
+                }
+            }
+            
+            insights.push(`Context size: ${config.contextSize} word(s) - ${config.contextSize > 1 ? 'captures dependencies' : 'limited context'}`);
+            
+            document.getElementById('trainingInsights').innerHTML = insights.map(
+                insight => `<li>${insight}</li>`
+            ).join('');
+        }
+        
+        function findConvergenceEpoch() {
+            if (trainingData.loss.length < 10) return -1;
+            
+            // Find when loss stops decreasing significantly
+            for (let i = 10; i < trainingData.loss.length; i++) {
+                const recentLosses = trainingData.loss.slice(i-10, i);
+                const avgRecent = recentLosses.reduce((a, b) => a + b) / recentLosses.length;
+                const currentLoss = trainingData.loss[i];
+                
+                if (Math.abs(avgRecent - currentLoss) < 0.01) {
+                    return i;
+                }
+            }
+            return trainingData.loss.length;
+        }
+        
+        function updateComparisonTable() {
+            const result = trainingResults[currentModel];
+            if (!result) return;
+            
+            const modelPrefix = currentModel;
+            
+            document.getElementById(modelPrefix + 'Loss').textContent = result.loss.toFixed(3);
+            document.getElementById(modelPrefix + 'Accuracy').textContent = Math.round(result.accuracy) + '%';
+            document.getElementById(modelPrefix + 'Time').textContent = result.trainingTime.toFixed(1) + 's';
+            document.getElementById(modelPrefix + 'Convergence').textContent = 
+                result.convergenceEpoch > 0 ? 'Epoch ' + result.convergenceEpoch : 'No convergence';
+        }
+        
+        function updateComparisonInsights() {
+            const insights = [];
+            const results = Object.keys(trainingResults);
+            
+            if (results.length === 0) {
+                insights.push('Train different models to see performance comparisons');
+                insights.push('Larger context generally improves performance');
+                insights.push('More parameters can lead to better accuracy but slower training');
+                insights.push('Neural models typically outperform n-gram baselines');
+            } else {
+                // Find best performing models
+                let bestLoss = Infinity, bestAccuracy = 0, fastestTraining = Infinity;
+                let bestLossModel, bestAccuracyModel, fastestModel;
+                
+                results.forEach(model => {
+                    const result = trainingResults[model];
+                    if (result.loss < bestLoss) {
+                        bestLoss = result.loss;
+                        bestLossModel = model;
+                    }
+                    if (result.accuracy > bestAccuracy) {
+                        bestAccuracy = result.accuracy;
+                        bestAccuracyModel = model;
+                    }
+                    if (result.trainingTime < fastestTraining) {
+                        fastestTraining = result.trainingTime;
+                        fastestModel = model;
+                    }
+                });
+                
+                if (bestLossModel) {
+                    insights.push(`${modelConfigs[bestLossModel].name} achieved lowest loss (${bestLoss.toFixed(3)})`);
+                }
+                if (bestAccuracyModel) {
+                    insights.push(`${modelConfigs[bestAccuracyModel].name} achieved highest accuracy (${Math.round(bestAccuracy)}%)`);
+                }
+                if (fastestModel) {
+                    insights.push(`${modelConfigs[fastestModel].name} trained fastest (${fastestTraining.toFixed(1)}s)`);
+                }
+                
+                if (results.includes('ngram') && results.length > 1) {
+                    const ngramResult = trainingResults['ngram'];
+                    const neuralResults = results.filter(m => m !== 'ngram').map(m => trainingResults[m]);
+                    const avgNeuralLoss = neuralResults.reduce((sum, r) => sum + r.loss, 0) / neuralResults.length;
+                    
+                    if (avgNeuralLoss < ngramResult.loss) {
+                        insights.push('Neural models outperform n-gram baseline in loss');
+                    }
+                }
+            }
+            
+            document.getElementById('comparisonInsights').innerHTML = insights.map(
+                insight => `<li>${insight}</li>`
+            ).join('');
+        }
+        
+        // Initialize
+        window.addEventListener('load', function() {
+            updateChart();
+            updateTrainingInsights();
+            updateComparisonInsights();
+        });
+    </script>
+</body>
+</html>
