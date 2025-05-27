@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sparsity Explorer - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .controls-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .control-group {
+            text-align: center;
+        }
+        
+        .control-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        .slider-container {
+            margin: 1rem 0;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e9ecef;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .slider-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 0.5rem;
+        }
+        
+        .visualization-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .problem-demo {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .problem-demo h4 {
+            color: #856404;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .problem-demo h4:before {
+            content: "⚠️";
+            margin-right: 0.5rem;
+        }
+        
+        .coverage-demo {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .seen-ngram {
+            background: #d4edda;
+            color: #155724;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            margin: 0.1rem;
+            display: inline-block;
+        }
+        
+        .unseen-ngram {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            margin: 0.1rem;
+            display: inline-block;
+        }
+        
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .insights-panel ul {
+            list-style: none;
+        }
+        
+        .insights-panel li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-panel li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        
+        .exponential-warning {
+            background: #dc3545;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 968px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .visualization-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 1</a> / 
+                Session 1.2
+            </div>
+            <h1>Sparsity Explorer</h1>
+            <p>Visualize how n-gram coverage drops exponentially as sequence length increases</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="controls-section">
+            <h2 class="section-title">Simulation Controls</h2>
+            
+            <div class="controls-grid">
+                <div class="control-group">
+                    <div class="control-label">Vocabulary Size</div>
+                    <div class="slider-container">
+                        <input type="range" id="vocabSlider" class="slider" min="10" max="10000" value="1000" step="10">
+                        <div class="slider-value" id="vocabValue">1,000</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">N-gram Size</div>
+                    <div class="slider-container">
+                        <input type="range" id="ngramSlider" class="slider" min="1" max="8" value="3" step="1">
+                        <div class="slider-value" id="ngramValue">3</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">Training Data Size</div>
+                    <div class="slider-container">
+                        <input type="range" id="dataSlider" class="slider" min="1000" max="1000000" value="100000" step="1000">
+                        <div class="slider-value" id="dataValue">100k</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="visualization-grid">
+            <div class="chart-section">
+                <h3 class="section-title">Possible vs. Seen N-grams</h3>
+                <div class="chart-container">
+                    <canvas id="sparsityChart"></canvas>
+                </div>
+                <p style="text-align: center; color: #666; font-size: 0.9rem;">
+                    Exponential growth of possible combinations vs. linear growth of training data
+                </p>
+            </div>
+            
+            <div class="chart-section">
+                <h3 class="section-title">Coverage Percentage</h3>
+                <div class="chart-container">
+                    <canvas id="coverageChart"></canvas>
+                </div>
+                <p style="text-align: center; color: #666; font-size: 0.9rem;">
+                    Percentage of possible n-grams actually seen in training
+                </p>
+            </div>
+        </div>
+        
+        <div class="stats-section">
+            <h3 class="section-title">Sparsity Statistics</h3>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="possibleNgrams">0</div>
+                    <div class="stat-label">Possible N-grams</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="seenNgrams">0</div>
+                    <div class="stat-label">Seen in Training</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="coveragePercent">0%</div>
+                    <div class="stat-label">Coverage</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="unseenNgrams">0</div>
+                    <div class="stat-label">Unseen N-grams</div>
+                </div>
+            </div>
+            
+            <div class="problem-demo">
+                <h4>The Sparsity Problem</h4>
+                <div id="problemDescription">
+                    <p>As n-gram size increases, the number of possible combinations grows exponentially, but training data grows linearly. This creates massive "holes" in our knowledge.</p>
+                </div>
+                
+                <div class="coverage-demo" id="coverageDemo">
+                    <!-- Coverage examples will be shown here -->
+                </div>
+            </div>
+            
+            <div class="insights-panel">
+                <h4>Key Insights</h4>
+                <ul id="insightsList">
+                    <li>Adjust the sliders to see how sparsity changes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        let sparsityChart = null;
+        let coverageChart = null;
+        
+        function formatNumber(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(0) + 'k';
+            return num.toString();
+        }
+        
+        function calculateSparsity() {
+            const vocabSize = parseInt(document.getElementById('vocabSlider').value);
+            const ngramSize = parseInt(document.getElementById('ngramSlider').value);
+            const trainingSize = parseInt(document.getElementById('dataSlider').value);
+            
+            // Calculate possible n-grams (vocab^n)
+            const possibleNgrams = Math.pow(vocabSize, ngramSize);
+            
+            // Estimate seen n-grams (limited by training data size)
+            // This is a simplified model - in reality it's more complex
+            const maxSeenNgrams = Math.min(trainingSize * 0.7, possibleNgrams);
+            const seenNgrams = Math.floor(maxSeenNgrams);
+            
+            // Calculate coverage
+            const coverage = (seenNgrams / possibleNgrams) * 100;
+            const unseenNgrams = possibleNgrams - seenNgrams;
+            
+            return {
+                vocabSize,
+                ngramSize,
+                trainingSize,
+                possibleNgrams,
+                seenNgrams,
+                unseenNgrams,
+                coverage
+            };
+        }
+        
+        function updateDisplays() {
+            const stats = calculateSparsity();
+            
+            // Update slider displays
+            document.getElementById('vocabValue').textContent = formatNumber(stats.vocabSize);
+            document.getElementById('ngramValue').textContent = stats.ngramSize;
+            document.getElementById('dataValue').textContent = formatNumber(stats.trainingSize);
+            
+            // Update statistics
+            document.getElementById('possibleNgrams').textContent = formatNumber(stats.possibleNgrams);
+            document.getElementById('seenNgrams').textContent = formatNumber(stats.seenNgrams);
+            document.getElementById('coveragePercent').textContent = stats.coverage.toFixed(4) + '%';
+            document.getElementById('unseenNgrams').textContent = formatNumber(stats.unseenNgrams);
+            
+            // Update charts
+            updateCharts(stats);
+            
+            // Update insights
+            updateInsights(stats);
+            
+            // Update problem description
+            updateProblemDemo(stats);
+        }
+        
+        function updateCharts(stats) {
+            const ctx1 = document.getElementById('sparsityChart').getContext('2d');
+            const ctx2 = document.getElementById('coverageChart').getContext('2d');
+            
+            // Generate data for different n-gram sizes
+            const ngramSizes = [1, 2, 3, 4, 5, 6, 7, 8];
+            const possibleData = ngramSizes.map(n => Math.pow(stats.vocabSize, n));
+            const seenData = ngramSizes.map(n => Math.min(stats.trainingSize * 0.7, Math.pow(stats.vocabSize, n)));
+            const coverageData = ngramSizes.map((n, i) => (seenData[i] / possibleData[i]) * 100);
+            
+            // Destroy existing charts
+            if (sparsityChart) sparsityChart.destroy();
+            if (coverageChart) coverageChart.destroy();
+            
+            // Create sparsity chart
+            sparsityChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ngramSizes,
+                    datasets: [
+                        {
+                            label: 'Possible N-grams',
+                            data: possibleData,
+                            borderColor: '#dc3545',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            borderWidth: 3,
+                            fill: false
+                        },
+                        {
+                            label: 'Seen in Training',
+                            data: seenData,
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            borderWidth: 3,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'Count (log scale)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'N-gram Size'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    }
+                }
+            });
+            
+            // Create coverage chart
+            coverageChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ngramSizes,
+                    datasets: [{
+                        label: 'Coverage %',
+                        data: coverageData,
+                        backgroundColor: ngramSizes.map((n, i) => 
+                            coverageData[i] > 10 ? '#28a745' : 
+                            coverageData[i] > 1 ? '#ffc107' : '#dc3545'
+                        ),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Coverage Percentage'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'N-gram Size'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateInsights(stats) {
+            const insights = [];
+            
+            if (stats.coverage < 0.01) {
+                insights.push(`Extremely sparse: Only ${stats.coverage.toFixed(6)}% of possible ${stats.ngramSize}-grams are seen in training`);
+            } else if (stats.coverage < 1) {
+                insights.push(`Very sparse: Only ${stats.coverage.toFixed(2)}% of possible ${stats.ngramSize}-grams are covered`);
+            } else if (stats.coverage < 10) {
+                insights.push(`Sparse: ${stats.coverage.toFixed(1)}% coverage means most n-grams are unseen`);
+            } else {
+                insights.push(`Good coverage: ${stats.coverage.toFixed(1)}% of possible n-grams are seen`);
+            }
+            
+            if (stats.ngramSize >= 4) {
+                insights.push(`At ${stats.ngramSize}-grams, exponential growth makes complete coverage impossible`);
+            }
+            
+            if (stats.possibleNgrams > 1e9) {
+                insights.push(`${formatNumber(stats.possibleNgrams)} possible combinations is far beyond what any dataset can cover`);
+            }
+            
+            const ratioNeeded = stats.possibleNgrams / stats.trainingSize;
+            if (ratioNeeded > 1000) {
+                insights.push(`Would need ${formatNumber(ratioNeeded)}x more training data for complete coverage`);
+            }
+            
+            insights.push(`This is why neural networks are needed - they generalize beyond exact n-gram matches`);
+            
+            document.getElementById('insightsList').innerHTML = insights.map(
+                insight => `<li>${insight}</li>`
+            ).join('');
+        }
+        
+        function updateProblemDemo(stats) {
+            const demo = document.getElementById('coverageDemo');
+            
+            if (stats.coverage < 1) {
+                demo.innerHTML = `
+                    <p><strong>Example:</strong> If you encounter these ${stats.ngramSize}-grams in new text:</p>
+                    <div style="margin: 0.5rem 0;">
+                        <span class="seen-ngram">common phrase</span>
+                        <span class="unseen-ngram">rare combination</span>
+                        <span class="unseen-ngram">never seen before</span>
+                        <span class="seen-ngram">another common</span>
+                        <span class="unseen-ngram">completely new</span>
+                    </div>
+                    <p>Red = Not in training data (${(100 - stats.coverage).toFixed(1)}% of all possible combinations)</p>
+                    <p>Green = Seen in training (${stats.coverage.toFixed(1)}% of all possible combinations)</p>
+                `;
+            } else {
+                demo.innerHTML = `
+                    <p>With ${stats.coverage.toFixed(1)}% coverage, most n-grams would be seen in training.</p>
+                `;
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('vocabSlider').addEventListener('input', updateDisplays);
+        document.getElementById('ngramSlider').addEventListener('input', updateDisplays);
+        document.getElementById('dataSlider').addEventListener('input', updateDisplays);
+        
+        // Initial update
+        updateDisplays();
+    </script>
+</body>
+</html>
