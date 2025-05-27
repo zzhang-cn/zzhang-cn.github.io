@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loss Function Explorer - LLM4LLM</title>
+    
+    <!-- Shared Resources -->
+    <link rel="stylesheet" href="../../shared/styles.css">
+    
+    <!-- Page-specific styles -->
+    <style>
+        .prediction-demo {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .prediction-scenario {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .scenario-info {
+            flex: 1;
+        }
+        
+        .scenario-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .scenario-details {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .scenario-metrics {
+            text-align: right;
+        }
+        
+        .confidence-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .loss-value {
+            font-size: 1rem;
+            color: #dc3545;
+            margin-top: 0.25rem;
+        }
+        
+        .loss-equation {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.1rem;
+        }
+        
+        .interactive-demo {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .interactive-demo h4 {
+            color: #856404;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header container for auto-generation -->
+    <div id="header-container"></div>
+    
+    <div class="container">
+        <div class="main-grid">
+            <div class="panel">
+                <h2 class="section-title">Interactive Loss Calculator</h2>
+                
+                <div class="control-group">
+                    <label class="control-label">Context: "The cat sat on the"</label>
+                    <div class="control-label" style="font-size: 0.9rem; color: #666;">Choose what the model predicts:</div>
+                    <div class="word-selector">
+                        <div class="word-option selected" onclick="selectWord('mat', 0.8)" data-word="mat">mat</div>
+                        <div class="word-option" onclick="selectWord('chair', 0.6)" data-word="chair">chair</div>
+                        <div class="word-option" onclick="selectWord('table', 0.4)" data-word="table">table</div>
+                        <div class="word-option" onclick="selectWord('floor', 0.3)" data-word="floor">floor</div>
+                        <div class="word-option" onclick="selectWord('elephant', 0.05)" data-word="elephant">elephant</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Model Confidence</label>
+                    <div class="slider-container">
+                        <input type="range" id="confidenceSlider" class="slider" min="0.01" max="0.99" step="0.01" value="0.8">
+                        <div class="slider-value" id="confidenceValue">80%</div>
+                    </div>
+                </div>
+                
+                <div class="loss-equation">
+                    <strong>Cross-Entropy Loss:</strong><br>
+                    L = -log(p) = -log(<span id="probabilityDisplay">0.8</span>) = <span id="lossDisplay">0.223</span>
+                </div>
+                
+                <div class="prediction-demo">
+                    <h4>Current Prediction Scenario</h4>
+                    <div class="prediction-scenario">
+                        <div class="scenario-info">
+                            <div class="scenario-title">Prediction: "<span id="currentWord">mat</span>"</div>
+                            <div class="scenario-details">Actual correct word: "<span id="correctWord">mat</span>"</div>
+                            <div class="scenario-details" id="predictionStatus">✅ Correct prediction!</div>
+                        </div>
+                        <div class="scenario-metrics">
+                            <div class="confidence-value" id="currentConfidence">80%</div>
+                            <div class="loss-value">Loss: <span id="currentLoss">0.223</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="interactive-demo">
+                    <h4>Try Different Scenarios</h4>
+                    <p>Click different words above and adjust confidence to see how loss changes:</p>
+                    <ul style="margin-top: 0.5rem; list-style: disc; margin-left: 1rem;">
+                        <li><strong>High confidence + correct</strong> = Low loss (good!)</li>
+                        <li><strong>High confidence + wrong</strong> = High loss (bad!)</li>
+                        <li><strong>Low confidence + correct</strong> = Medium loss</li>
+                        <li><strong>Low confidence + wrong</strong> = Medium loss</li>
+                    </ul>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Key Insights</h4>
+                    <ul id="insightsList">
+                        <li>Lower loss means better predictions</li>
+                        <li>Cross-entropy heavily penalizes confident wrong predictions</li>
+                        <li>The model learns by trying to minimize this loss</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2 class="section-title">Loss Behavior Visualization</h2>
+                
+                <div class="chart-container">
+                    <canvas id="lossChart"></canvas>
+                </div>
+                
+                <div class="panel" style="margin-top: 1rem; padding: 1rem;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Example Scenarios</h3>
+                    <div id="scenarioExamples">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Why Cross-Entropy?</h4>
+                    <ul>
+                        <li><strong>Smooth gradient:</strong> Provides clear direction for improvement</li>
+                        <li><strong>Penalizes confidence:</strong> Wrong predictions with high confidence get heavily penalized</li>
+                        <li><strong>Probabilistic:</strong> Works naturally with softmax probability outputs</li>
+                        <li><strong>Information theoretic:</strong> Measures how "surprised" the model is by the correct answer</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- External Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- Shared Resources -->
+    <script src="../../shared/utils.js"></script>
+    <script src="../../shared/header-template.js"></script>
+    
+    <!-- Page-specific JavaScript -->
+    <script>
+        let chart = null;
+        let currentPrediction = 'mat';
+        let currentConfidence = 0.8;
+        let correctAnswer = 'mat';
+        
+        function calculateLoss(probability) {
+            return -Math.log(probability);
+        }
+        
+        function selectWord(word, suggestedConfidence) {
+            currentPrediction = word;
+            
+            // Update UI using shared utility
+            document.querySelectorAll('.word-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`[data-word="${word}"]`).classList.add('selected');
+            
+            // Set suggested confidence
+            document.getElementById('confidenceSlider').value = suggestedConfidence;
+            currentConfidence = suggestedConfidence;
+            
+            updateDisplay();
+        }
+        
+        function updateDisplay() {
+            const probability = currentConfidence;
+            const loss = calculateLoss(probability);
+            const isCorrect = currentPrediction === correctAnswer;
+            
+            // Update displays using shared formatting
+            document.getElementById('probabilityDisplay').textContent = probability.toFixed(3);
+            document.getElementById('lossDisplay').textContent = loss.toFixed(3);
+            document.getElementById('confidenceValue').textContent = formatPercentage(probability, 0);
+            document.getElementById('currentWord').textContent = currentPrediction;
+            document.getElementById('correctWord').textContent = correctAnswer;
+            document.getElementById('currentConfidence').textContent = formatPercentage(probability, 0);
+            document.getElementById('currentLoss').textContent = loss.toFixed(3);
+            
+            // Update status
+            const statusElement = document.getElementById('predictionStatus');
+            if (isCorrect) {
+                statusElement.innerHTML = '✅ Correct prediction!';
+                statusElement.style.color = '#28a745';
+            } else {
+                statusElement.innerHTML = '❌ Wrong prediction';
+                statusElement.style.color = '#dc3545';
+            }
+            
+            // Update insights
+            updateInsights(probability, loss, isCorrect);
+            
+            // Update chart
+            updateChart();
+        }
+        
+        function updateInsights(probability, loss, isCorrect) {
+            const insights = [];
+            
+            if (isCorrect) {
+                if (probability > 0.8) {
+                    insights.push('Excellent! High confidence in correct prediction = low loss');
+                } else if (probability > 0.5) {
+                    insights.push('Good prediction, but model could be more confident');
+                } else {
+                    insights.push('Correct but low confidence - model is uncertain');
+                }
+            } else {
+                if (probability > 0.8) {
+                    insights.push('Dangerous! High confidence in wrong prediction = very high loss');
+                } else if (probability > 0.5) {
+                    insights.push('Wrong prediction with moderate confidence = high loss');
+                } else {
+                    insights.push('Wrong but low confidence - model is appropriately uncertain');
+                }
+            }
+            
+            insights.push(`Loss = ${loss.toFixed(3)} (${loss < 1 ? 'low' : loss < 2 ? 'medium' : 'high'})`);
+            insights.push('Training adjusts model weights to minimize loss across all examples');
+            
+            document.getElementById('insightsList').innerHTML = insights.map(
+                insight => `<li>${insight}</li>`
+            ).join('');
+        }
+        
+        function updateChart() {
+            const canvas = document.getElementById('lossChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Destroy existing chart using shared utility
+            destroyChart(chart);
+            
+            // Generate data points for the loss curve
+            const probabilities = [];
+            const losses = [];
+            
+            for (let p = 0.01; p <= 0.99; p += 0.01) {
+                probabilities.push(p);
+                losses.push(calculateLoss(p));
+            }
+            
+            // Mark current point
+            const currentPoint = {
+                x: currentConfidence,
+                y: calculateLoss(currentConfidence)
+            };
+            
+            // Use shared chart options
+            const chartOptions = createDefaultChartOptions({
+                xAxisLabel: 'Probability (Model Confidence)',
+                yAxisLabel: 'Cross-Entropy Loss',
+                chartSpecific: {
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: {
+                                display: true,
+                                text: 'Probability (Model Confidence)'
+                            },
+                            min: 0,
+                            max: 1
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Cross-Entropy Loss'
+                            },
+                            min: 0,
+                            max: 5
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 1) {
+                                        return `Current: ${currentPrediction} (${formatPercentage(currentConfidence, 0)} confidence)`;
+                                    }
+                                    return `Probability: ${context.parsed.x.toFixed(2)}, Loss: ${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Cross-Entropy Loss',
+                            data: probabilities.map((p, i) => ({x: p, y: losses[i]})),
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Current Prediction',
+                            data: [currentPoint],
+                            backgroundColor: currentPrediction === correctAnswer ? '#28a745' : '#dc3545',
+                            borderColor: currentPrediction === correctAnswer ? '#28a745' : '#dc3545',
+                            pointRadius: 8,
+                            showLine: false
+                        }
+                    ]
+                },
+                options: chartOptions
+            });
+            
+            updateScenarioExamples();
+        }
+        
+        function updateScenarioExamples() {
+            const scenarios = [
+                { word: 'mat', prob: 0.9, correct: 'mat' },
+                { word: 'elephant', prob: 0.9, correct: 'mat' },
+                { word: 'mat', prob: 0.3, correct: 'mat' },
+                { word: 'chair', prob: 0.6, correct: 'mat' }
+            ];
+            
+            const container = document.getElementById('scenarioExamples');
+            container.innerHTML = scenarios.map(scenario => {
+                const loss = calculateLoss(scenario.prob);
+                const isCorrect = scenario.word === scenario.correct;
+                const statusIcon = isCorrect ? '✅' : '❌';
+                const statusColor = isCorrect ? '#28a745' : '#dc3545';
+                
+                return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; margin: 0.5rem 0; background: #f8f9fa; border-radius: 4px; font-size: 0.9rem;">
+                        <span>${statusIcon} Predict "${scenario.word}" with ${formatPercentage(scenario.prob, 0)} confidence</span>
+                        <span style="color: ${statusColor}; font-weight: bold;">Loss: ${loss.toFixed(2)}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Event listeners
+        document.getElementById('confidenceSlider').addEventListener('input', function() {
+            currentConfidence = parseFloat(this.value);
+            updateDisplay();
+        });
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-initialize header
+            LLM4LLMHeader.initializeHeader('loss-explorer');
+            
+            // Initial display
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>
