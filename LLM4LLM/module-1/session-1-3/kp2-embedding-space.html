@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Embedding Space - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .canvas-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .controls-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        .embedding-canvas {
+            width: 100%;
+            height: 500px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: #fafafa;
+            cursor: move;
+            position: relative;
+        }
+        
+        .word-point {
+            position: absolute;
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+        
+        .word-point:hover {
+            background: #5a6fd8;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .word-point.selected {
+            background: #28a745;
+            transform: scale(1.1);
+        }
+        
+        .word-point.neighbor {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .similarity-line {
+            position: absolute;
+            background: rgba(102, 126, 234, 0.3);
+            height: 2px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        .word-categories {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .category-group {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .category-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .category-words {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .word-tag {
+            background: #e9ecef;
+            color: #495057;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .word-tag:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .similarity-display {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .similarity-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .similarity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .similarity-words {
+            font-weight: 500;
+        }
+        
+        .similarity-score {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .instructions {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .instructions h4 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .instructions ul {
+            list-style: none;
+        }
+        
+        .instructions li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .instructions li:before {
+            content: "👆";
+            position: absolute;
+            left: 0;
+        }
+        
+        .preset-layouts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .preset-btn {
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .insights-panel {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .insights-panel h4 {
+            color: #856404;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .insights-panel h4:before {
+            content: "💡";
+            margin-right: 0.5rem;
+        }
+        
+        .insights-list {
+            list-style: none;
+        }
+        
+        .insights-list li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #856404;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .embedding-canvas {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 1</a> / 
+                Session 1.3
+            </div>
+            <h1>Word Embedding Space</h1>
+            <p>Explore semantic relationships through vector distances in a conceptual 2D embedding space</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="main-grid">
+            <div class="canvas-panel">
+                <h2 class="section-title">Interactive Embedding Space</h2>
+                
+                <div class="embedding-canvas" id="embeddingCanvas">
+                    <!-- Word points will be dynamically created here -->
+                </div>
+                
+                <div class="instructions">
+                    <h4>How to Explore</h4>
+                    <ul>
+                        <li>Click a word to see its nearest neighbors highlighted</li>
+                        <li>Use preset layouts to see different semantic arrangements</li>
+                        <li>Notice how similar words are positioned closer together</li>
+                        <li>Observe how distance represents semantic similarity</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <h2 class="section-title">Controls & Analysis</h2>
+                
+                <div class="control-group">
+                    <div class="control-label">Preset Layouts</div>
+                    <div class="preset-layouts">
+                        <button class="preset-btn" onclick="setLayout('semantic')">Semantic Clusters</button>
+                        <button class="preset-btn" onclick="setLayout('random')">Random Layout</button>
+                        <button class="preset-btn" onclick="setLayout('categories')">By Categories</button>
+                        <button class="preset-btn" onclick="setLayout('linear')">Linear Arrangement</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">Word Categories</div>
+                    <div class="word-categories">
+                        <div class="category-group">
+                            <div class="category-title">Animals</div>
+                            <div class="category-words">
+                                <span class="word-tag" onclick="highlightCategory('animals')">cat</span>
+                                <span class="word-tag" onclick="highlightCategory('animals')">dog</span>
+                                <span class="word-tag" onclick="highlightCategory('animals')">bird</span>
+                                <span class="word-tag" onclick="highlightCategory('animals')">fish</span>
+                            </div>
+                        </div>
+                        
+                        <div class="category-group">
+                            <div class="category-title">Royalty</div>
+                            <div class="category-words">
+                                <span class="word-tag" onclick="highlightCategory('royalty')">king</span>
+                                <span class="word-tag" onclick="highlightCategory('royalty')">queen</span>
+                                <span class="word-tag" onclick="highlightCategory('royalty')">prince</span>
+                                <span class="word-tag" onclick="highlightCategory('royalty')">princess</span>
+                            </div>
+                        </div>
+                        
+                        <div class="category-group">
+                            <div class="category-title">Numbers</div>
+                            <div class="category-words">
+                                <span class="word-tag" onclick="highlightCategory('numbers')">one</span>
+                                <span class="word-tag" onclick="highlightCategory('numbers')">two</span>
+                                <span class="word-tag" onclick="highlightCategory('numbers')">three</span>
+                                <span class="word-tag" onclick="highlightCategory('numbers')">four</span>
+                            </div>
+                        </div>
+                        
+                        <div class="category-group">
+                            <div class="category-title">Colors</div>
+                            <div class="category-words">
+                                <span class="word-tag" onclick="highlightCategory('colors')">red</span>
+                                <span class="word-tag" onclick="highlightCategory('colors')">blue</span>
+                                <span class="word-tag" onclick="highlightCategory('colors')">green</span>
+                                <span class="word-tag" onclick="highlightCategory('colors')">yellow</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-label">Similarity Analysis</div>
+                    <div class="similarity-display" id="similarityDisplay">
+                        <p style="color: #666; text-align: center;">Click a word to see similarities</p>
+                    </div>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Key Insights</h4>
+                    <ul class="insights-list" id="insightsList">
+                        <li>Words with similar meanings are positioned closer together</li>
+                        <li>Distance in the space represents semantic similarity</li>
+                        <li>Each word is represented as a point in high-dimensional space</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let words = [
+            // Animals
+            { text: 'cat', x: 150, y: 100, category: 'animals' },
+            { text: 'dog', x: 200, y: 120, category: 'animals' },
+            { text: 'bird', x: 180, y: 80, category: 'animals' },
+            { text: 'fish', x: 220, y: 100, category: 'animals' },
+            
+            // Royalty
+            { text: 'king', x: 400, y: 150, category: 'royalty' },
+            { text: 'queen', x: 450, y: 140, category: 'royalty' },
+            { text: 'prince', x: 420, y: 190, category: 'royalty' },
+            { text: 'princess', x: 470, y: 180, category: 'royalty' },
+            
+            // Numbers
+            { text: 'one', x: 300, y: 300, category: 'numbers' },
+            { text: 'two', x: 340, y: 310, category: 'numbers' },
+            { text: 'three', x: 320, y: 340, category: 'numbers' },
+            { text: 'four', x: 360, y: 330, category: 'numbers' },
+            
+            // Colors
+            { text: 'red', x: 150, y: 350, category: 'colors' },
+            { text: 'blue', x: 200, y: 360, category: 'colors' },
+            { text: 'green', x: 180, y: 390, category: 'colors' },
+            { text: 'yellow', x: 230, y: 380, category: 'colors' },
+        ];
+        
+        let selectedWord = null;
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+        
+        const canvas = document.getElementById('embeddingCanvas');
+        
+        function createWordElements() {
+            canvas.innerHTML = '';
+            
+            words.forEach((word, index) => {
+                const element = document.createElement('div');
+                element.className = 'word-point';
+                element.textContent = word.text;
+                element.style.left = word.x + 'px';
+                element.style.top = word.y + 'px';
+                element.dataset.index = index;
+                
+                // Click event only
+                element.addEventListener('click', selectWord);
+                
+                canvas.appendChild(element);
+            });
+        }
+        
+        function startDrag(e) {
+            e.preventDefault();
+            isDragging = true;
+            const wordIndex = parseInt(e.target.dataset.index);
+            selectedWord = wordIndex;
+            
+            const rect = canvas.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left - words[wordIndex].x;
+            dragOffset.y = e.clientY - rect.top - words[wordIndex].y;
+            
+            e.target.classList.add('dragging');
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+        
+        function drag(e) {
+            if (!isDragging || selectedWord === null) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const newX = Math.max(0, Math.min(rect.width - 100, e.clientX - rect.left - dragOffset.x));
+            const newY = Math.max(0, Math.min(rect.height - 40, e.clientY - rect.top - dragOffset.y));
+            
+            words[selectedWord].x = newX;
+            words[selectedWord].y = newY;
+            
+            const element = canvas.children[selectedWord];
+            element.style.left = newX + 'px';
+            element.style.top = newY + 'px';
+            
+            updateSimilarities();
+        }
+        
+        function stopDrag(e) {
+            if (selectedWord !== null) {
+                canvas.children[selectedWord].classList.remove('dragging');
+            }
+            
+            isDragging = false;
+            selectedWord = null;
+            
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+        
+        function selectWord(e) {
+            // Remove previous selections and highlights
+            document.querySelectorAll('.word-point').forEach(el => {
+                el.classList.remove('selected', 'neighbor');
+            });
+            
+            // Select current word
+            e.target.classList.add('selected');
+            const wordIndex = parseInt(e.target.dataset.index);
+            
+            // Calculate and highlight nearest neighbors
+            highlightNearestNeighbors(wordIndex);
+            
+            // Display similarities
+            displaySimilarities(wordIndex);
+            updateInsights(wordIndex);
+        }
+        
+        function highlightNearestNeighbors(wordIndex) {
+            const selectedWord = words[wordIndex];
+            const similarities = [];
+            
+            words.forEach((word, index) => {
+                if (index !== wordIndex) {
+                    const distance = calculateDistance(selectedWord, word);
+                    const similarity = calculateSimilarity(distance);
+                    similarities.push({
+                        index: index,
+                        word: word.text,
+                        distance: distance,
+                        similarity: similarity
+                    });
+                }
+            });
+            
+            // Sort by similarity and get top 3 neighbors
+            similarities.sort((a, b) => b.similarity - a.similarity);
+            const topNeighbors = similarities.slice(0, 3);
+            
+            // Highlight the nearest neighbors
+            topNeighbors.forEach(neighbor => {
+                canvas.children[neighbor.index].classList.add('neighbor');
+            });
+        }
+        
+        function calculateDistance(word1, word2) {
+            const dx = word1.x - word2.x;
+            const dy = word1.y - word2.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+        
+        function calculateSimilarity(distance, maxDistance = 500) {
+            // Convert distance to similarity (0-1, where 1 is most similar)
+            return Math.max(0, 1 - (distance / maxDistance));
+        }
+        
+        function displaySimilarities(wordIndex) {
+            const selectedWord = words[wordIndex];
+            const similarities = [];
+            
+            words.forEach((word, index) => {
+                if (index !== wordIndex) {
+                    const distance = calculateDistance(selectedWord, word);
+                    const similarity = calculateSimilarity(distance);
+                    similarities.push({
+                        word: word.text,
+                        distance: distance,
+                        similarity: similarity
+                    });
+                }
+            });
+            
+            // Sort by similarity (highest first)
+            similarities.sort((a, b) => b.similarity - a.similarity);
+            
+            const display = document.getElementById('similarityDisplay');
+            display.innerHTML = similarities.slice(0, 5).map(sim => 
+                `<div class="similarity-item">
+                    <span class="similarity-words">${selectedWord.text} ↔ ${sim.word}</span>
+                    <span class="similarity-score">${(sim.similarity * 100).toFixed(1)}%</span>
+                </div>`
+            ).join('');
+        }
+        
+        function updateInsights(wordIndex) {
+            const selectedWord = words[wordIndex];
+            const insights = [];
+            
+            // Find words in same category
+            const sameCategory = words.filter(w => w.category === selectedWord.category && w.text !== selectedWord.text);
+            if (sameCategory.length > 0) {
+                insights.push(`"${selectedWord.text}" is in the ${selectedWord.category} category with ${sameCategory.map(w => w.text).join(', ')}`);
+            }
+            
+            // Find closest word
+            let closestWord = null;
+            let minDistance = Infinity;
+            words.forEach(word => {
+                if (word.text !== selectedWord.text) {
+                    const distance = calculateDistance(selectedWord, word);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestWord = word;
+                    }
+                }
+            });
+            
+            if (closestWord) {
+                const similarity = calculateSimilarity(minDistance);
+                insights.push(`Closest word is "${closestWord.text}" with ${(similarity * 100).toFixed(1)}% similarity`);
+            }
+            
+            insights.push('Drag words closer together to increase their similarity score');
+            insights.push('In real embeddings, these relationships are learned from text patterns');
+            
+            document.getElementById('insightsList').innerHTML = insights.map(
+                insight => `<li>${insight}</li>`
+            ).join('');
+        }
+        
+        function updateSimilarities() {
+            // If a word is selected, update its similarity display
+            const selected = document.querySelector('.word-point.selected');
+            if (selected) {
+                const wordIndex = parseInt(selected.dataset.index);
+                displaySimilarities(wordIndex);
+                updateInsights(wordIndex);
+            }
+        }
+        
+        function setLayout(layoutType) {
+            const canvasRect = canvas.getBoundingClientRect();
+            const width = canvasRect.width - 100;
+            const height = canvasRect.height - 40;
+            
+            switch (layoutType) {
+                case 'semantic':
+                    // Group by semantic categories
+                    words.forEach((word, index) => {
+                        switch (word.category) {
+                            case 'animals':
+                                word.x = 100 + (index % 4) * 60;
+                                word.y = 80 + Math.floor(index / 4) * 40;
+                                break;
+                            case 'royalty':
+                                word.x = 350 + (index % 4) * 60;
+                                word.y = 80 + Math.floor(index / 4) * 40;
+                                break;
+                            case 'numbers':
+                                word.x = 100 + (index % 4) * 60;
+                                word.y = 300 + Math.floor(index / 4) * 40;
+                                break;
+                            case 'colors':
+                                word.x = 350 + (index % 4) * 60;
+                                word.y = 300 + Math.floor(index / 4) * 40;
+                                break;
+                        }
+                    });
+                    break;
+                
+                case 'random':
+                    words.forEach(word => {
+                        word.x = Math.random() * width;
+                        word.y = Math.random() * height;
+                    });
+                    break;
+                
+                case 'categories':
+                    const categories = ['animals', 'royalty', 'numbers', 'colors'];
+                    categories.forEach((cat, catIndex) => {
+                        const categoryWords = words.filter(w => w.category === cat);
+                        categoryWords.forEach((word, wordIndex) => {
+                            word.x = (catIndex % 2) * (width / 2) + 100 + (wordIndex % 2) * 100;
+                            word.y = Math.floor(catIndex / 2) * (height / 2) + 100 + Math.floor(wordIndex / 2) * 60;
+                        });
+                    });
+                    break;
+                
+                case 'linear':
+                    words.forEach((word, index) => {
+                        word.x = 50 + (index * (width / words.length));
+                        word.y = height / 2;
+                    });
+                    break;
+            }
+            
+            createWordElements();
+            updateSimilarities();
+        }
+        
+        function highlightCategory(category) {
+            document.querySelectorAll('.word-point').forEach(el => {
+                el.classList.remove('selected', 'neighbor');
+            });
+            
+            words.forEach((word, index) => {
+                if (word.category === category) {
+                    canvas.children[index].classList.add('neighbor');
+                }
+            });
+        }
+        
+        // Initialize
+        createWordElements();
+        
+        // Set default layout
+        setTimeout(() => setLayout('semantic'), 100);
+    </script>
+</body>
+</html>
