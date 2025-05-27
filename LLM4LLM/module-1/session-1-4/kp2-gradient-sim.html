@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradient Descent Simulator - LLM4LLM (Test Version)</title>
+    
+    <!-- Inline shared styles for testing -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        /* Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        /* Panels */
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        
+        /* Control Groups */
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        /* Sliders */
+        .slider-container {
+            margin: 1rem 0;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e9ecef;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .slider-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+        
+        /* Canvas */
+        .canvas {
+            width: 100%;
+            height: 400px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+            cursor: crosshair;
+            position: relative;
+        }
+        
+        /* Buttons */
+        .demo-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            margin: 0.25rem;
+        }
+        
+        .demo-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .demo-btn.secondary {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 1px solid #e9ecef;
+        }
+        
+        .demo-btn.secondary:hover {
+            background: #e9ecef;
+        }
+        
+        .demo-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        /* Demo controls */
+        .demo-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        /* Statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        /* Insights Panel */
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .insights-panel ul {
+            list-style: none;
+        }
+        
+        .insights-panel li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-panel li:before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        
+        /* Preset selector */
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .preset-btn {
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        /* Training info */
+        .training-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .training-info h4 {
+            color: #856404;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .canvas {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auto-generated header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 1</a> / 
+                Session 1.4
+            </div>
+            <h1>Gradient Descent Simulator</h1>
+            <p>Watch gradient descent navigate loss landscapes with different learning rates</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="main-grid">
+            <div class="panel">
+                <h2 class="section-title">Interactive Controls</h2>
+                
+                <div class="control-group">
+                    <label class="control-label">Loss Landscape</label>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" onclick="setLandscape('bowl')">Simple Bowl</button>
+                        <button class="preset-btn" onclick="setLandscape('valley')">Narrow Valley</button>
+                        <button class="preset-btn" onclick="setLandscape('hills')">Rolling Hills</button>
+                        <button class="preset-btn" onclick="setLandscape('saddle')">Saddle Point</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Learning Rate</label>
+                    <div class="slider-container">
+                        <input type="range" id="learningRateSlider" class="slider" min="0.001" max="0.1" step="0.001" value="0.01">
+                        <div class="slider-value" id="learningRateValue">0.01</div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Animation Controls</label>
+                    <div class="demo-controls">
+                        <button class="demo-btn" id="startBtn" onclick="startOptimization()">Start</button>
+                        <button class="demo-btn secondary" id="pauseBtn" onclick="pauseOptimization()" disabled>Pause</button>
+                        <button class="demo-btn secondary" onclick="resetOptimization()">Reset</button>
+                        <button class="demo-btn secondary" onclick="stepOptimization()">Single Step</button>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="currentLoss">0.00</div>
+                        <div class="stat-label">Current Loss</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stepCount">0</div>
+                        <div class="stat-label">Steps Taken</div>
+                    </div>
+                </div>
+                
+                <div class="training-info">
+                    <h4>How to Use</h4>
+                    <p><strong>1.</strong> Choose a loss landscape above</p>
+                    <p><strong>2.</strong> Adjust the learning rate slider</p>
+                    <p><strong>3.</strong> Click on the landscape to set starting position</p>
+                    <p><strong>4.</strong> Press "Start" to watch gradient descent in action!</p>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Key Insights</h4>
+                    <ul id="insightsList">
+                        <li>Click the landscape to set a starting position</li>
+                        <li>Try different learning rates to see their effects</li>
+                        <li>Watch how the ball follows the gradient downhill</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2 class="section-title">Loss Landscape Visualization</h2>
+                
+                <canvas class="canvas" id="lossCanvas" width="500" height="400"></canvas>
+                
+                <div class="insights-panel">
+                    <h4>Understanding Gradient Descent</h4>
+                    <ul>
+                        <li><strong>Gradient:</strong> The direction of steepest increase (uphill)</li>
+                        <li><strong>Descent:</strong> Move in opposite direction (downhill)</li>
+                        <li><strong>Learning Rate:</strong> How big steps to take</li>
+                        <li><strong>Convergence:</strong> Eventually reaches minimum (low loss)</li>
+                        <li><strong>Local Minima:</strong> Can get stuck in valleys</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Inline shared utilities for testing
+        function formatNumber(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(1) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(1) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(0) + 'k';
+            return num.toString();
+        }
+        
+        function clamp(value, min, max) {
+            return Math.min(Math.max(value, min), max);
+        }
+        
+        // Page-specific code
+        let canvas, ctx;
+        let animationId = null;
+        let isRunning = false;
+        let currentPosition = { x: 0.8, y: 0.8 }; // Normalized coordinates (0-1)
+        let currentLandscape = 'bowl';
+        let learningRate = 0.01;
+        let stepCount = 0;
+        let path = [];
+        
+        // Loss landscape functions
+        const landscapes = {
+            bowl: (x, y) => {
+                // Simple quadratic bowl
+                return (x - 0.5) ** 2 + (y - 0.5) ** 2;
+            },
+            
+            valley: (x, y) => {
+                // Narrow valley (Rosenbrock-like)
+                const a = 1, b = 100;
+                return (a - x) ** 2 + b * (y - x ** 2) ** 2;
+            },
+            
+            hills: (x, y) => {
+                // Rolling hills with multiple minima
+                return Math.sin(x * Math.PI * 3) * Math.cos(y * Math.PI * 3) * 0.3 + 
+                       (x - 0.3) ** 2 + (y - 0.7) ** 2;
+            },
+            
+            saddle: (x, y) => {
+                // Saddle point
+                return (x - 0.5) ** 2 - (y - 0.5) ** 2 + 1;
+            }
+        };
+        
+        function initCanvas() {
+            canvas = document.getElementById('lossCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Set up high DPI rendering
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            // Add click handler
+            canvas.addEventListener('click', handleCanvasClick);
+            
+            drawLandscape();
+        }
+        
+        function handleCanvasClick(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (event.clientX - rect.left) / rect.width;
+            const y = (event.clientY - rect.top) / rect.height;
+            
+            currentPosition = { x: clamp(x, 0, 1), y: clamp(y, 0, 1) };
+            resetOptimization();
+            drawLandscape();
+            updateStats();
+        }
+        
+        function drawLandscape() {
+            const width = canvas.getBoundingClientRect().width;
+            const height = canvas.getBoundingClientRect().height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw contour lines
+            const resolution = 50;
+            const stepX = width / resolution;
+            const stepY = height / resolution;
+            
+            // Calculate min/max for color scaling
+            let minLoss = Infinity, maxLoss = -Infinity;
+            for (let i = 0; i <= resolution; i++) {
+                for (let j = 0; j <= resolution; j++) {
+                    const x = i / resolution;
+                    const y = j / resolution;
+                    const loss = landscapes[currentLandscape](x, y);
+                    minLoss = Math.min(minLoss, loss);
+                    maxLoss = Math.max(maxLoss, loss);
+                }
+            }
+            
+            // Draw landscape as colored pixels
+            for (let i = 0; i < resolution; i++) {
+                for (let j = 0; j < resolution; j++) {
+                    const x = i / resolution;
+                    const y = j / resolution;
+                    const loss = landscapes[currentLandscape](x, y);
+                    
+                    // Normalize loss to 0-1 for coloring
+                    const normalized = (loss - minLoss) / (maxLoss - minLoss);
+                    
+                    // Color from blue (low loss) to red (high loss)
+                    const hue = (1 - normalized) * 240; // 240 = blue, 0 = red
+                    ctx.fillStyle = `hsl(${hue}, 60%, ${50 + normalized * 30}%)`;
+                    
+                    ctx.fillRect(i * stepX, j * stepY, stepX, stepY);
+                }
+            }
+            
+            // Draw path
+            if (path.length > 1) {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                for (let i = 0; i < path.length; i++) {
+                    const point = path[i];
+                    const canvasX = point.x * width;
+                    const canvasY = point.y * height;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(canvasX, canvasY);
+                    } else {
+                        ctx.lineTo(canvasX, canvasY);
+                    }
+                }
+                ctx.stroke();
+            }
+            
+            // Draw current position
+            const canvasX = currentPosition.x * width;
+            const canvasY = currentPosition.y * height;
+            
+            ctx.fillStyle = '#ff4444';
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(canvasX, canvasY, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Draw starting position if path exists
+            if (path.length > 0) {
+                const startX = path[0].x * width;
+                const startY = path[0].y * height;
+                
+                ctx.fillStyle = '#44ff44';
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(startX, startY, 6, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            }
+        }
+        
+        function calculateGradient(x, y, epsilon = 0.001) {
+            const lossFunc = landscapes[currentLandscape];
+            
+            // Numerical gradient calculation
+            const dfdx = (lossFunc(x + epsilon, y) - lossFunc(x - epsilon, y)) / (2 * epsilon);
+            const dfdy = (lossFunc(x, y + epsilon) - lossFunc(x, y - epsilon)) / (2 * epsilon);
+            
+            return { x: dfdx, y: dfdy };
+        }
+        
+        function stepOptimization() {
+            if (stepCount >= 1000) {
+                pauseOptimization();
+                return;
+            }
+            
+            const gradient = calculateGradient(currentPosition.x, currentPosition.y);
+            
+            // Update position (move opposite to gradient direction)
+            currentPosition.x = clamp(currentPosition.x - learningRate * gradient.x, 0, 1);
+            currentPosition.y = clamp(currentPosition.y - learningRate * gradient.y, 0, 1);
+            
+            // Add to path
+            path.push({ x: currentPosition.x, y: currentPosition.y });
+            
+            stepCount++;
+            updateStats();
+            updateInsights();
+            drawLandscape();
+            
+            // Check for convergence
+            const gradientMagnitude = Math.sqrt(gradient.x ** 2 + gradient.y ** 2);
+            if (gradientMagnitude < 0.001) {
+                pauseOptimization();
+                updateInsights('converged');
+            }
+        }
+        
+        function startOptimization() {
+            if (path.length === 0) {
+                path.push({ x: currentPosition.x, y: currentPosition.y });
+            }
+            
+            isRunning = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            
+            function animate() {
+                if (isRunning) {
+                    stepOptimization();
+                    animationId = setTimeout(animate, 100); // Adjust speed here
+                }
+            }
+            animate();
+        }
+        
+        function pauseOptimization() {
+            isRunning = false;
+            if (animationId) {
+                clearTimeout(animationId);
+            }
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+        }
+        
+        function resetOptimization() {
+            pauseOptimization();
+            stepCount = 0;
+            path = [];
+            updateStats();
+            updateInsights();
+            drawLandscape();
+        }
+        
+        function setLandscape(type) {
+            currentLandscape = type;
+            resetOptimization();
+            drawLandscape();
+            updateInsights();
+        }
+        
+        function updateStats() {
+            const currentLoss = landscapes[currentLandscape](currentPosition.x, currentPosition.y);
+            document.getElementById('currentLoss').textContent = currentLoss.toFixed(3);
+            document.getElementById('stepCount').textContent = stepCount;
+        }
+        
+        function updateInsights(status = 'normal') {
+            const insights = [];
+            
+            if (status === 'converged') {
+                insights.push('🎯 Converged! Gradient is nearly zero');
+            }
+            
+            if (learningRate > 0.05) {
+                insights.push('⚠️ High learning rate - may overshoot minimum');
+            } else if (learningRate < 0.005) {
+                insights.push('🐌 Low learning rate - slow but steady progress');
+            } else {
+                insights.push('✅ Good learning rate for stable convergence');
+            }
+            
+            if (stepCount > 500) {
+                insights.push('🔄 Many steps taken - consider increasing learning rate');
+            }
+            
+            const landscapeInfo = {
+                bowl: 'Simple convex function - easy to optimize',
+                valley: 'Narrow valley - challenging for gradient descent',
+                hills: 'Multiple local minima - may get stuck',
+                saddle: 'Saddle point - gradient descent struggles here'
+            };
+            
+            insights.push(landscapeInfo[currentLandscape]);
+            
+            if (path.length === 0) {
+                insights.unshift('Click the landscape to set a starting position');
+            }
+            
+            document.getElementById('insightsList').innerHTML = insights.map(
+                insight => `<li>${insight}</li>`
+            ).join('');
+        }
+        
+        // Event listeners
+        document.getElementById('learningRateSlider').addEventListener('input', function() {
+            learningRate = parseFloat(this.value);
+            document.getElementById('learningRateValue').textContent = this.value;
+            updateInsights();
+        });
+        
+        // Initialize
+        window.addEventListener('load', function() {
+            initCanvas();
+            updateStats();
+            updateInsights();
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            setTimeout(initCanvas, 100);
+        });
+    </script>
+</body>
+</html>
