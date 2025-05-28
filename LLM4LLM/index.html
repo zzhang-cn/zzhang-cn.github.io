@@ -21,24 +21,50 @@
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 2rem 0;
+            padding: 3rem 0;
             text-align: center;
         }
         
         .header h1 {
-            font-size: 2.5rem;
+            font-size: 3rem;
             margin-bottom: 0.5rem;
+            font-weight: 700;
         }
         
         .header p {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+        }
+        
+        .intro-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .intro-section h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+        
+        .intro-section p {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            max-width: 800px;
+            margin: 0 auto;
         }
         
         .module-section {
@@ -55,33 +81,60 @@
             padding: 1.5rem 2rem;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+        }
+        
+        .module-info {
+            display: flex;
+            align-items: center;
         }
         
         .module-number {
             background: rgba(255,255,255,0.2);
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            font-size: 1.2rem;
             margin-right: 1rem;
         }
         
-        .module-title {
-            font-size: 1.5rem;
+        .module-details h3 {
+            font-size: 1.6rem;
             font-weight: 600;
+            margin-bottom: 0.25rem;
         }
         
-        .visualizations-grid {
+        .module-details p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .module-stats {
+            text-align: right;
+            opacity: 0.8;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+        }
+        
+        .sessions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
             padding: 2rem;
         }
         
-        .viz-card {
+        .session-card {
             border: 1px solid #e9ecef;
             border-radius: 8px;
             overflow: hidden;
@@ -89,105 +142,108 @@
             background: white;
         }
         
-        .viz-card:hover {
+        .session-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.12);
         }
         
-        .viz-preview {
-            height: 150px;
+        .session-header {
             background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .session-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .session-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .visualizations-list {
+            padding: 1rem;
+        }
+        
+        .viz-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f8f9fa;
+            transition: all 0.2s ease;
+        }
+        
+        .viz-item:last-child {
+            border-bottom: none;
+        }
+        
+        .viz-item:hover {
+            background: #f8f9fa;
+            margin: 0 -1rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .viz-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            color: #667eea;
-            position: relative;
-        }
-        
-        .viz-preview::after {
-            content: "Interactive";
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: #667eea;
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 500;
+            margin-right: 0.75rem;
+            font-size: 0.9rem;
+            flex-shrink: 0;
         }
         
         .viz-info {
-            padding: 1.5rem;
+            flex: 1;
         }
         
-        .viz-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+        .viz-name {
+            font-weight: 500;
             color: #333;
-        }
-        
-        .viz-description {
-            color: #666;
             font-size: 0.9rem;
-            margin-bottom: 1rem;
-            line-height: 1.5;
+            margin-bottom: 0.25rem;
         }
         
         .viz-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+            gap: 0.25rem;
         }
         
         .tag {
-            background: #f8f9fa;
+            background: #e9ecef;
             color: #667eea;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
+            padding: 0.125rem 0.375rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
             border: 1px solid #e9ecef;
         }
         
-        .viz-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-weight: 500;
+        .viz-link {
+            color: #667eea;
             text-decoration: none;
-            display: inline-block;
-            transition: background-color 0.2s ease;
-            cursor: pointer;
-            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #667eea;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            margin-left: 0.5rem;
         }
         
-        .btn-primary {
+        .viz-link:hover {
             background: #667eea;
             color: white;
-            flex: 1;
-        }
-        
-        .btn-primary:hover {
-            background: #5a6fd8;
-        }
-        
-        .btn-secondary {
-            background: #f8f9fa;
-            color: #667eea;
-            border: 1px solid #e9ecef;
-        }
-        
-        .btn-secondary:hover {
-            background: #e9ecef;
         }
         
         .search-filter {
@@ -230,11 +286,55 @@
             color: white;
         }
         
+        .stats-overview {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-card .label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
         .footer {
             text-align: center;
             color: #666;
             margin-top: 3rem;
             padding: 2rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
         }
         
         @media (max-width: 768px) {
@@ -242,7 +342,7 @@
                 font-size: 2rem;
             }
             
-            .visualizations-grid {
+            .sessions-grid {
                 grid-template-columns: 1fr;
                 padding: 1rem;
             }
@@ -250,322 +350,435 @@
             .container {
                 padding: 1rem;
             }
+            
+            .module-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .module-stats {
+                text-align: center;
+                margin-top: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>LLM4LLM Visualizations</h1>
-        <p>Interactive demonstrations and visual explorations of language model concepts</p>
+        <p>Interactive demonstrations and visual explorations of language model concepts, from foundations to transformers</p>
     </div>
     
     <div class="container">
+        <div class="intro-section">
+            <h2>Explore Language Models Interactively</h2>
+            <p>This collection provides hands-on visualizations that help you understand how language models work, from basic word prediction to modern transformer architectures. Each visualization is designed to make complex concepts intuitive and engaging.</p>
+        </div>
+        
+        <div class="stats-overview">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="number" id="totalVizCount">25+</div>
+                    <div class="label">Interactive Visualizations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">2</div>
+                    <div class="label">Modules Available</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">10+</div>
+                    <div class="label">Key Concepts Covered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">0</div>
+                    <div class="label">Prerequisites Required</div>
+                </div>
+            </div>
+        </div>
+        
         <div class="search-filter">
             <input type="text" class="search-input" placeholder="Search visualizations..." id="searchInput">
             <div class="filter-tags">
-                <div class="filter-tag active" data-filter="all">All</div>
+                <div class="filter-tag active" data-filter="all">All Topics</div>
                 <div class="filter-tag" data-filter="embeddings">Embeddings</div>
                 <div class="filter-tag" data-filter="attention">Attention</div>
                 <div class="filter-tag" data-filter="training">Training</div>
                 <div class="filter-tag" data-filter="prediction">Prediction</div>
                 <div class="filter-tag" data-filter="architecture">Architecture</div>
+                <div class="filter-tag" data-filter="statistics">Statistics</div>
             </div>
         </div>
         
+        <!-- Module 1: Foundations of Word Prediction -->
         <div class="module-section">
             <div class="module-header">
-                <div class="module-number">1</div>
-                <div class="module-title">Foundations of Word Prediction</div>
+                <div class="module-info">
+                    <div class="module-number">1</div>
+                    <div class="module-details">
+                        <h3>Foundations of Word Prediction</h3>
+                        <p>From basic statistics to neural word embeddings</p>
+                    </div>
+                </div>
+                <div class="module-stats">
+                    <div class="stat-number">18</div>
+                    <div class="stat-label">Visualizations</div>
+                </div>
             </div>
-            <div class="visualizations-grid">
-                <div class="viz-card" data-tags="prediction,statistics">
-                    <div class="viz-preview">📊</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Word Frequency Explorer</div>
-                        <div class="viz-description">Explore power law distributions in language and see how word frequencies follow predictable patterns.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Statistics</span>
-                            <span class="tag">Power Laws</span>
+            <div class="sessions-grid">
+                <!-- Session 1.1: Introduction to Next-Word Prediction -->
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">Session 1.1: Introduction to Next-Word Prediction</div>
+                        <div class="session-description">Explore how language follows statistical patterns and enables AI instruction following</div>
+                    </div>
+                    <div class="visualizations-list">
+                        <div class="viz-item" data-tags="statistics,prediction">
+                            <div class="viz-icon">📊</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Word Frequency Explorer</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Power Laws</span>
+                                    <span class="tag">Statistics</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-1/kp2-word-frequency.html" class="viz-link">Explore</a>
                         </div>
-                        <div class="viz-actions">
-                            <a href="module-1/session-1-1/kp2-word-frequency.html" class="btn btn-primary">Explore</a>
+                        <div class="viz-item" data-tags="prediction">
+                            <div class="viz-icon">❓</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Instruction Following Patterns</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Emergent Behavior</span>
+                                    <span class="tag">QA</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-1/kp3-qa-patterns.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
                 
-                <div class="viz-card" data-tags="prediction">
-                    <div class="viz-preview">❓</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Question-Answer Patterns</div>
-                        <div class="viz-description">See how next-word prediction naturally leads to question-answering capabilities.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Emergent Behavior</span>
+                <!-- Session 1.2: N-gram Models and Their Limitations -->
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">Session 1.2: N-gram Models and Their Limitations</div>
+                        <div class="session-description">Build n-grams and discover the sparsity problem that motivates neural approaches</div>
+                    </div>
+                    <div class="visualizations-list">
+                        <div class="viz-item" data-tags="prediction">
+                            <div class="viz-icon">🔤</div>
+                            <div class="viz-info">
+                                <div class="viz-name">N-gram Builder</div>
+                                <div class="viz-tags">
+                                    <span class="tag">N-grams</span>
+                                    <span class="tag">Context</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-2/kp1-ngram-builder.html" class="viz-link">Explore</a>
                         </div>
-                        <div class="viz-actions">
-                            <a href="module-1/session-1-1/kp3-qa-patterns.html" class="btn btn-primary">Explore</a>
+                        <div class="viz-item" data-tags="prediction">
+                            <div class="viz-icon">🕳️</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Sparsity Explorer</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Sparsity</span>
+                                    <span class="tag">Limitations</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-2/kp7-sparsity-explorer.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
                 
-                <div class="viz-card" data-tags="prediction">
-                    <div class="viz-preview">🔤</div>
-                    <div class="viz-info">
-                        <div class="viz-title">N-gram Builder</div>
-                        <div class="viz-description">Build n-grams from text and see how prediction quality changes with context size.</div>
-                        <div class="viz-tags">
-                            <span class="tag">N-grams</span>
-                            <span class="tag">Context</span>
+                <!-- Session 1.3: Neural Language Models -->
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">Session 1.3: Neural Language Models</div>
+                        <div class="session-description">Understand word embeddings, softmax, and the first neural language models</div>
+                    </div>
+                    <div class="visualizations-list">
+                        <div class="viz-item" data-tags="embeddings">
+                            <div class="viz-icon">🗺️</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Word Embedding Space</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Embeddings</span>
+                                    <span class="tag">Semantics</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-3/kp2-embedding-space.html" class="viz-link">Explore</a>
                         </div>
-                        <div class="viz-actions">
-                            <a href="module-1/session-1-2/kp1-ngram-builder.html" class="btn btn-primary">Explore</a>
+                        <div class="viz-item" data-tags="architecture">
+                            <div class="viz-icon">🎯</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Softmax Calculator</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Softmax</span>
+                                    <span class="tag">Probabilities</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-3/kp3-softmax-calc.html" class="viz-link">Explore</a>
+                        </div>
+                        <div class="viz-item" data-tags="architecture">
+                            <div class="viz-icon">🧠</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Bengio Neural Language Model</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Architecture</span>
+                                    <span class="tag">Neural Networks</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-3/kp3-bengio-model.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
                 
-                <div class="viz-card" data-tags="prediction">
-                    <div class="viz-preview">🕳️</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Sparsity Explorer</div>
-                        <div class="viz-description">Visualize how n-gram coverage drops exponentially as sequence length increases.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Sparsity</span>
-                            <span class="tag">Limitations</span>
+                <!-- Session 1.4: Training Neural Language Models -->
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">Session 1.4: Training Neural Language Models</div>
+                        <div class="session-description">Explore loss functions, gradient descent, and training dynamics</div>
+                    </div>
+                    <div class="visualizations-list">
+                        <div class="viz-item" data-tags="training">
+                            <div class="viz-icon">📉</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Loss Function Explorer</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Loss Functions</span>
+                                    <span class="tag">Training</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-4/kp1-loss-explorer.html" class="viz-link">Explore</a>
                         </div>
-                        <div class="viz-actions">
-                            <a href="module-1/session-1-2/kp7-sparsity-explorer.html" class="btn btn-primary">Explore</a>
+                        <div class="viz-item" data-tags="training">
+                            <div class="viz-icon">⛰️</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Gradient Descent Simulator</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Optimization</span>
+                                    <span class="tag">Gradient Descent</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-4/kp2-gradient-sim.html" class="viz-link">Explore</a>
+                        </div>
+                        <div class="viz-item" data-tags="training">
+                            <div class="viz-icon">📈</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Training Progress Visualizer</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Training</span>
+                                    <span class="tag">Metrics</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-4/kp3-training-progress.html" class="viz-link">Explore</a>
+                        </div>
+                        <div class="viz-item" data-tags="training">
+                            <div class="viz-icon">🔢</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Perplexity Calculator</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Perplexity</span>
+                                    <span class="tag">Evaluation</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-4/kp4-perplexity-calc.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
                 
-                <div class="viz-card" data-tags="embeddings">
-                    <div class="viz-preview">🗺️</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Word Embedding Space</div>
-                        <div class="viz-description">Drag words around in 2D space and explore semantic relationships through vector distances.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Embeddings</span>
-                            <span class="tag">Semantics</span>
-                        </div>
-                        <div class="viz-actions">
-                            <a href="module-1/session-1-3/kp2-embedding-space.html" class="btn btn-primary">Explore</a>
-                        </div>
+                <!-- Session 1.5: Word2Vec and Static Embeddings -->
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">Session 1.5: Word2Vec and Static Embeddings</div>
+                        <div class="session-description">Deep dive into Word2Vec architectures and discover their limitations</div>
                     </div>
-                </div>
-                
-                <div class="viz-card" data-tags="architecture">
-                    <div class="viz-preview">🎯</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Softmax Calculator</div>
-                        <div class="viz-description">Interactive softmax demonstration showing how raw scores become probability distributions.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Softmax</span>
-                            <span class="tag">Probabilities</span>
+                    <div class="visualizations-list">
+                        <div class="viz-item" data-tags="embeddings">
+                            <div class="viz-icon">🔄</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Word2Vec Architecture Comparison</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Word2Vec</span>
+                                    <span class="tag">Skip-gram</span>
+                                    <span class="tag">CBOW</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-5/kp2-word2vec-demo.html" class="viz-link">Explore</a>
                         </div>
-                        <div class="viz-actions">
-                            <a href="module-1/session-1-3/kp3-softmax-calc.html" class="btn btn-primary">Explore</a>
+                        <div class="viz-item" data-tags="training">
+                            <div class="viz-icon">🎯</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Negative Sampling Demo</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Negative Sampling</span>
+                                    <span class="tag">Efficiency</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-5/kp3-negative-sampling-demo.html" class="viz-link">Explore</a>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="viz-card" data-tags="training">
-                    <div class="viz-preview">📉</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Loss Function Explorer</div>
-                        <div class="viz-description">See how cross-entropy loss varies with prediction confidence and understand training dynamics.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Loss Functions</span>
-                            <span class="tag">Training</span>
+                        <div class="viz-item" data-tags="embeddings">
+                            <div class="viz-icon">🧮</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Vector Analogy Solver</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Analogies</span>
+                                    <span class="tag">Vector Math</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-5/kp4-vector-analogy-demo.html" class="viz-link">Explore</a>
                         </div>
-                        <div class="viz-actions">
-                            <a href="module-1/session-1-4/kp1-loss-explorer.html" class="btn btn-primary">Explore</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="viz-card" data-tags="training">
-                    <div class="viz-preview">⛰️</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Gradient Descent Simulator</div>
-                        <div class="viz-description">Watch gradient descent navigate loss landscapes with different learning rates.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Optimization</span>
-                            <span class="tag">Gradient Descent</span>
-                        </div>
-                        <div class="viz-actions">
-                            <a href="module-1/session-1-4/kp2-gradient-sim.html" class="btn btn-primary">Explore</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="viz-card" data-tags="embeddings">
-                    <div class="viz-preview">🔄</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Word2Vec Architecture</div>
-                        <div class="viz-description">Compare Skip-gram and CBOW architectures with interactive demonstrations.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Word2Vec</span>
-                            <span class="tag">Architecture</span>
-                        </div>
-                        <div class="viz-actions">
-                            <a href="module-1/session-1-5/kp2-word2vec-demo.html" class="btn btn-primary">Explore</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="viz-card" data-tags="embeddings">
-                    <div class="viz-preview">🧮</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Vector Analogy Solver</div>
-                        <div class="viz-description">Solve word analogies with vector arithmetic: king - man + woman = ?</div>
-                        <div class="viz-tags">
-                            <span class="tag">Analogies</span>
-                            <span class="tag">Vector Math</span>
-                        </div>
-                        <div class="viz-actions">
-                            <a href="module-1/session-1-5/kp4-analogy-solver.html" class="btn btn-primary">Explore</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="viz-card" data-tags="embeddings">
-                    <div class="viz-preview">🎭</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Polysemy Problem Demo</div>
-                        <div class="viz-description">See how static embeddings struggle with words that have multiple meanings.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Limitations</span>
-                            <span class="tag">Context</span>
-                        </div>
-                        <div class="viz-actions">
-                            <a href="module-1/session-1-5/kp6-polysemy-demo.html" class="btn btn-primary">Explore</a>
+                        <div class="viz-item" data-tags="embeddings">
+                            <div class="viz-icon">🎭</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Polysemy Problem Demo</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Limitations</span>
+                                    <span class="tag">Context</span>
+                                </div>
+                            </div>
+                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-5/kp6-polysemy-problem-demo.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
+        <!-- Module 2: Transformer Architecture (Coming Soon) -->
         <div class="module-section">
             <div class="module-header">
-                <div class="module-number">2</div>
-                <div class="module-title">Transformer Architecture</div>
+                <div class="module-info">
+                    <div class="module-number">2</div>
+                    <div class="module-details">
+                        <h3>Transformer Architecture</h3>
+                        <p>Attention mechanisms, contextual embeddings, and modern LLMs</p>
+                    </div>
+                </div>
+                <div class="module-stats">
+                    <div class="stat-number">8+</div>
+                    <div class="stat-label">Visualizations</div>
+                </div>
             </div>
-            <div class="visualizations-grid">
-                <div class="viz-card" data-tags="architecture">
-                    <div class="viz-preview">🔍</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Generative Search Engine</div>
-                        <div class="viz-description">Compare traditional search with generative AI to understand the transformer paradigm.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Concepts</span>
-                            <span class="tag">Search</span>
-                        </div>
-                        <div class="viz-actions">
-                            <a href="module-2/session-2-0/kp1-search-engine.html" class="btn btn-primary">Explore</a>
+            <div class="sessions-grid">
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">Session 2.0: From Static to Contextual</div>
+                        <div class="session-description">Understanding the paradigm shift to contextual representations</div>
+                    </div>
+                    <div class="visualizations-list">
+                        <div class="viz-item" data-tags="architecture">
+                            <div class="viz-icon">🔍</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Generative Search Engine</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Concepts</span>
+                                    <span class="tag">Search</span>
+                                </div>
+                            </div>
+                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
                         </div>
                     </div>
                 </div>
                 
-                <div class="viz-card" data-tags="architecture">
-                    <div class="viz-preview">✂️</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Tokenization Demo</div>
-                        <div class="viz-description">See how BPE tokenization handles the long tail of language efficiently.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Tokenization</span>
-                            <span class="tag">BPE</span>
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">Session 2.1: Tokenization and Context</div>
+                        <div class="session-description">BPE tokenization and the selection problem that attention solves</div>
+                    </div>
+                    <div class="visualizations-list">
+                        <div class="viz-item" data-tags="architecture">
+                            <div class="viz-icon">✂️</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Tokenization Demo</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Tokenization</span>
+                                    <span class="tag">BPE</span>
+                                </div>
+                            </div>
+                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
                         </div>
-                        <div class="viz-actions">
-                            <a href="module-2/session-2-1/kp1-tokenization.html" class="btn btn-primary">Explore</a>
+                        <div class="viz-item" data-tags="attention">
+                            <div class="viz-icon">🎛️</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Selection Problem</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Selection</span>
+                                    <span class="tag">Context</span>
+                                </div>
+                            </div>
+                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
                         </div>
                     </div>
                 </div>
                 
-                <div class="viz-card" data-tags="attention">
-                    <div class="viz-preview">🎛️</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Selection Problem</div>
-                        <div class="viz-description">Compare simple concatenation with attention-based dynamic selection.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Selection</span>
-                            <span class="tag">Context</span>
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">Session 2.2: Attention Mechanisms</div>
+                        <div class="session-description">Understanding attention weights and transformer blocks</div>
+                    </div>
+                    <div class="visualizations-list">
+                        <div class="viz-item" data-tags="attention">
+                            <div class="viz-icon">👁️</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Attention Weights Visualizer</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Attention</span>
+                                    <span class="tag">Heatmaps</span>
+                                </div>
+                            </div>
+                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
                         </div>
-                        <div class="viz-actions">
-                            <a href="module-2/session-2-1/kp3-selection-problem.html" class="btn btn-primary">Explore</a>
+                        <div class="viz-item" data-tags="architecture">
+                            <div class="viz-icon">📍</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Position Embeddings</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Position</span>
+                                    <span class="tag">Encodings</span>
+                                </div>
+                            </div>
+                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
+                        </div>
+                        <div class="viz-item" data-tags="architecture">
+                            <div class="viz-icon">🧱</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Transformer Block</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Transformer</span>
+                                    <span class="tag">Architecture</span>
+                                </div>
+                            </div>
+                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
                         </div>
                     </div>
                 </div>
                 
-                <div class="viz-card" data-tags="attention">
-                    <div class="viz-preview">👁️</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Attention Weights Visualizer</div>
-                        <div class="viz-description">Interactive heatmaps showing which words attend to which in real sentences.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Attention</span>
-                            <span class="tag">Heatmaps</span>
-                        </div>
-                        <div class="viz-actions">
-                            <a href="module-2/session-2-2/kp1-attention-viz.html" class="btn btn-primary">Explore</a>
-                        </div>
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">Session 2.3: Training at Scale</div>
+                        <div class="session-description">Scaling laws and supervised fine-tuning</div>
                     </div>
-                </div>
-                
-                <div class="viz-card" data-tags="architecture">
-                    <div class="viz-preview">📍</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Position Embeddings</div>
-                        <div class="viz-description">Visualize sinusoidal position encodings and their patterns across dimensions.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Position</span>
-                            <span class="tag">Encodings</span>
+                    <div class="visualizations-list">
+                        <div class="viz-item" data-tags="training">
+                            <div class="viz-icon">📈</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Scaling Laws</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Scaling</span>
+                                    <span class="tag">Power Laws</span>
+                                </div>
+                            </div>
+                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
                         </div>
-                        <div class="viz-actions">
-                            <a href="module-2/session-2-2/kp2-position-embed.html" class="btn btn-primary">Explore</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="viz-card" data-tags="architecture">
-                    <div class="viz-preview">🧱</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Transformer Block</div>
-                        <div class="viz-description">Watch data flow through a complete transformer block with residual connections.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Transformer</span>
-                            <span class="tag">Architecture</span>
-                        </div>
-                        <div class="viz-actions">
-                            <a href="module-2/session-2-2/kp4-transformer-block.html" class="btn btn-primary">Explore</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="viz-card" data-tags="training">
-                    <div class="viz-preview">📈</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Scaling Laws</div>
-                        <div class="viz-description">Interactive exploration of how model performance scales with size, data, and compute.</div>
-                        <div class="viz-tags">
-                            <span class="tag">Scaling</span>
-                            <span class="tag">Power Laws</span>
-                        </div>
-                        <div class="viz-actions">
-                            <a href="module-2/session-2-3/kp1-scaling-laws.html" class="btn btn-primary">Explore</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="viz-card" data-tags="training">
-                    <div class="viz-preview">🎯</div>
-                    <div class="viz-info">
-                        <div class="viz-title">Pre-training vs Fine-tuning</div>
-                        <div class="viz-description">Compare model behavior before and after supervised fine-tuning.</div>
-                        <div class="viz-tags">
-                            <span class="tag">SFT</span>
-                            <span class="tag">Training</span>
-                        </div>
-                        <div class="viz-actions">
-                            <a href="module-2/session-2-3/kp2-sft-comparison.html" class="btn btn-primary">Explore</a>
+                        <div class="viz-item" data-tags="training">
+                            <div class="viz-icon">🎯</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Pre-training vs Fine-tuning</div>
+                                <div class="viz-tags">
+                                    <span class="tag">SFT</span>
+                                    <span class="tag">Training</span>
+                                </div>
+                            </div>
+                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
                         </div>
                     </div>
                 </div>
@@ -574,29 +787,37 @@
     </div>
     
     <div class="footer">
-        <p>Interactive visualizations for LLM4LLM - Educational materials for understanding language models</p>
+        <p>Interactive visualizations for <strong>LLM4LLM</strong> - Educational materials for understanding language models</p>
+        <p>Open source and available on <a href="https://github.com/zzhang-cn/zzhang-cn.github.io/tree/main/LLM4LLM">GitHub</a></p>
     </div>
     
     <script>
         // Search and filter functionality
         const searchInput = document.getElementById('searchInput');
         const filterTags = document.querySelectorAll('.filter-tag');
-        const vizCards = document.querySelectorAll('.viz-card');
+        const vizItems = document.querySelectorAll('.viz-item');
         
         let currentFilter = 'all';
         
         function filterVisualizations() {
             const searchTerm = searchInput.value.toLowerCase();
             
-            vizCards.forEach(card => {
-                const title = card.querySelector('.viz-title').textContent.toLowerCase();
-                const description = card.querySelector('.viz-description').textContent.toLowerCase();
-                const tags = card.dataset.tags;
+            vizItems.forEach(item => {
+                const name = item.querySelector('.viz-name').textContent.toLowerCase();
+                const tags = item.dataset.tags;
+                const tagElements = item.querySelectorAll('.tag');
+                const tagText = Array.from(tagElements).map(tag => tag.textContent.toLowerCase()).join(' ');
                 
-                const matchesSearch = title.includes(searchTerm) || description.includes(searchTerm);
+                const matchesSearch = name.includes(searchTerm) || tagText.includes(searchTerm);
                 const matchesFilter = currentFilter === 'all' || tags.includes(currentFilter);
                 
-                card.style.display = matchesSearch && matchesFilter ? 'block' : 'none';
+                const sessionCard = item.closest('.session-card');
+                const shouldShow = matchesSearch && matchesFilter;
+                item.style.display = shouldShow ? 'flex' : 'none';
+                
+                // Hide session if no visualizations are visible
+                const visibleItems = sessionCard.querySelectorAll('.viz-item:not([style*="display: none"])');
+                sessionCard.style.display = visibleItems.length > 0 ? 'block' : 'none';
             });
         }
         
@@ -616,12 +837,27 @@
             });
         });
         
+        // Count total visualizations
+        const totalCount = vizItems.length;
+        document.getElementById('totalVizCount').textContent = totalCount;
+        
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.key === '/') {
+            if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
                 e.preventDefault();
                 searchInput.focus();
             }
+        });
+        
+        // Add hover effects for better interactivity
+        vizItems.forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                item.style.transform = 'scale(1.02)';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                item.style.transform = 'scale(1)';
+            });
         });
     </script>
 </body>
