@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 1: Foundations of Word Prediction - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.2s ease;
+        }
+        
+        .breadcrumb a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 700px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .module-overview {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+        
+        .overview-content h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+        
+        .overview-content p {
+            color: #666;
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+        
+        .learning-objectives {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .learning-objectives h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .learning-objectives ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .learning-objectives li {
+            margin-bottom: 0.75rem;
+            padding-left: 1.5rem;
+            position: relative;
+            color: #555;
+        }
+        
+        .learning-objectives li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .session-section {
+            margin-bottom: 3rem;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .session-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .session-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .session-number {
+            background: rgba(255,255,255,0.2);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+        
+        .session-details h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .session-details p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .session-stats {
+            text-align: right;
+            opacity: 0.8;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+        }
+        
+        .visualizations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+        
+        .viz-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+        }
+        
+        .viz-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+        
+        .viz-preview {
+            height: 120px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #667eea;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .viz-preview::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: transform 0.6s ease;
+        }
+        
+        .viz-card:hover .viz-preview::before {
+            transform: rotate(45deg) translate(50%, 50%);
+        }
+        
+        .viz-preview::after {
+            content: "Interactive";
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        
+        .viz-info {
+            padding: 1.5rem;
+        }
+        
+        .viz-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .viz-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        
+        .viz-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .tag {
+            background: #f8f9fa;
+            color: #667eea;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+        }
+        
+        .viz-card:hover .tag {
+            background: #e8f2ff;
+            border-color: #667eea;
+        }
+        
+        .viz-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-1px);
+        }
+        
+        .progress-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e9ecef;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+        }
+        
+        .session-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .session-link {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s ease;
+            border: 1px solid #e9ecef;
+        }
+        
+        .session-link:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .session-link-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .session-link-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #666;
+            margin-top: 3rem;
+            padding: 2rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .overview-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .visualizations-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .session-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .session-stats {
+                text-align: center;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="https://zzhang-cn.github.io/LLM4LLM/">← All Modules</a> / Module 1
+            </div>
+            <h1>Foundations of Word Prediction</h1>
+            <p>Explore the evolution from statistical patterns to neural embeddings, building the foundation for understanding modern language models</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="module-overview">
+            <div class="overview-grid">
+                <div class="overview-content">
+                    <h2>What You'll Learn</h2>
+                    <p>This module takes you on a journey from basic language statistics to sophisticated neural embeddings. You'll discover how language follows predictable patterns, why simple n-gram models have limitations, and how neural networks revolutionized language modeling.</p>
+                    <p>Through interactive visualizations, you'll see how word embeddings capture semantic relationships, understand the training process for neural language models, and explore the specific innovations of Word2Vec that made large-scale embedding learning practical.</p>
+                </div>
+                <div class="learning-objectives">
+                    <h3>Learning Objectives</h3>
+                    <ul>
+                        <li>Understand Zipf's law and power distributions in language</li>
+                        <li>See how next-word prediction enables instruction following</li>
+                        <li>Build n-grams and discover the sparsity problem</li>
+                        <li>Explore word embeddings and semantic vector spaces</li>
+                        <li>Learn about neural language model architectures</li>
+                        <li>Understand training dynamics and loss functions</li>
+                        <li>Compare Word2Vec architectures (Skip-gram vs CBOW)</li>
+                        <li>Discover limitations of static embeddings</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="progress-section">
+            <div class="progress-header">
+                <h3>Module Progress</h3>
+                <span>5 Sessions • 18 Visualizations</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%"></div>
+            </div>
+            <div class="session-links">
+                <a href="#session-1-1" class="session-link">
+                    <div class="session-link-title">Session 1.1</div>
+                    <div class="session-link-subtitle">Introduction to Next-Word Prediction</div>
+                </a>
+                <a href="#session-1-2" class="session-link">
+                    <div class="session-link-title">Session 1.2</div>
+                    <div class="session-link-subtitle">N-gram Models & Limitations</div>
+                </a>
+                <a href="#session-1-3" class="session-link">
+                    <div class="session-link-title">Session 1.3</div>
+                    <div class="session-link-subtitle">Neural Language Models</div>
+                </a>
+                <a href="#session-1-4" class="session-link">
+                    <div class="session-link-title">Session 1.4</div>
+                    <div class="session-link-subtitle">Training Neural Models</div>
+                </a>
+                <a href="#session-1-5" class="session-link">
+                    <div class="session-link-title">Session 1.5</div>
+                    <div class="session-link-subtitle">Word2Vec & Static Embeddings</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Session 1.1: Introduction to Next-Word Prediction -->
+        <div class="session-section" id="session-1-1">
+            <div class="session-header">
+                <div class="session-info">
+                    <div class="session-number">1.1</div>
+                    <div class="session-details">
+                        <h3>Introduction to Next-Word Prediction</h3>
+                        <p>Discover how language follows statistical patterns and enables AI instruction following</p>
+                    </div>
+                </div>
+                <div class="session-stats">
+                    <div class="stat-number">2</div>
+                    <div class="stat-label">Visualizations</div>
+                </div>
+            </div>
+            <div class="visualizations-grid">
+                <div class="viz-card">
+                    <div class="viz-preview">📊</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Word Frequency Explorer</div>
+                        <div class="viz-description">Discover how word frequencies in natural language follow predictable power law patterns (Zipf's Law).</div>
+                        <div class="viz-tags">
+                            <span class="tag">Statistics</span>
+                            <span class="tag">Power Laws</span>
+                            <span class="tag">Zipf's Law</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-1/kp2-word-frequency.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-preview">❓</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Instruction Following Patterns</div>
+                        <div class="viz-description">See how next-word prediction naturally leads to question-answering and instruction-following capabilities.</div>
+                        <div class="viz-tags">
+                            <span class="tag">Emergent Behavior</span>
+                            <span class="tag">QA Patterns</span>
+                            <span class="tag">Instructions</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-1/kp3-qa-patterns.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Session 1.2: N-gram Models and Their Limitations -->
+        <div class="session-section" id="session-1-2">
+            <div class="session-header">
+                <div class="session-info">
+                    <div class="session-number">1.2</div>
+                    <div class="session-details">
+                        <h3>N-gram Models and Their Limitations</h3>
+                        <p>Build n-grams and discover the sparsity problem that motivates neural approaches</p>
+                    </div>
+                </div>
+                <div class="session-stats">
+                    <div class="stat-number">2</div>
+                    <div class="stat-label">Visualizations</div>
+                </div>
+            </div>
+            <div class="visualizations-grid">
+                <div class="viz-card">
+                    <div class="viz-preview">🔤</div>
+                    <div class="viz-info">
+                        <div class="viz-title">N-gram Builder</div>
+                        <div class="viz-description">Build n-grams from text and see how prediction quality changes with context size.</div>
+                        <div class="viz-tags">
+                            <span class="tag">N-grams</span>
+                            <span class="tag">Context</span>
+                            <span class="tag">Prediction</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-2/kp1-ngram-builder.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-preview">🕳️</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Sparsity Explorer</div>
+                        <div class="viz-description">Visualize how n-gram coverage drops exponentially as sequence length increases.</div>
+                        <div class="viz-tags">
+                            <span class="tag">Sparsity</span>
+                            <span class="tag">Limitations</span>
+                            <span class="tag">Exponential Growth</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-2/kp7-sparsity-explorer.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Session 1.3: Neural Language Models -->
+        <div class="session-section" id="session-1-3">
+            <div class="session-header">
+                <div class="session-info">
+                    <div class="session-number">1.3</div>
+                    <div class="session-details">
+                        <h3>Neural Language Models</h3>
+                        <p>Understand word embeddings, softmax, and the first neural language models</p>
+                    </div>
+                </div>
+                <div class="session-stats">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Visualizations</div>
+                </div>
+            </div>
+            <div class="visualizations-grid">
+                <div class="viz-card">
+                    <div class="viz-preview">🗺️</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Word Embedding Space</div>
+                        <div class="viz-description">Explore semantic relationships through vector distances in a conceptual 2D embedding space.</div>
+                        <div class="viz-tags">
+                            <span class="tag">Embeddings</span>
+                            <span class="tag">Semantics</span>
+                            <span class="tag">Vector Space</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-3/kp2-embedding-space.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-preview">🎯</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Softmax Calculator</div>
+                        <div class="viz-description">Interactive softmax demonstration showing how raw scores become probability distributions.</div>
+                        <div class="viz-tags">
+                            <span class="tag">Softmax</span>
+                            <span class="tag">Probabilities</span>
+                            <span class="tag">Normalization</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-3/kp3-softmax-calc.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-preview">🧠</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Bengio Neural Language Model</div>
+                        <div class="viz-description">Explore the complete neural network architecture from input words to probability distributions.</div>
+                        <div class="viz-tags">
+                            <span class="tag">Neural Networks</span>
+                            <span class="tag">Architecture</span>
+                            <span class="tag">Bengio Model</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-3/kp3-bengio-model.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Session 1.4: Training Neural Language Models -->
+        <div class="session-section" id="session-1-4">
+            <div class="session-header">
+                <div class="session-info">
+                    <div class="session-number">1.4</div>
+                    <div class="session-details">
+                        <h3>Training Neural Language Models</h3>
+                        <p>Explore loss functions, gradient descent, and training dynamics</p>
+                    </div>
+                </div>
+                <div class="session-stats">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Visualizations</div>
+                </div>
+            </div>
+            <div class="visualizations-grid">
+                <div class="viz-card">
+                    <div class="viz-preview">📉</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Loss Function Explorer</div>
+                        <div class="viz-description">See how cross-entropy loss varies with prediction confidence and understand training dynamics.</div>
+                        <div class="viz-tags">
+                            <span class="tag">Loss Functions</span>
+                            <span class="tag">Cross-Entropy</span>
+                            <span class="tag">Training</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-4/kp1-loss-explorer.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-preview">⛰️</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Gradient Descent Simulator</div>
+                        <div class="viz-description">Watch gradient descent navigate loss landscapes with different learning rates.</div>
+                        <div class="viz-tags">
+                            <span class="tag">Optimization</span>
+                            <span class="tag">Gradient Descent</span>
+                            <span class="tag">Learning Rate</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-4/kp2-gradient-sim.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-preview">📈</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Training Progress Visualizer</div>
+                        <div class="viz-description">Monitor neural language model training with real-time loss and accuracy metrics.</div>
+                        <div class="viz-tags">
+                            <span class="tag">Training</span>
+                            <span class="tag">Metrics</span>
+                            <span class="tag">Progress</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-4/kp3-training-progress.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-preview">🔢</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Perplexity Calculator</div>
+                        <div class="viz-description">Calculate and compare perplexity scores across different language models.</div>
+                        <div class="viz-tags">
+                            <span class="tag">Perplexity</span>
+                            <span class="tag">Evaluation</span>
+                            <span class="tag">Metrics</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-4/kp4-perplexity-calc.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Session 1.5: Word2Vec and Static Embeddings -->
+        <div class="session-section" id="session-1-5">
+            <div class="session-header">
+                <div class="session-info">
+                    <div class="session-number">1.5</div>
+                    <div class="session-details">
+                        <h3>Word2Vec and Static Embeddings</h3>
+                        <p>Deep dive into Word2Vec architectures and discover their limitations</p>
+                    </div>
+                </div>
+                <div class="session-stats">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Visualizations</div>
+                </div>
+            </div>
+            <div class="visualizations-grid">
+                <div class="viz-card">
+                    <div class="viz-preview">🔄</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Word2Vec Architecture Comparison</div>
+                        <div class="viz-description">Compare Skip-gram and CBOW architectures with interactive demonstrations.</div>
+                        <div class="viz-tags">
+                            <span class="tag">Word2Vec</span>
+                            <span class="tag">Skip-gram</span>
+                            <span class="tag">CBOW</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-5/kp2-word2vec-demo.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-preview">🎯</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Negative Sampling Demo</div>
+                        <div class="viz-description">Explore how negative sampling makes training Word2Vec dramatically more efficient.</div>
+                        <div class="viz-tags">
+                            <span class="tag">Negative Sampling</span>
+                            <span class="tag">Efficiency</span>
+                            <span class="tag">Training</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-5/kp3-negative-sampling-demo.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-preview">🧮</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Vector Analogy Solver</div>
+                        <div class="viz-description">Solve word analogies with vector arithmetic: king - man + woman = queen</div>
+                        <div class="viz-tags">
+                            <span class="tag">Analogies</span>
+                            <span class="tag">Vector Math</span>
+                            <span class="tag">Semantics</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-5/kp4-vector-analogy-demo.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-preview">🎭</div>
+                    <div class="viz-info">
+                        <div class="viz-title">Polysemy Problem Demo</div>
+                        <div class="viz-description">See how static embeddings struggle with words that have multiple meanings.</div>
+                        <div class="viz-tags">
+                            <span class="tag">Limitations</span>
+                            <span class="tag">Context</span>
+                            <span class="tag">Polysemy</span>
+                        </div>
+                        <div class="viz-actions">
+                            <a href="session-1-5/kp6-polysemy-problem-demo.html" class="btn btn-primary">Explore</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Interactive visualizations for <strong>LLM4LLM Module 1</strong> - Foundations of Word Prediction</p>
+        <p>Part of the <a href="https://zzhang-cn.github.io/LLM4LLM/">LLM4LLM visualization collection</a></p>
+    </div>
+</body>
+</html>
