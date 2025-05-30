@@ -41,6 +41,108 @@
             padding: 2rem;
         }
         
+        .example-selector {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .example-selector h3 {
+            margin-bottom: 1.5rem;
+            color: #333;
+            font-size: 1.3rem;
+        }
+        
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .example-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .example-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .example-card.selected {
+            border-color: #667eea;
+            background: #e8f2ff;
+        }
+        
+        .example-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .example-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .example-desc {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 0 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
         .comparison-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -137,11 +239,6 @@
             width: 100%;
             margin: 1rem 0;
             transition: border-color 0.3s ease;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: #667eea;
         }
         
         .keywords {
@@ -250,6 +347,7 @@
             border-radius: 0 8px 8px 0;
             font-size: 1rem;
             line-height: 1.7;
+            min-height: 200px;
         }
         
         .typing-cursor {
@@ -258,32 +356,6 @@
             width: 2px;
             height: 1.2em;
             animation: blink 1s infinite;
-        }
-        
-        .controls {
-            text-align: center;
-            margin: 2rem 0;
-        }
-        
-        .btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            margin: 0 0.5rem;
-            transition: background-color 0.2s ease;
-        }
-        
-        .btn:hover {
-            background: #5a6fd8;
-        }
-        
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
         }
         
         @keyframes fadeIn {
@@ -310,65 +382,7 @@
             51%, 100% { opacity: 0; }
         }
         
-        .example-selector {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        
-        .example-selector h3 {
-            margin-bottom: 1.5rem;
-            color: #333;
-            font-size: 1.3rem;
-        }
-        
-        .example-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .example-card {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-        
-        .example-card:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-        }
-        
-        .example-card.selected {
-            border-color: #667eea;
-            background: #e8f2ff;
-        }
-        
-        .example-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .example-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
-        
-        .example-desc {
-            font-size: 0.9rem;
-            color: #666;
-            line-height: 1.4;
-        }
+        @media (max-width: 968px) {
             .comparison-grid {
                 grid-template-columns: 1fr;
             }
@@ -376,22 +390,10 @@
             .container {
                 padding: 1rem;
             }
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #e9ecef;
-            border-radius: 2px;
-            margin: 2rem 0;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.5s ease;
+            
+            .example-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
     </style>
 </head>
@@ -402,9 +404,36 @@
     </div>
     
     <div class="container">
+        <div class="example-selector">
+            <h3>Choose an Example to Explore:</h3>
+            <div class="example-grid">
+                <div class="example-card" onclick="selectExample('science')" id="card-science">
+                    <div class="example-icon">🔬</div>
+                    <div class="example-title">Scientific Explanation</div>
+                    <div class="example-desc">Complex biology question</div>
+                </div>
+                <div class="example-card" onclick="selectExample('creative')" id="card-creative">
+                    <div class="example-icon">✨</div>
+                    <div class="example-title">Creative Task</div>
+                    <div class="example-desc">Generate original content</div>
+                </div>
+                <div class="example-card" onclick="selectExample('analysis')" id="card-analysis">
+                    <div class="example-icon">📊</div>
+                    <div class="example-title">Analysis & Reasoning</div>
+                    <div class="example-desc">Compare and synthesize</div>
+                </div>
+                <div class="example-card" onclick="selectExample('practical')" id="card-practical">
+                    <div class="example-icon">🛠️</div>
+                    <div class="example-title">Practical Help</div>
+                    <div class="example-desc">Step-by-step guidance</div>
+                </div>
+            </div>
+        </div>
+        
         <div class="controls">
             <button class="btn" onclick="startDemo()" id="startBtn">Start Demo</button>
             <button class="btn" onclick="resetDemo()" id="resetBtn" disabled>Reset</button>
+            <button class="btn" onclick="nextExample()" id="nextBtn" disabled>Next Example</button>
         </div>
         
         <div class="progress-bar">
@@ -419,14 +448,14 @@
                 <div class="step" id="search-step-1">
                     <div class="step-title">Step 1: What User is Thinking</div>
                     <div class="thought-bubble" id="searchThought">
-                        I'm trying to understand the detailed biological process of how green plants and trees use chlorophyll in their leaves to capture sunlight and convert carbon dioxide from the air along with water from their roots into glucose sugar for energy, and I'm particularly confused about the specific chemical reactions that happen during the light-dependent and light-independent phases of this complex process.
+                        Loading...
                     </div>
                 </div>
                 
                 <div class="step" id="search-step-2">
                     <div class="step-title">Step 2: What User Actually Types</div>
                     <input type="text" class="search-input" id="searchInput" 
-                           placeholder="User simplifies to searchable keywords..." readonly>
+                           placeholder="User simplifies to keywords..." readonly>
                     <div class="keywords" id="searchKeywords"></div>
                 </div>
                 
@@ -458,14 +487,14 @@
                 <div class="step" id="llm-step-1">
                     <div class="step-title">Step 1: Full Context Input</div>
                     <div class="thought-bubble" id="llmInput">
-                        I'm trying to understand the detailed biological process of how green plants and trees use chlorophyll in their leaves to capture sunlight and convert carbon dioxide from the air along with water from their roots into glucose sugar for energy, and I'm particularly confused about the specific chemical reactions that happen during the light-dependent and light-independent phases of this complex process.
+                        Loading...
                     </div>
                 </div>
                 
                 <div class="step" id="llm-step-2">
                     <div class="step-title">Step 2: Attention Mechanism</div>
                     <div class="attention-text" id="attentionText">
-                        I'm trying to understand the detailed <span class="attention-word">biological process</span> of how <span class="attention-word">green plants</span> and trees use <span class="attention-word">chlorophyll</span> in their leaves to <span class="attention-word">capture sunlight</span> and convert <span class="attention-word">carbon dioxide</span> from the air along with <span class="attention-word">water</span> from their roots into <span class="attention-word">glucose sugar</span> for energy, and I'm particularly confused about the <span class="attention-word">specific chemical reactions</span> that happen during the <span class="attention-word">light-dependent</span> and <span class="attention-word">light-independent phases</span> of this complex process.
+                        I want to understand how <span class="attention-word">photosynthesis</span> works in detail, especially the <span class="attention-word">chemical reactions</span> that happen when plants convert <span class="attention-word">sunlight</span> and <span class="attention-word">carbon dioxide</span> into glucose.
                     </div>
                 </div>
                 
@@ -476,7 +505,6 @@
                         <div class="knowledge-node">Chemistry Processes</div>
                         <div class="knowledge-node">Plant Physiology</div>
                         <div class="knowledge-node">Educational Explanations</div>
-                        <div class="knowledge-node">Step-by-step Processes</div>
                     </div>
                 </div>
                 
@@ -497,64 +525,64 @@
         
         const examples = {
             science: {
-                thought: "I want to understand how photosynthesis works in detail, especially the chemical reactions that happen when plants convert sunlight and carbon dioxide into glucose, and I'm confused about the different phases of this process.",
-                keywords: ['photosynthesis', 'chlorophyll', 'glucose', 'chemical reactions'],
+                thought: "I want to understand how photosynthesis works in detail, especially the chemical reactions that happen when plants convert sunlight and carbon dioxide into glucose.",
+                keywords: ['photosynthesis', 'chemical reactions', 'plants', 'glucose'],
                 searchResults: [
                     { title: "Photosynthesis - Wikipedia", snippet: "Photosynthesis is the process used by plants to convert light energy..." },
                     { title: "Khan Academy: Photosynthesis", snippet: "Learn about light-dependent and light-independent reactions..." },
-                    { title: "Biology Online: Chlorophyll", snippet: "Chlorophyll is the green pigment that captures light energy..." },
+                    { title: "Biology: Chlorophyll Function", snippet: "Chlorophyll captures light energy in plants..." },
                     { title: "NASA: How Plants Make Food", snippet: "Explanation of how plants convert sunlight and CO2..." }
                 ],
                 llmResponse: `Photosynthesis happens in two main stages:
 
 ## Light-Dependent Reactions:
-Chlorophyll captures sunlight and splits water molecules (H₂O) into hydrogen and oxygen. Oxygen is released, while hydrogen creates energy carriers (ATP and NADPH).
+Chlorophyll captures sunlight and splits water molecules into hydrogen and oxygen. Oxygen is released, while hydrogen creates energy carriers (ATP and NADPH).
 
-## Light-Independent Reactions (Calvin Cycle):
+## Light-Independent Reactions:
 The energy carriers power the conversion of CO₂ into glucose. This happens without direct sunlight.
 
 ## Key Chemical Equations:
-• **Light reactions:** 6H₂O + light → 6O₂ + ATP + NADPH
-• **Calvin cycle:** 6CO₂ + ATP + NADPH → C₆H₁₂O₆
+• Light reactions: 6H₂O + light → 6O₂ + ATP + NADPH
+• Calvin cycle: 6CO₂ + ATP + NADPH → C₆H₁₂O₆
 
-Think of it like a factory: the first stage prepares energy, the second stage uses that energy to build glucose sugar! 🌱`
+Think of it like a factory: the first stage prepares energy, the second stage uses that energy to build glucose! 🌱`
             },
             
             creative: {
-                thought: "I need to write an original short story about a robot discovering emotions for my English class, but I want to avoid cliché plots and create something unique with good character development.",
-                keywords: ['robot story', 'creative writing', 'emotions', 'character development'],
+                thought: "I need to write an original short story about a robot discovering emotions for my English class, but I want to avoid cliché plots and create something unique.",
+                keywords: ['robot story', 'creative writing', 'emotions', 'original'],
                 searchResults: [
                     { title: "How to Write Short Stories", snippet: "Tips for crafting compelling fiction..." },
                     { title: "Robot Fiction Examples", snippet: "List of popular sci-fi books with robots..." },
-                    { title: "Character Development Guide", snippet: "Methods for creating three-dimensional characters..." },
+                    { title: "Character Development Guide", snippet: "Methods for creating characters..." },
                     { title: "Writing Prompts for Students", snippet: "Creative ideas for story inspiration..." }
                 ],
-                llmResponse: `Here's a fresh concept for your robot story:
+                llmResponse: `Here's a fresh concept for your story:
 
 ## "The Color of Sound"
 
-**Character:** ECHO-9, a library maintenance robot who has only processed information as data—until a lightning strike scrambles her audio processors.
+**Character:** ECHO-9, a library robot who processes everything as data—until lightning scrambles her audio sensors.
 
 ## Plot:
-**Opening:** ECHO-9 suddenly "hears" music for the first time. Her systems show errors, but she's mesmerized by the patterns.
+**Opening:** ECHO-9 suddenly "hears" music for the first time. Her systems show errors, but she's mesmerized.
 
-**Development:** She discovers different sounds trigger new sensations—classical music feels "warm," jazz feels "adventurous." She starts creating her own sounds by adjusting her motor frequencies.
+**Development:** Different sounds trigger new sensations—classical feels "warm," jazz feels "adventurous." She starts creating sounds with her motors.
 
-**Climax:** When technicians come to "fix" her, ECHO-9 must choose between returning to silent efficiency or keeping her newfound ability to experience beauty.
+**Climax:** When technicians come to "fix" her, ECHO-9 must choose between silent efficiency or keeping her newfound ability to experience beauty.
 
-**Theme:** What if consciousness isn't about thinking, but about **feeling** the world around us?
+**Theme:** What if consciousness isn't about thinking, but about feeling the world around us?
 
-This avoids the typical "robot wants to be human" story by focusing on aesthetic discovery as the path to emotion! 🎨`
+This avoids the typical "robot wants to be human" story by focusing on aesthetic discovery! 🎨`
             },
             
             analysis: {
-                thought: "I'm trying to decide between buying an electric car or gas car for my daily commute, considering costs, environmental impact, and charging infrastructure, but I'm getting conflicting information online.",
-                keywords: ['electric car', 'gas car', 'comparison', 'cost analysis'],
+                thought: "I'm trying to decide between buying an electric car or gas car for my daily commute, considering costs, environmental impact, and charging infrastructure.",
+                keywords: ['electric car', 'gas car', 'comparison', 'costs'],
                 searchResults: [
-                    { title: "Electric vs Gas Cars 2024", snippet: "Cost comparison of purchase price and maintenance..." },
+                    { title: "Electric vs Gas Cars 2024", snippet: "Cost comparison of purchase and maintenance..." },
                     { title: "Tesla Model 3 Review", snippet: "Detailed review of popular electric vehicle..." },
                     { title: "EV Charging Station Map", snippet: "Interactive map of charging locations..." },
-                    { title: "Environmental Impact Study", snippet: "Carbon footprint comparison of electric vs gas..." }
+                    { title: "Environmental Impact Study", snippet: "Carbon footprint comparison..." }
                 ],
                 llmResponse: `Let me break down this decision objectively:
 
@@ -574,15 +602,13 @@ This avoids the typical "robot wants to be human" story by focusing on aesthetic
 • Cold weather reduces range
 • Trip planning required
 
-## My Recommendation:
-If you drive regularly and can charge at home, electric makes financial sense. Your savings will compound over time.
-
-**Next step:** Test drive both options and calculate your specific costs based on local electricity rates! 🔌`
+## Recommendation:
+If you drive regularly and can charge at home, electric makes financial sense. Test drive both and calculate your specific costs! 🔌`
             },
             
             practical: {
-                thought: "My elderly grandmother fell last week and I want to set up a simple safety system for her, but she gets confused by complicated technology and needs something very easy to use.",
-                keywords: ['elderly safety', 'medical alert', 'fall detection', 'simple technology'],
+                thought: "My elderly grandmother fell last week and I want to set up a simple safety system for her, but she gets confused by complicated technology.",
+                keywords: ['elderly safety', 'medical alert', 'simple technology', 'falls'],
                 searchResults: [
                     { title: "Best Medical Alert Systems", snippet: "Reviews of Life Alert and other emergency systems..." },
                     { title: "Fall Detection for Seniors", snippet: "Wearable and home-based detection devices..." },
@@ -593,17 +619,17 @@ If you drive regularly and can charge at home, electric makes financial sense. Y
 
 ## Medical Alert Pendant
 **Best choice:** Traditional one-button pendant
-• **Single red button** - just press for help
-• **No charging** needed (5+ year battery)
-• **Waterproof** - wear in shower where falls happen
-• **Works anywhere** in the house
+• Single red button - just press for help
+• No charging needed (5+ year battery)
+• Waterproof - wear in shower
+• Works anywhere in the house
 
 ## Simple Setup:
-1. Professional installation (they handle everything)
+1. Professional installation
 2. Connect to landline (most reliable)
 3. Test once so she feels confident
 
-## Training (keep it simple):
+## Training:
 "Press the red button if you need help. Someone will talk to you and send help."
 
 ## Additional Safety:
@@ -611,7 +637,7 @@ If you drive regularly and can charge at home, electric makes financial sense. Y
 • Remove throw rugs
 • Install grab bars in bathroom
 
-**Cost:** $30-50/month. The peace of mind is worth it! 🏠`
+Cost: $30-50/month. The peace of mind is worth it! 🏠`
             }
         };
         
@@ -780,66 +806,18 @@ If you drive regularly and can charge at home, electric makes financial sense. Y
         async function typeResponse() {
             const container = document.getElementById('generatedText');
             const example = examples[currentExample];
-            const generatedResponse = example.llmResponse;
+            const response = example.llmResponse;
             
             let text = '';
-            for (let i = 0; i < generatedResponse.length; i++) {
-                text += generatedResponse[i];
-                // Convert markdown-like formatting to HTML
+            for (let i = 0; i < response.length; i++) {
+                text += response[i];
                 let formattedText = text
                     .replace(/## (.*?)(?=\n|$)/g, '<h3 style="color: #28a745; margin: 1rem 0 0.5rem 0; font-size: 1.1rem;">$1</h3>')
                     .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #333;">$1</strong>')
                     .replace(/• (.*?)(?=\n|$)/g, '<div style="margin: 0.25rem 0; padding-left: 1rem;">• $1</div>')
-                    .replace(/🌱|🎨|🔌|🏠/g, '<span style="font-size: 1.2rem;">        async function showSearchResults() {
-            const container = document.getElementById('searchResults');
-            
-            searchResults.forEach((result, index) => {
-                setTimeout(() => {
-                    const resultDiv = document.createElement('div');
-                    resultDiv.className = 'search-result';
-                    resultDiv.innerHTML = `
-                        <div class="result-title">🔗 ${result.title}</div>
-                        <div class="result-snippet">${result.snippet}</div>
-                    `;
-                    resultDiv.style.animationDelay = index * 0.1 + 's';
-                    container.appendChild(resultDiv);
-                }, index * 300);
-            });
-        }
-        
-        async function typeResponse() {
-            const container = document.getElementById('generatedText');
-            const cursor = document.getElementById('typingCursor');
-            
-            let text = '';
-            for (let i = 0; i < generatedResponse.length; i++) {
-                text += generatedResponse[i];
-                // Convert markdown-like formatting to HTML
-                let formattedText = text
-                    .replace(/## (.*?)(?=\n|$)/g, '<h3 style="color: #28a745; margin: 1rem 0 0.5rem 0; font-size: 1.1rem;">$1</h3>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #333;">$1</strong>')
-                    .replace(/• (.*?)(?=\n|$)/g, '<div style="margin: 0.25rem 0; padding-left: 1rem;">• $1</div>')
-                    .replace(/🌱/g, '<span style="font-size: 1.2rem;">🌱</span>')
-                    .replace(/\n\n/g, '<br><br>')
-                    .replace(/\n/g, '<br>');
-                
-                container.innerHTML = formattedText + '<span class="typing-cursor"></span>';
-                await sleep(20);
-            }
-            
-            // Remove cursor when done and apply final formatting
-            let finalText = text
-                .replace(/## (.*?)(?=\n|$)/g, '<h3 style="color: #28a745; margin: 1rem 0 0.5rem 0; font-size: 1.1rem;">$1</h3>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #333;">$1</strong>')
-                .replace(/• (.*?)(?=\n|$)/g, '<div style="margin: 0.25rem 0; padding-left: 1rem;">• $1</div>')
-                .replace(/🌱/g, '<span style="font-size: 1.2rem;">🌱</span>')
-                .replace(/\n\n/g, '<br><br>')
-                .replace(/\n/g, '<br>');
-            
-            container.innerHTML = finalText;
-        }</span>')
-                    .replace(/✅/g, '<span style="color: #28a745; font-size: 1.1rem;">✅</span>')
-                    .replace(/⚠️/g, '<span style="color: #ffc107; font-size: 1.1rem;">⚠️</span>')
+                    .replace(/✅/g, '<span style="color: #28a745;">✅</span>')
+                    .replace(/⚠️/g, '<span style="color: #ffc107;">⚠️</span>')
+                    .replace(/🌱|🎨|🔌|🏠/g, '<span style="font-size: 1.2rem;">$&</span>')
                     .replace(/\n\n/g, '<br><br>')
                     .replace(/\n/g, '<br>');
                 
@@ -847,61 +825,14 @@ If you drive regularly and can charge at home, electric makes financial sense. Y
                 await sleep(15);
             }
             
-            // Remove cursor when done and apply final formatting
+            // Final formatted text without cursor
             let finalText = text
                 .replace(/## (.*?)(?=\n|$)/g, '<h3 style="color: #28a745; margin: 1rem 0 0.5rem 0; font-size: 1.1rem;">$1</h3>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #333;">$1</strong>')
                 .replace(/• (.*?)(?=\n|$)/g, '<div style="margin: 0.25rem 0; padding-left: 1rem;">• $1</div>')
-                .replace(/🌱|🎨|🔌|🏠/g, '<span style="font-size: 1.2rem;">        async function showSearchResults() {
-            const container = document.getElementById('searchResults');
-            
-            searchResults.forEach((result, index) => {
-                setTimeout(() => {
-                    const resultDiv = document.createElement('div');
-                    resultDiv.className = 'search-result';
-                    resultDiv.innerHTML = `
-                        <div class="result-title">🔗 ${result.title}</div>
-                        <div class="result-snippet">${result.snippet}</div>
-                    `;
-                    resultDiv.style.animationDelay = index * 0.1 + 's';
-                    container.appendChild(resultDiv);
-                }, index * 300);
-            });
-        }
-        
-        async function typeResponse() {
-            const container = document.getElementById('generatedText');
-            const cursor = document.getElementById('typingCursor');
-            
-            let text = '';
-            for (let i = 0; i < generatedResponse.length; i++) {
-                text += generatedResponse[i];
-                // Convert markdown-like formatting to HTML
-                let formattedText = text
-                    .replace(/## (.*?)(?=\n|$)/g, '<h3 style="color: #28a745; margin: 1rem 0 0.5rem 0; font-size: 1.1rem;">$1</h3>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #333;">$1</strong>')
-                    .replace(/• (.*?)(?=\n|$)/g, '<div style="margin: 0.25rem 0; padding-left: 1rem;">• $1</div>')
-                    .replace(/🌱/g, '<span style="font-size: 1.2rem;">🌱</span>')
-                    .replace(/\n\n/g, '<br><br>')
-                    .replace(/\n/g, '<br>');
-                
-                container.innerHTML = formattedText + '<span class="typing-cursor"></span>';
-                await sleep(20);
-            }
-            
-            // Remove cursor when done and apply final formatting
-            let finalText = text
-                .replace(/## (.*?)(?=\n|$)/g, '<h3 style="color: #28a745; margin: 1rem 0 0.5rem 0; font-size: 1.1rem;">$1</h3>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #333;">$1</strong>')
-                .replace(/• (.*?)(?=\n|$)/g, '<div style="margin: 0.25rem 0; padding-left: 1rem;">• $1</div>')
-                .replace(/🌱/g, '<span style="font-size: 1.2rem;">🌱</span>')
-                .replace(/\n\n/g, '<br><br>')
-                .replace(/\n/g, '<br>');
-            
-            container.innerHTML = finalText;
-        }</span>')
-                .replace(/✅/g, '<span style="color: #28a745; font-size: 1.1rem;">✅</span>')
-                .replace(/⚠️/g, '<span style="color: #ffc107; font-size: 1.1rem;">⚠️</span>')
+                .replace(/✅/g, '<span style="color: #28a745;">✅</span>')
+                .replace(/⚠️/g, '<span style="color: #ffc107;">⚠️</span>')
+                .replace(/🌱|🎨|🔌|🏠/g, '<span style="font-size: 1.2rem;">$&</span>')
                 .replace(/\n\n/g, '<br><br>')
                 .replace(/\n/g, '<br>');
             
@@ -912,10 +843,14 @@ If you drive regularly and can charge at home, electric makes financial sense. Y
             isRunning = false;
             currentStep = 0;
             
-            // Update thought bubbles with current example
+            // Update content with current example
             const example = examples[currentExample];
             document.getElementById('searchThought').textContent = example.thought;
             document.getElementById('llmInput').textContent = example.thought;
+            
+            // Update attention text
+            const attentionText = document.getElementById('attentionText');
+            attentionText.innerHTML = example.thought.replace(/(photosynthesis|chemical reactions|plants|glucose|robot|emotions|electric car|costs|elderly|safety)/gi, '<span class="attention-word">$1</span>');
             
             // Reset UI
             document.getElementById('startBtn').disabled = false;
@@ -948,7 +883,7 @@ If you drive regularly and can charge at home, electric makes financial sense. Y
         
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            selectExample('science'); // Start with science example selected
+            selectExample('science');
         });
     </script>
 </body>
