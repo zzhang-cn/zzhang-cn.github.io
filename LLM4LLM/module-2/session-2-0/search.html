@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Engine vs Generative Search Engine - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .example-selector {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .example-selector h3 {
+            margin-bottom: 1.5rem;
+            color: #333;
+            font-size: 1.3rem;
+        }
+        
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .example-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .example-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .example-card.selected {
+            border-color: #667eea;
+            background: #e8f2ff;
+        }
+        
+        .example-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .example-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .example-desc {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 0 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .search-side {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border-top: 4px solid #dc3545;
+        }
+        
+        .llm-side {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border-top: 4px solid #28a745;
+        }
+        
+        .side-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .search-side .side-title {
+            color: #dc3545;
+        }
+        
+        .llm-side .side-title {
+            color: #28a745;
+        }
+        
+        .step {
+            margin-bottom: 2rem;
+            opacity: 0.3;
+            transition: all 0.5s ease;
+        }
+        
+        .step.active {
+            opacity: 1;
+            transform: translateY(-2px);
+        }
+        
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .search-side .step-title {
+            background: #ffe6e6;
+            color: #dc3545;
+        }
+        
+        .llm-side .step-title {
+            background: #e6f7e6;
+            color: #28a745;
+        }
+        
+        .thought-bubble {
+            background: #f0f8ff;
+            border: 2px dashed #667eea;
+            border-radius: 15px;
+            padding: 1.5rem;
+            position: relative;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        
+        .thought-bubble::before {
+            content: "💭";
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .search-input {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            width: 100%;
+            margin: 1rem 0;
+        }
+        
+        .keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .keyword {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            opacity: 0;
+            animation: slideIn 0.5s ease forwards;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .attention-text {
+            font-family: 'Courier New', monospace;
+            line-height: 1.8;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .attention-word {
+            transition: all 0.3s ease;
+            padding: 0.1rem 0.2rem;
+            border-radius: 3px;
+        }
+        
+        .attention-high {
+            background: #ff4444;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .attention-medium {
+            background: #ffaa44;
+            color: white;
+        }
+        
+        .attention-low {
+            background: #ffdd44;
+            color: #333;
+        }
+        
+        .search-results {
+            margin: 1rem 0;
+        }
+        
+        .search-result {
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: white;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-title {
+            color: #1a0dab;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .result-snippet {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .knowledge-network {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1rem 0;
+            justify-content: center;
+        }
+        
+        .knowledge-node {
+            background: #e6f7e6;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            opacity: 0;
+            animation: pulse 0.5s ease forwards;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+        
+        .generated-text {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+        
+        .typing-cursor {
+            display: inline-block;
+            background: #28a745;
+            width: 2px;
+            height: 1.2em;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        @media (max-width: 968px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .example-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Search Engine vs Generative Search Engine</h1>
+        <p>See how the same user need is handled by traditional search vs modern LLMs</p>
+    </div>
+    
+    <div class="container">
+        <div class="example-selector">
+            <h3>Choose an Example to Explore:</h3>
+            <div class="example-grid">
+                <div class="example-card selected" onclick="selectExample('science')" id="card-science">
+                    <div class="example-icon">🔬</div>
+                    <div class="example-title">Scientific Explanation</div>
+                    <div class="example-desc">Complex biology question</div>
+                </div>
+                <div class="example-card" onclick="selectExample('creative')" id="card-creative">
+                    <div class="example-icon">✨</div>
+                    <div class="example-title">Creative Task</div>
+                    <div class="example-desc">Generate original content</div>
+                </div>
+                <div class="example-card" onclick="selectExample('analysis')" id="card-analysis">
+                    <div class="example-icon">📊</div>
+                    <div class="example-title">Analysis & Reasoning</div>
+                    <div class="example-desc">Compare information</div>
+                </div>
+                <div class="example-card" onclick="selectExample('practical')" id="card-practical">
+                    <div class="example-icon">🛠️</div>
+                    <div class="example-title">Practical Help</div>
+                    <div class="example-desc">Step-by-step guidance</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="startDemo()" id="startBtn">Start Demo</button>
+            <button class="btn" onclick="resetDemo()" id="resetBtn" disabled>Reset</button>
+            <button class="btn" onclick="nextExample()" id="nextBtn" disabled>Next Example</button>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div class="comparison-grid">
+            <!-- Traditional Search Engine Side -->
+            <div class="search-side">
+                <h2 class="side-title">🔍 Traditional Search Engine</h2>
+                
+                <div class="step" id="search-step-1">
+                    <div class="step-title">Step 1: What User is Thinking</div>
+                    <div class="thought-bubble" id="searchThought">
+                        I want to understand how photosynthesis works in detail...
+                    </div>
+                </div>
+                
+                <div class="step" id="search-step-2">
+                    <div class="step-title">Step 2: What User Actually Types</div>
+                    <input type="text" class="search-input" id="searchInput" 
+                           placeholder="User simplifies to keywords..." readonly>
+                    <div class="keywords" id="searchKeywords"></div>
+                </div>
+                
+                <div class="step" id="search-step-3">
+                    <div class="step-title">Step 3: Index Search</div>
+                    <div style="text-align: center; margin: 1rem 0;">
+                        <div style="font-size: 3rem; opacity: 0.7;">📚 🔍 📄</div>
+                        <p>Searching through indexed web pages...</p>
+                    </div>
+                </div>
+                
+                <div class="step" id="search-step-4">
+                    <div class="step-title">Step 4: Search Results</div>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+                
+                <div class="step" id="search-step-5">
+                    <div class="step-title">Step 5: User Must Click Through</div>
+                    <p style="text-align: center; color: #666; font-style: italic;">
+                        User needs to visit multiple pages...
+                    </p>
+                </div>
+            </div>
+            
+            <!-- LLM/Generative Search Side -->
+            <div class="llm-side">
+                <h2 class="side-title">🤖 Generative Search Engine (LLM)</h2>
+                
+                <div class="step" id="llm-step-1">
+                    <div class="step-title">Step 1: Full Context Input</div>
+                    <div class="thought-bubble" id="llmInput">
+                        I want to understand how photosynthesis works in detail...
+                    </div>
+                </div>
+                
+                <div class="step" id="llm-step-2">
+                    <div class="step-title">Step 2: Attention Mechanism</div>
+                    <div class="attention-text" id="attentionText">
+                        I want to understand how <span class="attention-word">photosynthesis</span> works in detail...
+                    </div>
+                </div>
+                
+                <div class="step" id="llm-step-3">
+                    <div class="step-title">Step 3: Knowledge Retrieval (FFN)</div>
+                    <div class="knowledge-network" id="knowledgeNetwork">
+                        <div class="knowledge-node">Biology Knowledge</div>
+                        <div class="knowledge-node">Chemistry Processes</div>
+                        <div class="knowledge-node">Plant Physiology</div>
+                        <div class="knowledge-node">Educational Explanations</div>
+                    </div>
+                </div>
+                
+                <div class="step" id="llm-step-4">
+                    <div class="step-title">Step 4: Response Generation</div>
+                    <div class="generated-text" id="generatedText">
+                        <span class="typing-cursor" id="typingCursor"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentStep = 0;
+        let isRunning = false;
+        let currentExample = 'science';
+        
+        const examples = {
+            science: {
+                thought: "I want to understand how photosynthesis works in detail, especially the chemical reactions that happen when plants convert sunlight and carbon dioxide into glucose.",
+                keywords: ['photosynthesis', 'chlorophyll', 'glucose', 'chemical reactions'],
+                searchResults: [
+                    { title: "Photosynthesis - Wikipedia", snippet: "Photosynthesis is the process used by plants to convert light energy..." },
+                    { title: "Khan Academy: Photosynthesis", snippet: "Learn about light-dependent and light-independent reactions..." },
+                    { title: "Biology Online: Chlorophyll", snippet: "Chlorophyll is the green pigment that captures light energy..." },
+                    { title: "NASA: How Plants Make Food", snippet: "Explanation of how plants convert sunlight and CO2..." }
+                ],
+                attentionWords: ['photosynthesis', 'chemical reactions', 'plants', 'sunlight', 'carbon dioxide', 'glucose'],
+                llmResponse: `Photosynthesis happens in two main stages:
+
+## Light-Dependent Reactions:
+Chlorophyll captures sunlight and splits water molecules into hydrogen and oxygen. Oxygen is released, while hydrogen creates energy carriers (ATP and NADPH).
+
+## Light-Independent Reactions (Calvin Cycle):
+The energy carriers power the conversion of CO₂ into glucose. This happens without direct sunlight.
+
+## Key Chemical Equations:
+• **Light reactions:** 6H₂O + light → 6O₂ + ATP + NADPH
+• **Calvin cycle:** 6CO₂ + ATP + NADPH → C₆H₁₂O₆
+
+Think of it like a factory: the first stage prepares energy, the second stage uses that energy to build glucose! 🌱`
+            },
+            
+            creative: {
+                thought: "I need to write an original short story about a robot discovering emotions for my English class, but I want to avoid cliché plots and create something unique.",
+                keywords: ['robot story', 'creative writing', 'emotions', 'character development'],
+                searchResults: [
+                    { title: "How to Write Short Stories", snippet: "Tips for crafting compelling fiction..." },
+                    { title: "Robot Fiction Examples", snippet: "List of popular sci-fi books with robots..." },
+                    { title: "Character Development Guide", snippet: "Methods for creating three-dimensional characters..." },
+                    { title: "Writing Prompts for Students", snippet: "Creative ideas for story inspiration..." }
+                ],
+                attentionWords: ['original', 'robot', 'emotions', 'unique', 'story', 'avoid cliché'],
+                llmResponse: `Here's a fresh concept for your robot story:
+
+## "The Color of Sound"
+
+**Character:** ECHO-9, a library maintenance robot who processes only data—until lightning scrambles her audio processors.
+
+## Plot:
+**Opening:** ECHO-9 suddenly "hears" music for the first time. Her systems show errors, but she's mesmerized.
+
+**Development:** Different sounds trigger new sensations—classical feels "warm," jazz feels "adventurous." She starts creating sounds.
+
+**Climax:** When technicians come to "fix" her, ECHO-9 must choose between silent efficiency or newfound beauty.
+
+**Theme:** What if consciousness isn't about thinking, but about **feeling** the world around us?
+
+This avoids the typical "robot wants to be human" story by focusing on aesthetic discovery! 🎨`
+            },
+            
+            analysis: {
+                thought: "I'm trying to decide between buying an electric car or gas car for my daily commute, considering costs, environmental impact, and charging infrastructure.",
+                keywords: ['electric car', 'gas car', 'comparison', 'cost analysis'],
+                searchResults: [
+                    { title: "Electric vs Gas Cars 2024", snippet: "Cost comparison of purchase price and maintenance..." },
+                    { title: "Tesla Model 3 Review", snippet: "Detailed review of popular electric vehicle..." },
+                    { title: "EV Charging Station Map", snippet: "Interactive map of charging locations..." },
+                    { title: "Environmental Impact Study", snippet: "Carbon footprint comparison of electric vs gas..." }
+                ],
+                attentionWords: ['electric car', 'gas car', 'costs', 'environmental impact', 'charging', 'commute'],
+                llmResponse: `Let me break down this decision objectively:
+
+## Financial Analysis:
+**Upfront:** Electric cars cost $5,000-15,000 more initially
+**Operating:** Electric saves ~$1,500/year in fuel and maintenance
+**Break-even:** 3-4 years for most drivers
+
+## Practical Considerations:
+**✅ Electric Advantages:**
+• Lower operating costs
+• Quiet, smooth driving
+• Minimal maintenance
+
+**⚠️ Challenges:**
+• Need home charging access
+• Cold weather reduces range
+
+## My Recommendation:
+If you drive regularly and can charge at home, electric makes financial sense.
+
+**Next step:** Test drive both and calculate your specific costs! 🔌`
+            },
+            
+            practical: {
+                thought: "My elderly grandmother fell last week and I want to set up a simple safety system for her, but she gets confused by complicated technology.",
+                keywords: ['elderly safety', 'medical alert', 'fall detection', 'simple technology'],
+                searchResults: [
+                    { title: "Best Medical Alert Systems", snippet: "Reviews of Life Alert and other emergency systems..." },
+                    { title: "Fall Detection for Seniors", snippet: "Wearable and home-based detection devices..." },
+                    { title: "Aging in Place Technology", snippet: "Assistive devices for independent living..." },
+                    { title: "Medicare Alert Coverage", snippet: "Insurance coverage for emergency systems..." }
+                ],
+                attentionWords: ['elderly', 'grandmother', 'safety system', 'simple', 'fell', 'confused by technology'],
+                llmResponse: `Here's the simplest, most reliable solution:
+
+## Medical Alert Pendant
+**Best choice:** Traditional one-button pendant
+• **Single red button** - just press for help
+• **No charging** needed (5+ year battery)
+• **Waterproof** - wear in shower
+• **Works anywhere** in the house
+
+## Simple Setup:
+1. Professional installation
+2. Connect to landline (most reliable)
+3. Test once so she feels confident
+
+## Training:
+"Press the red button if you need help. Someone will talk to you and send help."
+
+**Cost:** $30-50/month. The peace of mind is worth it! 🏠`
+            }
+        };
+        
+        function selectExample(exampleKey) {
+            currentExample = exampleKey;
+            
+            // Update card selection
+            document.querySelectorAll('.example-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.getElementById('card-' + exampleKey).classList.add('selected');
+            
+            // Reset the demo
+            resetDemo();
+        }
+        
+        function nextExample() {
+            const exampleKeys = Object.keys(examples);
+            const currentIndex = exampleKeys.indexOf(currentExample);
+            const nextIndex = (currentIndex + 1) % exampleKeys.length;
+            selectExample(exampleKeys[nextIndex]);
+        }
+        
+        async function startDemo() {
+            if (isRunning) return;
+            isRunning = true;
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('resetBtn').disabled = false;
+            
+            // Reset all steps
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            currentStep = 0;
+            
+            // Start the demo sequence
+            await runDemoSequence();
+        }
+        
+        async function runDemoSequence() {
+            try {
+                // Step 1: Show thoughts (both sides)
+                await activateSteps(['search-step-1', 'llm-step-1'], 10);
+                
+                // Step 2: Search input vs LLM attention
+                await activateStep('search-step-2', 20);
+                await typeSearchKeywords();
+                await sleep(1000);
+                
+                await activateStep('llm-step-2', 30);
+                await highlightAttention();
+                await sleep(1000);
+                
+                // Step 3: Index search vs Knowledge retrieval
+                await activateStep('search-step-3', 40);
+                await sleep(1500);
+                
+                await activateStep('llm-step-3', 50);
+                await animateKnowledgeNodes();
+                await sleep(1000);
+                
+                // Step 4: Results vs Generation
+                await activateStep('search-step-4', 60);
+                await showSearchResults();
+                await sleep(1000);
+                
+                await activateStep('llm-step-4', 70);
+                await typeResponse();
+                
+                // Step 5: Final step for search side
+                await activateStep('search-step-5', 100);
+                
+                // Enable next example button
+                document.getElementById('nextBtn').disabled = false;
+                
+            } catch (error) {
+                console.error('Demo error:', error);
+            } finally {
+                isRunning = false;
+            }
+        }
+        
+        async function activateStep(stepId, progress) {
+            document.getElementById(stepId).classList.add('active');
+            updateProgress(progress);
+            await sleep(500);
+        }
+        
+        async function activateSteps(stepIds, progress) {
+            stepIds.forEach(id => {
+                document.getElementById(id).classList.add('active');
+            });
+            updateProgress(progress);
+            await sleep(500);
+        }
+        
+        function updateProgress(percentage) {
+            document.getElementById('progressFill').style.width = percentage + '%';
+        }
+        
+        async function typeSearchKeywords() {
+            const input = document.getElementById('searchInput');
+            const keywordsContainer = document.getElementById('searchKeywords');
+            const example = examples[currentExample];
+            
+            // Type in search box
+            const searchText = example.keywords.join(' ');
+            for (let i = 0; i <= searchText.length; i++) {
+                input.value = searchText.substring(0, i);
+                await sleep(50);
+            }
+            
+            await sleep(500);
+            
+            // Clear previous keywords
+            keywordsContainer.innerHTML = '';
+            
+            // Show keywords as pills
+            example.keywords.forEach((keyword, index) => {
+                setTimeout(() => {
+                    const pill = document.createElement('div');
+                    pill.className = 'keyword';
+                    pill.textContent = keyword;
+                    pill.style.animationDelay = index * 0.1 + 's';
+                    keywordsContainer.appendChild(pill);
+                }, index * 200);
+            });
+        }
+        
+        async function highlightAttention() {
+            const attentionText = document.getElementById('attentionText');
+            const example = examples[currentExample];
+            
+            // Update the attention text
+            let text = example.thought;
+            example.attentionWords.forEach(word => {
+                const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                text = text.replace(regex, `<span class="attention-word">${word}</span>`);
+            });
+            attentionText.innerHTML = text;
+            
+            // Animate attention highlighting
+            const words = attentionText.querySelectorAll('.attention-word');
+            const attentionLevels = ['high', 'medium', 'low'];
+            
+            words.forEach((word, index) => {
+                setTimeout(() => {
+                    const level = attentionLevels[Math.floor(Math.random() * attentionLevels.length)];
+                    word.classList.add('attention-' + level);
+                }, index * 100);
+            });
+        }
+        
+        async function animateKnowledgeNodes() {
+            const nodes = document.querySelectorAll('.knowledge-node');
+            nodes.forEach((node, index) => {
+                setTimeout(() => {
+                    node.style.animationDelay = index * 0.1 + 's';
+                }, index * 200);
+            });
+        }
+        
+        async function showSearchResults() {
+            const container = document.getElementById('searchResults');
+            const example = examples[currentExample];
+            
+            // Clear previous results
+            container.innerHTML = '';
+            
+            example.searchResults.forEach((result, index) => {
+                setTimeout(() => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'search-result';
+                    resultDiv.innerHTML = `
+                        <div class="result-title">🔗 ${result.title}</div>
+                        <div class="result-snippet">${result.snippet}</div>
+                    `;
+                    resultDiv.style.animationDelay = index * 0.1 + 's';
+                    container.appendChild(resultDiv);
+                }, index * 300);
+            });
+        }
+        
+        async function typeResponse() {
+            const container = document.getElementById('generatedText');
+            const example = examples[currentExample];
+            const generatedResponse = example.llmResponse;
+            
+            let text = '';
+            for (let i = 0; i < generatedResponse.length; i++) {
+                text += generatedResponse[i];
+                // Convert markdown-like formatting to HTML
+                let formattedText = text
+                    .replace(/## (.*?)(?=\n|$)/g, '<h3 style="color: #28a745; margin: 1rem 0 0.5rem 0; font-size: 1.1rem;">$1</h3>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #333;">$1</strong>')
+                    .replace(/• (.*?)(?=\n|$)/g, '<div style="margin: 0.25rem 0; padding-left: 1rem;">• $1</div>')
+                    .replace(/🌱|🎨|🔌|🏠/g, '<span style="font-size: 1.2rem;">$&</span>')
+                    .replace(/✅/g, '<span style="color: #28a745; font-size: 1.1rem;">✅</span>')
+                    .replace(/⚠️/g, '<span style="color: #ffc107; font-size: 1.1rem;">⚠️</span>')
+                    .replace(/\n\n/g, '<br><br>')
+                    .replace(/\n/g, '<br>');
+                
+                container.innerHTML = formattedText + '<span class="typing-cursor"></span>';
+                await sleep(15);
+            }
+            
+            // Remove cursor when done
+            let finalText = text
+                .replace(/## (.*?)(?=\n|$)/g, '<h3 style="color: #28a745; margin: 1rem 0 0.5rem 0; font-size: 1.1rem;">$1</h3>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #333;">$1</strong>')
+                .replace(/• (.*?)(?=\n|$)/g, '<div style="margin: 0.25rem 0; padding-left: 1rem;">• $1</div>')
+                .replace(/🌱|🎨|🔌|🏠/g, '<span style="font-size: 1.2rem;">$&</span>')
+                .replace(/✅/g, '<span style="color: #28a745; font-size: 1.1rem;">✅</span>')
+                .replace(/⚠️/g, '<span style="color: #ffc107; font-size: 1.1rem;">⚠️</span>')
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n/g, '<br>');
+            
+            container.innerHTML = finalText;
+        }
+        
+        function resetDemo() {
+            isRunning = false;
+            currentStep = 0;
+            
+            // Update thought bubbles with current example
+            const example = examples[currentExample];
+            document.getElementById('searchThought').textContent = example.thought;
+            document.getElementById('llmInput').textContent = example.thought;
+            
+            // Reset attention text
+            document.getElementById('attentionText').textContent = example.thought;
+            
+            // Reset UI
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('resetBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = true;
+            
+            // Clear all content
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchKeywords').innerHTML = '';
+            document.getElementById('searchResults').innerHTML = '';
+            document.getElementById('generatedText').innerHTML = '<span class="typing-cursor"></span>';
+            
+            // Reset attention highlights
+            document.querySelectorAll('.attention-word').forEach(word => {
+                word.className = 'attention-word';
+            });
+            
+            // Reset all steps
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Reset progress
+            updateProgress(0);
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            selectExample('science'); // Start with science example selected
+        });
+    </script>
+</body>
+</html>
