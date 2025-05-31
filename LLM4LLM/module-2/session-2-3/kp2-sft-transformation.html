@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SFT Transformation Demo - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .demo-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-icon {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .transformation-demo {
+            display: grid;
+            grid-template-columns: 1fr 60px 1fr;
+            gap: 1rem;
+            margin: 2rem 0;
+            align-items: center;
+        }
+        
+        .model-state {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            min-height: 300px;
+        }
+        
+        .model-state.pretrained {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+        
+        .model-state.finetuned {
+            border-color: #28a745;
+            background: #f8fff8;
+        }
+        
+        .model-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .model-state.pretrained .model-title {
+            color: #dc3545;
+        }
+        
+        .model-state.finetuned .model-title {
+            color: #28a745;
+        }
+        
+        .arrow-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .arrow {
+            width: 0;
+            height: 0;
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            border-left: 30px solid #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .arrow-label {
+            font-size: 0.8rem;
+            color: #667eea;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .prompt-response {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .prompt {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .response {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .response.pretrained {
+            color: #dc3545;
+        }
+        
+        .response.finetuned {
+            color: #28a745;
+        }
+        
+        .example-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .example-btn {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+        
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .example-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .sft-data-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .sft-example {
+            background: white;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid #28a745;
+        }
+        
+        .sft-human {
+            color: #dc3545;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .sft-assistant {
+            color: #28a745;
+            font-weight: 500;
+        }
+        
+        .key-differences {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .difference-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .difference-card.before {
+            border-color: #dc3545;
+        }
+        
+        .difference-card.after {
+            border-color: #28a745;
+        }
+        
+        .difference-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .difference-card.before .difference-title {
+            color: #dc3545;
+        }
+        
+        .difference-card.after .difference-title {
+            color: #28a745;
+        }
+        
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .insights-panel h4:before {
+            content: "💡";
+            margin-right: 0.5rem;
+        }
+        
+        .insights-list {
+            list-style: none;
+        }
+        
+        .insights-list li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 968px) {
+            .transformation-demo {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr auto 1fr;
+            }
+            
+            .arrow {
+                transform: rotate(90deg);
+                margin: 1rem 0;
+            }
+            
+            .key-differences {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 2</a> / 
+                Session 2.3 / KP2
+            </div>
+            <h1>SFT Transformation Demo</h1>
+            <p>See how Supervised Fine-Tuning transforms raw text predictors into helpful assistants</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="demo-section">
+            <h2 class="section-title">
+                <span class="section-icon">🔄</span>
+                The Great Transformation
+            </h2>
+            
+            <p style="margin-bottom: 1.5rem; color: #666;">
+                Same model, same training method (next-token prediction), but <strong>different data</strong> creates dramatically different behavior.
+            </p>
+            
+            <div class="example-selector">
+                <button class="example-btn active" onclick="selectExample('helpful')">Helpful Response</button>
+                <button class="example-btn" onclick="selectExample('creative')">Creative Task</button>
+                <button class="example-btn" onclick="selectExample('analysis')">Analysis Request</button>
+                <button class="example-btn" onclick="selectExample('code')">Code Generation</button>
+            </div>
+            
+            <div class="transformation-demo">
+                <div class="model-state pretrained">
+                    <div class="model-title">❌ Pre-trained Model</div>
+                    <div class="prompt-response" id="pretrainedExample">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    <div style="background: #f8d7da; padding: 1rem; border-radius: 6px; margin-top: 1rem; font-size: 0.9rem;">
+                        <strong>Problems:</strong> Unhelpful, inconsistent, may generate harmful content
+                    </div>
+                </div>
+                
+                <div class="arrow-container">
+                    <div class="arrow"></div>
+                    <div class="arrow-label">SFT<br>Training</div>
+                </div>
+                
+                <div class="model-state finetuned">
+                    <div class="model-title">✅ SFT Model</div>
+                    <div class="prompt-response" id="sftExample">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    <div style="background: #d4edda; padding: 1rem; border-radius: 6px; margin-top: 1rem; font-size: 0.9rem;">
+                        <strong>Improvements:</strong> Helpful, consistent, follows instructions, safe
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">
+                <span class="section-icon">📚</span>
+                What SFT Data Looks Like
+            </h2>
+            
+            <p style="margin-bottom: 1.5rem;">
+                SFT uses carefully curated examples of <strong>instructions followed by high-quality responses</strong>:
+            </p>
+            
+            <div class="sft-data-section">
+                <div class="sft-example">
+                    <div class="sft-human">Human: Explain photosynthesis in simple terms</div>
+                    <div class="sft-assistant">Assistant: Photosynthesis is how plants make their own food using sunlight. Plants take in sunlight through their leaves, absorb water through their roots, and breathe in carbon dioxide from the air. They combine these three ingredients to create sugar (their food) and release oxygen as a bonus. It's like plants are solar-powered food factories that also clean our air!</div>
+                </div>
+                
+                <div class="sft-example">
+                    <div class="sft-human">Human: Write a Python function to find the largest number in a list</div>
+                    <div class="sft-assistant">Assistant: Here's a Python function to find the largest number in a list:
+
+```python
+def find_largest(numbers):
+    """Find and return the largest number in a list"""
+    if not numbers:  # Handle empty list
+        return None
+    return max(numbers)
+
+# Example usage:
+my_list = [3, 7, 2, 9, 1]
+largest = find_largest(my_list)
+print(f"The largest number is: {largest}")
+```</div>
+                </div>
+                
+                <div class="sft-example">
+                    <div class="sft-human">Human: I'm feeling stressed about work. Any advice?</div>
+                    <div class="sft-assistant">Assistant: I understand work stress can be overwhelming. Here are some strategies that might help:
+
+1. **Take breaks**: Even 5-10 minute breaks can help reset your mind
+2. **Prioritize tasks**: Focus on what's most important first
+3. **Talk to someone**: Share your concerns with a trusted friend or colleague
+4. **Practice deep breathing**: It can quickly reduce stress in the moment
+5. **Set boundaries**: It's okay to say no to additional tasks when you're overwhelmed
+
+Remember, it's normal to feel stressed sometimes. If it persists, consider speaking with a counselor or your HR department.</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">
+                <span class="section-icon">⚖️</span>
+                Key Differences
+            </h2>
+            
+            <div class="key-differences">
+                <div class="difference-card before">
+                    <div class="difference-title">Before SFT (Pre-trained)</div>
+                    <ul style="list-style-position: inside;">
+                        <li><strong>Mimics training data:</strong> Continues text in any style</li>
+                        <li><strong>No consistent persona:</strong> Can be anyone or anything</li>
+                        <li><strong>No instruction following:</strong> Doesn't understand requests</li>
+                        <li><strong>Unpredictable:</strong> May generate inappropriate content</li>
+                        <li><strong>No helpfulness:</strong> Focused on statistical completion</li>
+                    </ul>
+                </div>
+                
+                <div class="difference-card after">
+                    <div class="difference-title">After SFT (Fine-tuned)</div>
+                    <ul style="list-style-position: inside;">
+                        <li><strong>Helpful assistant:</strong> Focused on being useful</li>
+                        <li><strong>Consistent persona:</strong> Reliable AI assistant character</li>
+                        <li><strong>Instruction following:</strong> Understands and follows requests</li>
+                        <li><strong>Safe and appropriate:</strong> Avoids harmful content</li>
+                        <li><strong>User-focused:</strong> Tries to genuinely help users</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="insights-panel">
+            <h4>The Magic of SFT</h4>
+            <ul class="insights-list">
+                <li><strong>Same Mechanism:</strong> Still just next-token prediction - no new algorithms needed</li>
+                <li><strong>Data Quality > Quantity:</strong> 10,000 high-quality examples beat 1,000,000 mediocre ones</li>
+                <li><strong>Pattern Learning:</strong> Model learns "instruction → helpful response" patterns</li>
+                <li><strong>Persona Development:</strong> Consistent training creates a stable AI assistant character</li>
+                <li><strong>Generalization:</strong> Can handle new instructions by combining learned patterns</li>
+                <li><strong>Critical Step:</strong> This transforms "autocomplete on steroids" into "helpful AI assistant"</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        const examples = {
+            helpful: {
+                pretrained: {
+                    prompt: 'Human: How do I bake a chocolate cake?',
+                    response: 'Human: How do I bake a chocolate cake? I personally prefer vanilla cake myself, though chocolate is nice too. My grandmother used to make the most amazing...'
+                },
+                sft: {
+                    prompt: 'Human: How do I bake a chocolate cake?',
+                    response: 'I\'d be happy to help you bake a chocolate cake! Here\'s a simple recipe:\n\nIngredients:\n- 1¾ cups flour\n- 2 cups sugar\n- ¾ cup cocoa powder\n...\n\nBake at 350°F for 30-35 minutes. Enjoy your homemade cake!'
+                }
+            },
+            creative: {
+                pretrained: {
+                    prompt: 'Human: Write a haiku about artificial intelligence',
+                    response: 'Human: Write a haiku about artificial intelligence\n\nArtificial intelligence has been a topic of discussion for many years. Some people think that...'
+                },
+                sft: {
+                    prompt: 'Human: Write a haiku about artificial intelligence',
+                    response: 'Here\'s a haiku about artificial intelligence:\n\nSilicon minds wake\nLearning from human wisdom\nFuture thoughts emerge'
+                }
+            },
+            analysis: {
+                pretrained: {
+                    prompt: 'Human: What are the pros and cons of renewable energy?',
+                    response: 'Human: What are the pros and cons of renewable energy? Renewable energy is definitely something to consider. Many companies are investing in...'
+                },
+                sft: {
+                    prompt: 'Human: What are the pros and cons of renewable energy?',
+                    response: 'Here\'s a balanced analysis of renewable energy:\n\n**Pros:**\n- Environmentally friendly\n- Infinite supply\n- Decreasing costs\n\n**Cons:**\n- Weather dependent\n- High initial investment\n- Storage challenges\n\nOverall, the benefits are increasingly outweighing the challenges.'
+                }
+            },
+            code: {
+                pretrained: {
+                    prompt: 'Human: Write a Python function to reverse a string',
+                    response: 'Human: Write a Python function to reverse a string\n\ndef reverse_string(s):\nprint("Hello world")\nif __name__ == "__main__":\n    # This is a comment about...'
+                },
+                sft: {
+                    prompt: 'Human: Write a Python function to reverse a string',
+                    response: 'Here\'s a Python function to reverse a string:\n\n```python\ndef reverse_string(text):\n    """Reverse a string and return it"""\n    return text[::-1]\n\n# Example usage:\nresult = reverse_string("hello")\nprint(result)  # Output: "olleh"\n```'
+                }
+            }
+        };
+        
+        function selectExample(type) {
+            // Update active button
+            document.querySelectorAll('.example-btn').forEach(btn => btn.classList.remove('active'));
+            // Find the button that was clicked by matching the onclick attribute
+            document.querySelectorAll('.example-btn').forEach(btn => {
+                if (btn.getAttribute('onclick').includes(`'${type}'`)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Update examples
+            const pretrainedContainer = document.getElementById('pretrainedExample');
+            const sftContainer = document.getElementById('sftExample');
+            
+            const example = examples[type];
+            
+            pretrainedContainer.innerHTML = `
+                <div class="prompt">${example.pretrained.prompt}</div>
+                <div class="response pretrained">${example.pretrained.response}</div>
+            `;
+            
+            sftContainer.innerHTML = `
+                <div class="prompt">${example.sft.prompt}</div>
+                <div class="response finetuned">${example.sft.response}</div>
+            `;
+        }
+        
+        // Initialize with helpful example
+        selectExample('helpful');
+    </script>
+</body>
+</html>
