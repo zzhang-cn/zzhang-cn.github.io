@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFN Knowledge Storage Visualizer - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .controls-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+        
+        .visualization-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-icon {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            outline: none;
+            appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .slider-value {
+            min-width: 60px;
+            font-weight: 500;
+            color: #667eea;
+        }
+        
+        .knowledge-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            transition: border-color 0.2s ease;
+        }
+        
+        .knowledge-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .add-knowledge-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            width: 100%;
+        }
+        
+        .add-knowledge-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .preset-knowledge {
+            display: grid;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .preset-btn {
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+        
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .ffn-architecture {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .layer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        .layer-label {
+            position: absolute;
+            left: -60px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .neurons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .neuron {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e9ecef;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .neuron.active {
+            background: #667eea;
+            transform: scale(1.2);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+        
+        .neuron.storing {
+            background: #28a745;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        .arrow {
+            width: 60px;
+            height: 2px;
+            background: #667eea;
+            position: relative;
+            margin: 0 1rem;
+        }
+        
+        .arrow::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid #667eea;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+        
+        .knowledge-items {
+            margin: 1rem 0;
+        }
+        
+        .knowledge-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        
+        .knowledge-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+        }
+        
+        .knowledge-text {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .knowledge-neurons {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .mini-neuron {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+        }
+        
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .remove-btn:hover {
+            background: #c82333;
+        }
+        
+        .capacity-visualization {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .capacity-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            margin: 1rem 0;
+        }
+        
+        .capacity-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .width-comparison {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .comparison-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .comparison-card.narrow {
+            border-color: #dc3545;
+        }
+        
+        .comparison-card.medium {
+            border-color: #ffc107;
+        }
+        
+        .comparison-card.wide {
+            border-color: #28a745;
+        }
+        
+        .comparison-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .comparison-card.narrow .comparison-title {
+            color: #dc3545;
+        }
+        
+        .comparison-card.medium .comparison-title {
+            color: #856404;
+        }
+        
+        .comparison-card.wide .comparison-title {
+            color: #28a745;
+        }
+        
+        .mini-ffn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .mini-layer {
+            display: flex;
+            gap: 3px;
+        }
+        
+        .mini-neuron-display {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+        }
+        
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .insights-panel h4:before {
+            content: "💡";
+            margin-right: 0.5rem;
+        }
+        
+        .insights-list {
+            list-style: none;
+        }
+        
+        .insights-list li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .layer-label {
+                position: static;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 2</a> / 
+                Session 2.1 / KP2
+            </div>
+            <h1>FFN Knowledge Storage Visualizer</h1>
+            <p>Explore how feed-forward networks store knowledge through expand-contract architecture</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="main-content">
+            <div class="controls-panel">
+                <h2 class="section-title">
+                    <span class="section-icon">⚙️</span>
+                    Network Controls
+                </h2>
+                
+                <div class="control-group">
+                    <label class="control-label">FFN Width (Hidden Dimension):</label>
+                    <div class="slider-container">
+                        <input type="range" id="widthSlider" class="slider" min="64" max="2048" value="512" step="64">
+                        <span class="slider-value" id="widthValue">512</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                        Wider networks can store more knowledge but require more computation
+                    </p>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Add Knowledge to Store:</label>
+                    <input type="text" class="knowledge-input" id="knowledgeInput" placeholder="e.g., 'Paris is the capital of France'">
+                    <button class="add-knowledge-btn" onclick="addKnowledge()">Store Knowledge</button>
+                    
+                    <div class="preset-knowledge">
+                        <button class="preset-btn" onclick="loadPresetKnowledge('facts')">
+                            <strong>Add Geography Facts</strong><br>
+                            <small>+5 country capitals (Paris, Tokyo, etc.)</small>
+                        </button>
+                        <button class="preset-btn" onclick="loadPresetKnowledge('science')">
+                            <strong>Add Science Facts</strong><br>
+                            <small>+5 scientific facts (water boiling, etc.)</small>
+                        </button>
+                        <button class="preset-btn" onclick="loadPresetKnowledge('language')">
+                            <strong>Add Language Rules</strong><br>
+                            <small>+5 grammar rules (word order, etc.)</small>
+                        </button>
+                        <button class="preset-btn" onclick="clearKnowledge()" style="background: #fff5f5; border-color: #dc3545; color: #dc3545;">
+                            <strong>Clear All Knowledge</strong><br>
+                            <small>Reset network to empty state</small>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="knowledgeCount">0</div>
+                        <div class="stat-label">Facts Stored</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="capacityUsed">0%</div>
+                        <div class="stat-label">Capacity Used</div>
+                    </div>
+                </div>
+                
+                <div class="capacity-visualization">
+                    <h4>Knowledge Storage Capacity</h4>
+                    <div class="capacity-bar">
+                        <div class="capacity-fill" id="capacityFill" style="width: 0%">0%</div>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #666;">
+                        Green: Efficient storage | Yellow: Getting full | Red: Interference likely
+                    </p>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Key Concepts</h4>
+                    <ul class="insights-list">
+                        <li><strong>Expand-Contract:</strong> Wide hidden layer stores more knowledge</li>
+                        <li><strong>Universal Approximation:</strong> Wider networks can represent more functions</li>
+                        <li><strong>Knowledge Interference:</strong> Too much knowledge can cause conflicts</li>
+                        <li><strong>Sparsity:</strong> Only some neurons activate for each piece of knowledge</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="visualization-panel">
+                <h2 class="section-title">
+                    <span class="section-icon">🧠</span>
+                    FFN Architecture
+                </h2>
+                
+                <div class="ffn-architecture">
+                    <div class="layer">
+                        <div class="layer-label">Input</div>
+                        <div class="neurons" id="inputLayer">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                        <div class="arrow"></div>
+                    </div>
+                    
+                    <div class="layer">
+                        <div class="layer-label">Expand</div>
+                        <div class="neurons" id="hiddenLayer">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                        <div class="arrow"></div>
+                    </div>
+                    
+                    <div class="layer">
+                        <div class="layer-label">Output</div>
+                        <div class="neurons" id="outputLayer">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <h3>Stored Knowledge</h3>
+                <div class="knowledge-items" id="knowledgeItems">
+                    <p style="text-align: center; color: #666; padding: 2rem;">
+                        Add knowledge items to see how they're stored in the network
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="width-comparison">
+            <h2 class="section-title">
+                <span class="section-icon">📊</span>
+                Network Width Comparison
+            </h2>
+            
+            <div class="comparison-grid">
+                <div class="comparison-card narrow">
+                    <div class="comparison-title">Narrow Network</div>
+                    <div class="mini-ffn">
+                        <div class="mini-layer">
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                        </div>
+                        <div class="mini-layer">
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                        </div>
+                        <div class="mini-layer">
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                        </div>
+                    </div>
+                    <p><strong>64-128 neurons</strong></p>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem;">
+                        ✗ Limited knowledge capacity<br>
+                        ✗ High interference between facts<br>
+                        ✓ Fast computation
+                    </p>
+                </div>
+                
+                <div class="comparison-card medium">
+                    <div class="comparison-title">Medium Network</div>
+                    <div class="mini-ffn">
+                        <div class="mini-layer">
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                        </div>
+                        <div class="mini-layer">
+                            <!-- More neurons -->
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                        </div>
+                        <div class="mini-layer">
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                        </div>
+                    </div>
+                    <p><strong>512-1024 neurons</strong></p>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem;">
+                        ✓ Good knowledge capacity<br>
+                        ✓ Moderate interference<br>
+                        ✓ Balanced computation cost
+                    </p>
+                </div>
+                
+                <div class="comparison-card wide">
+                    <div class="comparison-title">Wide Network</div>
+                    <div class="mini-ffn">
+                        <div class="mini-layer">
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                        </div>
+                        <div class="mini-layer">
+                            <!-- Many more neurons -->
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                        </div>
+                        <div class="mini-layer">
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                            <div class="mini-neuron-display"></div>
+                        </div>
+                    </div>
+                    <p><strong>2048+ neurons</strong></p>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem;">
+                        ✓ Massive knowledge capacity<br>
+                        ✓ Minimal interference<br>
+                        ✗ Higher computation cost
+                    </p>
+                </div>
+            </div>
+            
+            <div class="insights-panel">
+                <h4>Universal Approximation Theorem in Practice</h4>
+                <ul class="insights-list">
+                    <li>Wider FFNs can store more distinct "facts" or patterns without interference</li>
+                    <li>Each piece of knowledge activates a different subset of neurons (sparsity)</li>
+                    <li>Modern LLMs use FFNs 4x wider than their model dimension (e.g., 768 → 3072)</li>
+                    <li>This expansion ratio balances knowledge capacity with computational efficiency</li>
+                    <li>The contract layer combines activated knowledge for the final output</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentWidth = 512;
+        let storedKnowledge = [];
+        let maxCapacity = 20; // Simplified capacity limit
+        
+        const presetKnowledgeData = {
+            facts: [
+                "Paris is the capital of France",
+                "Tokyo is the capital of Japan", 
+                "London is the capital of England",
+                "Berlin is the capital of Germany",
+                "Madrid is the capital of Spain"
+            ],
+            science: [
+                "Water boils at 100 degrees Celsius",
+                "Earth has one natural satellite",
+                "Oxygen has atomic number 8",
+                "Speed of light is 299792458 m/s",
+                "DNA has four base pairs"
+            ],
+            language: [
+                "English uses SVO word order",
+                "Past tense adds -ed suffix",
+                "Plural nouns often end in -s",
+                "Questions can start with 'wh' words",
+                "Adjectives modify nouns"
+            ]
+        };
+        
+        function updateWidth() {
+            const slider = document.getElementById('widthSlider');
+            const valueDisplay = document.getElementById('widthValue');
+            currentWidth = parseInt(slider.value);
+            valueDisplay.textContent = currentWidth;
+            
+            // Update max capacity based on width
+            maxCapacity = Math.floor(currentWidth / 25);
+            
+            updateArchitecture();
+            updateCapacity();
+        }
+        
+        function updateArchitecture() {
+            const inputLayer = document.getElementById('inputLayer');
+            const hiddenLayer = document.getElementById('hiddenLayer');
+            const outputLayer = document.getElementById('outputLayer');
+            
+            // Clear existing neurons
+            inputLayer.innerHTML = '';
+            hiddenLayer.innerHTML = '';
+            outputLayer.innerHTML = '';
+            
+            // Input layer (fixed size)
+            for (let i = 0; i < 8; i++) {
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron';
+                inputLayer.appendChild(neuron);
+            }
+            
+            // Hidden layer (variable size based on width)
+            const hiddenNeurons = Math.min(64, Math.floor(currentWidth / 8)); // Limit display neurons
+            for (let i = 0; i < hiddenNeurons; i++) {
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron';
+                neuron.onclick = () => highlightNeuron(neuron);
+                hiddenLayer.appendChild(neuron);
+            }
+            
+            // Output layer (fixed size)
+            for (let i = 0; i < 8; i++) {
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron';
+                outputLayer.appendChild(neuron);
+            }
+            
+            // Show some neurons as active
+            activateRandomNeurons();
+        }
+        
+        function highlightNeuron(neuron) {
+            // Reset all neurons
+            document.querySelectorAll('.neuron').forEach(n => {
+                n.classList.remove('active', 'storing');
+            });
+            
+            // Highlight clicked neuron and show knowledge flow
+            neuron.classList.add('active');
+            
+            // Animate knowledge storage
+            setTimeout(() => {
+                neuron.classList.add('storing');
+            }, 200);
+        }
+        
+        function activateRandomNeurons() {
+            const hiddenNeurons = document.querySelectorAll('#hiddenLayer .neuron');
+            const numActive = Math.floor(hiddenNeurons.length * 0.3); // 30% active
+            
+            // Reset all neurons
+            hiddenNeurons.forEach(neuron => {
+                neuron.classList.remove('active', 'storing');
+            });
+            
+            // Randomly activate some neurons
+            const activeIndices = [];
+            while (activeIndices.length < numActive) {
+                const randomIndex = Math.floor(Math.random() * hiddenNeurons.length);
+                if (!activeIndices.includes(randomIndex)) {
+                    activeIndices.push(randomIndex);
+                    hiddenNeurons[randomIndex].classList.add('active');
+                }
+            }
+        }
+        
+        function addKnowledge() {
+            const input = document.getElementById('knowledgeInput');
+            const knowledge = input.value.trim();
+            
+            if (knowledge && storedKnowledge.length < maxCapacity) {
+                storedKnowledge.push({
+                    text: knowledge,
+                    neurons: generateRandomNeuronPattern()
+                });
+                
+                input.value = '';
+                updateKnowledgeDisplay();
+                updateCapacity();
+                activateRandomNeurons();
+            } else if (storedKnowledge.length >= maxCapacity) {
+                alert(`Network capacity reached! Maximum ${maxCapacity} facts for current width.`);
+            }
+        }
+        
+        function generateRandomNeuronPattern() {
+            const numNeurons = Math.floor(Math.random() * 8) + 3; // 3-10 neurons
+            const neurons = [];
+            for (let i = 0; i < numNeurons; i++) {
+                neurons.push(Math.floor(Math.random() * currentWidth));
+            }
+            return neurons;
+        }
+        
+        function loadPresetKnowledge(type) {
+            const knowledgeSet = presetKnowledgeData[type];
+            if (!knowledgeSet) return;
+            
+            // Don't clear - ADD to existing knowledge to show capacity growth
+            let addedCount = 0;
+            
+            knowledgeSet.forEach(knowledge => {
+                if (storedKnowledge.length < maxCapacity) {
+                    storedKnowledge.push({
+                        text: knowledge,
+                        neurons: generateRandomNeuronPattern()
+                    });
+                    addedCount++;
+                }
+            });
+            
+            // Show visual feedback
+            if (addedCount > 0) {
+                showCapacityAnimation();
+                setTimeout(() => {
+                    updateKnowledgeDisplay();
+                    updateCapacity();
+                    activateRandomNeurons();
+                }, 300);
+            } else {
+                alert(`Network capacity reached! Cannot add more ${type} knowledge. Try increasing network width or clearing some knowledge.`);
+            }
+        }
+        
+        function clearKnowledge() {
+            storedKnowledge = [];
+            updateKnowledgeDisplay();
+            updateCapacity();
+            activateRandomNeurons();
+        }
+        
+        function removeKnowledge(index) {
+            storedKnowledge.splice(index, 1);
+            updateKnowledgeDisplay();
+            updateCapacity();
+            activateRandomNeurons();
+        }
+        
+        function updateKnowledgeDisplay() {
+            const container = document.getElementById('knowledgeItems');
+            
+            if (storedKnowledge.length === 0) {
+                container.innerHTML = `
+                    <p style="text-align: center; color: #666; padding: 2rem;">
+                        Add knowledge items to see how they're stored in the network
+                    </p>
+                `;
+                return;
+            }
+            
+            container.innerHTML = storedKnowledge.map((item, index) => `
+                <div class="knowledge-item">
+                    <div>
+                        <div class="knowledge-text">${item.text}</div>
+                        <div class="knowledge-neurons">
+                            ${item.neurons.slice(0, 8).map(() => '<div class="mini-neuron"></div>').join('')}
+                            ${item.neurons.length > 8 ? `<span style="font-size: 0.8rem; margin-left: 0.5rem;">+${item.neurons.length - 8} more</span>` : ''}
+                        </div>
+                    </div>
+                    <button class="remove-btn" onclick="removeKnowledge(${index})">Remove</button>
+                </div>
+            `).join('');
+        }
+        
+        function showCapacityAnimation() {
+            // Animate neurons to show knowledge being stored
+            const hiddenNeurons = document.querySelectorAll('#hiddenLayer .neuron');
+            const randomNeurons = [];
+            
+            // Select random neurons to animate
+            for (let i = 0; i < Math.min(8, hiddenNeurons.length); i++) {
+                const randomIndex = Math.floor(Math.random() * hiddenNeurons.length);
+                if (!randomNeurons.includes(randomIndex)) {
+                    randomNeurons.push(randomIndex);
+                }
+            }
+            
+            // Animate the selected neurons
+            randomNeurons.forEach((index, i) => {
+                setTimeout(() => {
+                    hiddenNeurons[index].classList.add('storing');
+                    setTimeout(() => {
+                        hiddenNeurons[index].classList.remove('storing');
+                        hiddenNeurons[index].classList.add('active');
+                    }, 1000);
+                }, i * 100);
+            });
+        }
+        
+        function updateCapacity() {
+            const usedPercentage = Math.round((storedKnowledge.length / maxCapacity) * 100);
+            
+            document.getElementById('knowledgeCount').textContent = storedKnowledge.length;
+            document.getElementById('capacityUsed').textContent = usedPercentage + '%';
+            
+            const capacityFill = document.getElementById('capacityFill');
+            capacityFill.style.width = usedPercentage + '%';
+            capacityFill.textContent = usedPercentage + '%';
+            
+            // Change color based on capacity
+            if (usedPercentage < 50) {
+                capacityFill.style.background = '#28a745'; // Green
+            } else if (usedPercentage < 80) {
+                capacityFill.style.background = '#ffc107'; // Yellow
+                capacityFill.style.color = '#333';
+            } else {
+                capacityFill.style.background = '#dc3545'; // Red
+                capacityFill.style.color = 'white';
+            }
+            
+            // Update insights based on capacity
+            updateInsights(usedPercentage);
+        }
+        
+        function updateInsights(capacityUsed) {
+            const insights = [];
+            
+            if (capacityUsed < 30) {
+                insights.push('Network has plenty of capacity - minimal interference between facts');
+                insights.push('Each piece of knowledge can use optimal neuron patterns');
+            } else if (capacityUsed < 70) {
+                insights.push('Network approaching moderate capacity - some neuron sharing occurs');
+                insights.push('Knowledge storage becoming more efficient through compression');
+            } else {
+                insights.push('Network nearing capacity - significant interference possible');
+                insights.push('New knowledge may overwrite or interfere with existing facts');
+            }
+            
+            insights.push(`Current network width: ${currentWidth} neurons in hidden layer`);
+            insights.push(`Theoretical capacity: ${maxCapacity} distinct facts`);
+            
+            if (currentWidth >= 1024) {
+                insights.push('Wide network enables massive knowledge storage with minimal interference');
+            } else if (currentWidth <= 256) {
+                insights.push('Narrow network limits knowledge capacity - consider wider architecture');
+            }
+            
+            // Update the insights in the panel
+            const insightsList = document.querySelector('.insights-panel .insights-list');
+            const existingInsights = insightsList.querySelectorAll('li');
+            
+            // Keep the first 4 items (key concepts), update the rest
+            const conceptItems = Array.from(existingInsights).slice(0, 4);
+            insightsList.innerHTML = conceptItems.map(item => item.outerHTML).join('') + 
+                                   insights.map(insight => `<li>${insight}</li>`).join('');
+        }
+        
+        // Event listeners
+        document.getElementById('widthSlider').addEventListener('input', updateWidth);
+        document.getElementById('knowledgeInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addKnowledge();
+            }
+        });
+        
+        // Initialize
+        updateWidth();
+        updateCapacity();
+    </script>
+</body>
+</html>
