@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selection Problem Demonstrator - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .demo-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-icon {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .example-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .example-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .example-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+        
+        .example-card.active {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .example-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .example-text {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        
+        .example-problem {
+            font-size: 0.85rem;
+            color: #dc3545;
+            font-weight: 500;
+        }
+        
+        .window-control {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .window-control h4 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            outline: none;
+            appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .slider-value {
+            min-width: 40px;
+            font-weight: 500;
+            color: #667eea;
+        }
+        
+        .visualization {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .sentence-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            line-height: 2;
+            margin: 1rem 0;
+        }
+        
+        .word {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            margin: 0.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .word:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .word.in-window {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .word.out-window {
+            background: #e9ecef;
+            color: #666;
+        }
+        
+        .word.target {
+            background: #dc3545;
+            color: white;
+            font-weight: bold;
+            border: 3px solid #721c24;
+        }
+        
+        .word.important-missed {
+            background: #ffc107;
+            color: #333;
+            font-weight: bold;
+            border: 2px dashed #856404;
+        }
+        
+        .prediction-info {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .target-word {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #dc3545;
+            margin-bottom: 0.5rem;
+        }
+        
+        .window-words {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+        }
+        
+        .problem-explanation {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .problem-explanation h4 {
+            color: #856404;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .problem-explanation h4:before {
+            content: "⚠️";
+            margin-right: 0.5rem;
+        }
+        
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .comparison-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .comparison-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .comparison-card.problem {
+            border-color: #dc3545;
+        }
+        
+        .comparison-card.solution {
+            border-color: #28a745;
+        }
+        
+        .comparison-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .comparison-card.problem .comparison-title {
+            color: #dc3545;
+        }
+        
+        .comparison-card.solution .comparison-title {
+            color: #28a745;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .example-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .legend {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 2</a> / 
+                Session 2.1 / KP3
+            </div>
+            <h1>The Selection Problem</h1>
+            <p>Discover why Bengio's fixed concatenation approach fails for dynamic language understanding</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="demo-section">
+            <h2 class="section-title">
+                <span class="section-icon">🎯</span>
+                Interactive Demonstration
+            </h2>
+            
+            <p style="margin-bottom: 1.5rem; color: #666;">
+                Select an example below to see how Bengio's fixed window approach misses important context.
+            </p>
+            
+            <div class="example-selector" id="exampleSelector">
+                <!-- Examples will be populated by JavaScript -->
+            </div>
+            
+            <div class="window-control">
+                <h4>Bengio's Fixed Window Size</h4>
+                <div class="slider-container">
+                    <span>2</span>
+                    <input type="range" id="windowSlider" class="slider" min="2" max="6" value="4" step="1">
+                    <span>6</span>
+                    <span class="slider-value" id="windowValue">4</span>
+                </div>
+                <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+                    Adjust the window size to see how it affects what information is available for prediction.
+                </p>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #667eea;"></div>
+                    <span><strong>In Window:</strong> Used for prediction</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e9ecef;"></div>
+                    <span><strong>Outside Window:</strong> Ignored</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #dc3545; border: 3px solid #721c24;"></div>
+                    <span><strong>Target:</strong> Word being predicted</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffc107; border: 2px dashed #856404;"></div>
+                    <span><strong>Important but Missed:</strong> Should matter but outside window</span>
+                </div>
+            </div>
+            
+            <div class="visualization" id="visualization">
+                <p style="text-align: center; color: #666; padding: 2rem;">
+                    Select an example above to see the selection problem in action.
+                </p>
+            </div>
+        </div>
+        
+        <div class="comparison-section">
+            <div class="comparison-card problem">
+                <div class="comparison-title">❌ Bengio's Fixed Concatenation</div>
+                <ul style="list-style-position: inside; margin: 1rem 0;">
+                    <li><strong>Fixed Window:</strong> Always uses last N words</li>
+                    <li><strong>Equal Weights:</strong> Every word gets same importance</li>
+                    <li><strong>Position-Based:</strong> Location determines relevance</li>
+                    <li><strong>Context Blindness:</strong> Can't see beyond window</li>
+                </ul>
+                <div style="background: #f8d7da; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
+                    <strong>Core Problem:</strong> Important words outside the fixed window are completely ignored, 
+                    leading to poor predictions when crucial context is distant.
+                </div>
+            </div>
+            
+            <div class="comparison-card solution">
+                <div class="comparison-title">✅ What We Need Instead</div>
+                <ul style="list-style-position: inside; margin: 1rem 0;">
+                    <li><strong>Dynamic Selection:</strong> Focus on relevant words anywhere</li>
+                    <li><strong>Content-Based:</strong> Importance based on meaning</li>
+                    <li><strong>Flexible Context:</strong> No fixed window limitations</li>
+                    <li><strong>Smart Weighting:</strong> Important words get more attention</li>
+                </ul>
+                <div style="background: #d4edda; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
+                    <strong>The Solution:</strong> Attention mechanism (Session 2.2) provides dynamic, 
+                    content-based selection that can focus on any relevant word in the sequence.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const examples = [
+            {
+                title: "Long-Range Dependency",
+                text: "The scientist who discovered penicillin was awarded the Nobel Prize",
+                targetWord: "awarded",
+                targetPosition: 7,
+                problem: "To predict 'awarded', we need to know who was awarded - the 'scientist'. But fixed windows might miss this crucial subject.",
+                importantWords: ["scientist"]
+            },
+            {
+                title: "Hierarchical Relationship", 
+                text: "The company CEO announced quarterly profits during the meeting",
+                targetWord: "profits",
+                targetPosition: 5,
+                problem: "To predict 'profits', we need to know this is about a 'company' announcement. The corporate context matters.",
+                importantWords: ["company", "ceo"]
+            },
+            {
+                title: "Pronoun Resolution",
+                text: "The student in the back row raised her hand to ask",
+                targetWord: "ask",
+                targetPosition: 10,
+                problem: "To predict 'ask', we need to resolve 'her' back to 'student'. This requires long-range reference tracking.",
+                importantWords: ["student", "her"]
+            },
+            {
+                title: "Relative Clause",
+                text: "The book that Mary borrowed from the library was overdue",
+                targetWord: "overdue", 
+                targetPosition: 9,
+                problem: "To predict 'overdue', we need to remember we're talking about 'the book', not just the immediate context.",
+                importantWords: ["book"]
+            }
+        ];
+        
+        let currentExample = null;
+        let windowSize = 4;
+        
+        function initializeExamples() {
+            const container = document.getElementById('exampleSelector');
+            
+            container.innerHTML = examples.map((example, index) => `
+                <div class="example-card" onclick="selectExample(${index})">
+                    <div class="example-title">${example.title}</div>
+                    <div class="example-text">"${example.text}"</div>
+                    <div class="example-problem">${example.problem}</div>
+                </div>
+            `).join('');
+        }
+        
+        function selectExample(index) {
+            currentExample = examples[index];
+            
+            // Update active state
+            document.querySelectorAll('.example-card').forEach((card, i) => {
+                card.classList.toggle('active', i === index);
+            });
+            
+            updateVisualization();
+        }
+        
+        function updateWindowSize() {
+            const slider = document.getElementById('windowSlider');
+            const valueDisplay = document.getElementById('windowValue');
+            windowSize = parseInt(slider.value);
+            valueDisplay.textContent = windowSize;
+            
+            if (currentExample) {
+                updateVisualization();
+            }
+        }
+        
+        function updateVisualization() {
+            if (!currentExample) return;
+            
+            const container = document.getElementById('visualization');
+            const words = currentExample.text.split(' ');
+            const targetPos = currentExample.targetPosition;
+            
+            // Create word visualization
+            const wordDisplay = words.map((word, index) => {
+                let className = 'word';
+                let title = '';
+                
+                if (index === targetPos) {
+                    className += ' target';
+                    title = `Target: Predicting "${word}"`;
+                } else if (index >= targetPos - windowSize && index < targetPos) {
+                    className += ' in-window';
+                    title = `In window: Available for prediction`;
+                } else {
+                    className += ' out-window';
+                    title = `Outside window: Ignored by Bengio's model`;
+                }
+                
+                // Check if this word is important but missed
+                if (currentExample.importantWords.includes(word.toLowerCase()) && 
+                    (index < targetPos - windowSize || index > targetPos)) {
+                    className += ' important-missed';
+                    title = `PROBLEM: Important for prediction but outside window!`;
+                }
+                
+                return `<span class="${className}" title="${title}">${word}</span>`;
+            }).join(' ');
+            
+            // Get window context
+            const windowStart = Math.max(0, targetPos - windowSize);
+            const windowWords = words.slice(windowStart, targetPos);
+            const missedImportant = currentExample.importantWords.filter(word => 
+                !windowWords.some(w => w.toLowerCase() === word)
+            );
+            
+            container.innerHTML = `
+                <div class="sentence-display">${wordDisplay}</div>
+                
+                <div class="prediction-info">
+                    <div><strong>Target Word:</strong> <span class="target-word">${currentExample.targetWord}</span></div>
+                    <div><strong>Fixed Window Sees:</strong> 
+                        <span class="window-words">[${windowWords.join(', ')}]</span>
+                    </div>
+                    <div><strong>All words get equal weight:</strong> ${Math.round(100/windowSize)}% each</div>
+                    ${missedImportant.length > 0 ? 
+                        `<div style="color: #dc3545; font-weight: 500; margin-top: 1rem;">
+                            <strong>⚠️ MISSED Important Words:</strong> ${missedImportant.join(', ')}
+                        </div>` : 
+                        `<div style="color: #28a745; font-weight: 500; margin-top: 1rem;">
+                            ✅ This example works okay - important context is within the window
+                        </div>`
+                    }
+                </div>
+                
+                ${missedImportant.length > 0 ? `
+                    <div class="problem-explanation">
+                        <h4>Why This Fails</h4>
+                        <p>${currentExample.problem}</p>
+                        <p style="margin-top: 1rem;">
+                            <strong>Solution needed:</strong> A mechanism that can dynamically focus on relevant words 
+                            anywhere in the sequence, not just within a fixed window. This is exactly what 
+                            attention provides (covered in Session 2.2).
+                        </p>
+                    </div>
+                ` : ''}
+            `;
+        }
+        
+        // Event listeners
+        document.getElementById('windowSlider').addEventListener('input', updateWindowSize);
+        
+        // Initialize
+        initializeExamples();
+        selectExample(0); // Start with first example
+    </script>
+</body>
+</html>
