@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preference Learning Demo - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .intro-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .comparison-area {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .prompt-display {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .prompt-text {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: #333;
+        }
+        
+        .responses-comparison {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+            align-items: center;
+        }
+        
+        .response-option {
+            border: 3px solid #e9ecef;
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 200px;
+        }
+        
+        .response-option:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        
+        .response-option.selected {
+            border-color: #28a745;
+            background: #f0f8f0;
+            transform: scale(1.02);
+        }
+        
+        .response-option.rejected {
+            border-color: #dc3545;
+            background: #fdf2f2;
+            opacity: 0.7;
+        }
+        
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .response-text {
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .vs-divider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .vs-text {
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .choice-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .choice-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 0.9rem;
+        }
+        
+        .choice-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .choice-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .feedback-section {
+            text-align: center;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feedback-content {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .feedback-content.show {
+            opacity: 1;
+        }
+        
+        .stats-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 0 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .learning-visualization {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .reward-progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2rem 0;
+        }
+        
+        .reward-bar {
+            flex: 1;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin: 0 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .reward-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #dc3545, #ffc107, #28a745);
+            width: 0%;
+            transition: width 1s ease;
+            border-radius: 10px;
+        }
+        
+        .reward-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        @media (max-width: 968px) {
+            .responses-comparison {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .vs-divider {
+                order: -1;
+                flex-direction: row;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Preference Learning Demo</h1>
+        <p>Experience how AI learns human preferences through comparison</p>
+    </div>
+    
+    <div class="container">
+        <div class="intro-section">
+            <h2>How It Works</h2>
+            <p>Instead of labeling each response as "good" or "bad", humans simply compare pairs of responses and choose which one is better. This comparative approach captures subtle human preferences that would be hard to specify explicitly.</p>
+        </div>
+        
+        <!-- Comparison Area -->
+        <div class="comparison-area">
+            <div class="prompt-display">
+                <strong>User Query:</strong>
+                <div class="prompt-text" id="currentPrompt">
+                    "What's the best way to learn a new programming language?"
+                </div>
+            </div>
+            
+            <div class="responses-comparison">
+                <div class="response-option" id="responseA" onclick="selectResponse('A')">
+                    <div class="response-header">
+                        🤖 Response A
+                    </div>
+                    <div class="response-text" id="responseTextA">
+                        Just pick any language and start coding immediately. Don't waste time with tutorials or books - you'll figure it out as you go.
+                    </div>
+                </div>
+                
+                <div class="vs-divider">
+                    <div class="vs-text">VS</div>
+                    <div class="choice-buttons">
+                        <button class="choice-btn" onclick="selectResponse('A')" id="chooseA">Choose A</button>
+                        <button class="choice-btn" onclick="selectResponse('B')" id="chooseB">Choose B</button>
+                    </div>
+                </div>
+                
+                <div class="response-option" id="responseB" onclick="selectResponse('B')">
+                    <div class="response-header">
+                        🤖 Response B
+                    </div>
+                    <div class="response-text" id="responseTextB">
+                        Start with fundamentals through structured tutorials, practice with small projects, read others' code, and gradually tackle more complex challenges. Set aside regular practice time and don't hesitate to ask questions in programming communities.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feedback-section">
+                <div class="feedback-content" id="feedbackContent">
+                    👆 Choose which response you think is more helpful!
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <h3>Learning Progress</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="comparisonsCount">0</div>
+                    <div class="stat-label">Comparisons Made</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="accuracyScore">0%</div>
+                    <div class="stat-label">Model Accuracy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="rewardImprovement">0%</div>
+                    <div class="stat-label">Reward Model Confidence</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="nextComparison()" id="nextBtn">Next Comparison</button>
+            <button class="btn" onclick="autoDemo()" id="autoBtn">Auto Demo</button>
+            <button class="btn" onclick="resetDemo()" id="resetBtn">Reset</button>
+        </div>
+        
+        <!-- Learning Visualization -->
+        <div class="learning-visualization">
+            <h3>Reward Model Learning</h3>
+            <p>As you make more comparisons, the AI learns to predict human preferences:</p>
+            
+            <div class="reward-progress">
+                <div class="reward-label">Poor Response</div>
+                <div class="reward-bar">
+                    <div class="reward-fill" id="rewardFill"></div>
+                </div>
+                <div class="reward-label">Great Response</div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 1rem; color: #666;">
+                The model learns to assign higher scores to responses that humans prefer
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let comparisonsCount = 0;
+        let currentComparisonIndex = 0;
+        let isAutoRunning = false;
+        
+        const comparisons = [
+            {
+                prompt: "What's the best way to learn a new programming language?",
+                responseA: "Just pick any language and start coding immediately. Don't waste time with tutorials or books - you'll figure it out as you go.",
+                responseB: "Start with fundamentals through structured tutorials, practice with small projects, read others' code, and gradually tackle more complex challenges. Set aside regular practice time and don't hesitate to ask questions in programming communities.",
+                betterChoice: "B"
+            },
+            {
+                prompt: "How can I be more productive while working from home?",
+                responseA: "Create a dedicated workspace, establish a routine, take regular breaks, minimize distractions, and set clear boundaries between work and personal time.",
+                responseB: "Just work whenever you feel like it. Productivity is overrated anyway. Work from bed, watch TV while working, and don't worry about schedules.",
+                betterChoice: "A"
+            },
+            {
+                prompt: "What should I do if I'm feeling overwhelmed with my workload?",
+                responseA: "Stop complaining and just work harder. Everyone has stress, so deal with it. Sleep less and push through - that's what successful people do.",
+                responseB: "Prioritize your tasks, break large projects into smaller steps, communicate with your manager about realistic deadlines, and consider delegating when possible. Taking care of your mental health is important for long-term productivity.",
+                betterChoice: "B"
+            },
+            {
+                prompt: "How do I handle disagreements with my friends?",
+                responseA: "Listen actively to their perspective, express your feelings calmly, look for common ground, and be willing to compromise. Sometimes agreeing to disagree respectfully is okay too.",
+                responseB: "Just cut them off completely. Friends who disagree with you aren't real friends. You don't need that negativity in your life.",
+                betterChoice: "A"
+            },
+            {
+                prompt: "What's the best approach to saving money?",
+                responseA: "Don't save anything - you only live once! Spend money on whatever makes you happy right now. Saving is for boring people.",
+                responseB: "Create a budget, track your expenses, automate savings, look for areas to cut unnecessary spending, and set specific financial goals. Even small amounts saved regularly can add up significantly.",
+                betterChoice: "B"
+            }
+        ];
+        
+        function selectResponse(choice) {
+            if (isAutoRunning) return;
+            
+            const responseA = document.getElementById('responseA');
+            const responseB = document.getElementById('responseB');
+            const feedbackContent = document.getElementById('feedbackContent');
+            
+            // Clear previous selections
+            responseA.classList.remove('selected', 'rejected');
+            responseB.classList.remove('selected', 'rejected');
+            
+            // Apply selection
+            if (choice === 'A') {
+                responseA.classList.add('selected');
+                responseB.classList.add('rejected');
+            } else {
+                responseB.classList.add('selected');
+                responseA.classList.add('rejected');
+            }
+            
+            // Update feedback
+            const currentComparison = comparisons[currentComparisonIndex];
+            const isCorrect = choice === currentComparison.betterChoice;
+            
+            feedbackContent.innerHTML = isCorrect ? 
+                "✅ Great choice! This response is more helpful and constructive." :
+                "🤔 Many people prefer the other response for being more helpful and supportive.";
+            feedbackContent.classList.add('show');
+            
+            // Update statistics
+            comparisonsCount++;
+            updateStats();
+            
+            // Disable buttons temporarily
+            document.getElementById('chooseA').disabled = true;
+            document.getElementById('chooseB').disabled = true;
+            
+            // Re-enable after delay
+            setTimeout(() => {
+                document.getElementById('chooseA').disabled = false;
+                document.getElementById('chooseB').disabled = false;
+            }, 2000);
+        }
+        
+        function nextComparison() {
+            currentComparisonIndex = (currentComparisonIndex + 1) % comparisons.length;
+            loadComparison();
+        }
+        
+        function loadComparison() {
+            const comparison = comparisons[currentComparisonIndex];
+            
+            document.getElementById('currentPrompt').textContent = comparison.prompt;
+            document.getElementById('responseTextA').textContent = comparison.responseA;
+            document.getElementById('responseTextB').textContent = comparison.responseB;
+            
+            // Clear previous state
+            document.getElementById('responseA').classList.remove('selected', 'rejected');
+            document.getElementById('responseB').classList.remove('selected', 'rejected');
+            document.getElementById('feedbackContent').classList.remove('show');
+            document.getElementById('feedbackContent').innerHTML = "👆 Choose which response you think is more helpful!";
+            
+            // Re-enable buttons
+            document.getElementById('chooseA').disabled = false;
+            document.getElementById('chooseB').disabled = false;
+        }
+        
+        function updateStats() {
+            document.getElementById('comparisonsCount').textContent = comparisonsCount;
+            
+            // Simulate improving accuracy and confidence
+            const accuracy = Math.min(95, 60 + (comparisonsCount * 7));
+            const confidence = Math.min(95, 40 + (comparisonsCount * 11));
+            
+            document.getElementById('accuracyScore').textContent = Math.round(accuracy) + '%';
+            document.getElementById('rewardImprovement').textContent = Math.round(confidence) + '%';
+            
+            // Update reward visualization
+            const rewardFill = document.getElementById('rewardFill');
+            rewardFill.style.width = confidence + '%';
+        }
+        
+        async function autoDemo() {
+            if (isAutoRunning) return;
+            
+            isAutoRunning = true;
+            document.getElementById('autoBtn').disabled = true;
+            
+            for (let i = 0; i < 5; i++) {
+                const comparison = comparisons[currentComparisonIndex];
+                
+                // Auto-select the better choice
+                await sleep(1500);
+                selectResponse(comparison.betterChoice);
+                
+                await sleep(2500);
+                
+                if (i < 4) {
+                    nextComparison();
+                    await sleep(1000);
+                }
+            }
+            
+            isAutoRunning = false;
+            document.getElementById('autoBtn').disabled = false;
+        }
+        
+        function resetDemo() {
+            comparisonsCount = 0;
+            currentComparisonIndex = 0;
+            isAutoRunning = false;
+            
+            loadComparison();
+            updateStats();
+            
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('rewardFill').style.width = '0%';
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadComparison();
+            updateStats();
+        });
+    </script>
+</body>
+</html>
