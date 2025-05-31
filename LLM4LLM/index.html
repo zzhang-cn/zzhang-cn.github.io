@@ -127,6 +127,22 @@
             font-size: 0.9rem;
         }
         
+        .module-link {
+            display: block;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            margin-top: 0.5rem;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+            text-align: center;
+        }
+        
+        .module-link:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
         .sessions-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -378,7 +394,7 @@
         <div class="stats-overview">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="number" id="totalVizCount">24+</div>
+                    <div class="number" id="totalVizCount">29+</div>
                     <div class="label">Interactive Visualizations</div>
                 </div>
                 <div class="stat-card">
@@ -386,7 +402,7 @@
                     <div class="label">Modules Available</div>
                 </div>
                 <div class="stat-card">
-                    <div class="number">10+</div>
+                    <div class="number">15+</div>
                     <div class="label">Key Concepts Covered</div>
                 </div>
                 <div class="stat-card">
@@ -406,6 +422,8 @@
                 <div class="filter-tag" data-filter="prediction">Prediction</div>
                 <div class="filter-tag" data-filter="architecture">Architecture</div>
                 <div class="filter-tag" data-filter="statistics">Statistics</div>
+                <div class="filter-tag" data-filter="tokenization">Tokenization</div>
+                <div class="filter-tag" data-filter="scaling">Scaling</div>
             </div>
         </div>
         
@@ -417,6 +435,7 @@
                     <div class="module-details">
                         <h3>Foundations of Word Prediction</h3>
                         <p>From basic statistics to neural word embeddings</p>
+                        <a href="module-1/" class="module-link">→ Explore Module 1</a>
                     </div>
                 </div>
                 <div class="module-stats">
@@ -441,7 +460,7 @@
                                     <span class="tag">Statistics</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-1/kp2-word-frequency.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-1/kp2-word-frequency.html" class="viz-link">Explore</a>
                         </div>
                         <div class="viz-item" data-tags="prediction">
                             <div class="viz-icon">❓</div>
@@ -452,7 +471,7 @@
                                     <span class="tag">QA</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-1/kp3-qa-patterns.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-1/kp3-qa-patterns.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
@@ -473,7 +492,7 @@
                                     <span class="tag">Context</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-2/kp1-ngram-builder.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-2/kp1-ngram-builder.html" class="viz-link">Explore</a>
                         </div>
                         <div class="viz-item" data-tags="prediction">
                             <div class="viz-icon">🕳️</div>
@@ -484,7 +503,7 @@
                                     <span class="tag">Limitations</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-2/kp7-sparsity-explorer.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-2/kp7-sparsity-explorer.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
@@ -505,7 +524,7 @@
                                     <span class="tag">Semantics</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-3/kp2-embedding-space.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-3/kp2-embedding-space.html" class="viz-link">Explore</a>
                         </div>
                         <div class="viz-item" data-tags="architecture">
                             <div class="viz-icon">🧠</div>
@@ -516,7 +535,7 @@
                                     <span class="tag">Neural Networks</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-3/kp3-bengio-model.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-3/kp3-bengio-model.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
@@ -537,7 +556,7 @@
                                     <span class="tag">Training</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-4/kp1-loss-explorer.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-4/kp1-loss-explorer.html" class="viz-link">Explore</a>
                         </div>
                         <div class="viz-item" data-tags="training">
                             <div class="viz-icon">⛰️</div>
@@ -548,7 +567,7 @@
                                     <span class="tag">Gradient Descent</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-4/kp2-gradient-sim.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-4/kp2-gradient-sim.html" class="viz-link">Explore</a>
                         </div>
                         <div class="viz-item" data-tags="training">
                             <div class="viz-icon">📈</div>
@@ -559,7 +578,7 @@
                                     <span class="tag">Metrics</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-4/kp3-training-progress.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-4/kp3-training-progress.html" class="viz-link">Explore</a>
                         </div>
                         <div class="viz-item" data-tags="training">
                             <div class="viz-icon">🔢</div>
@@ -570,7 +589,7 @@
                                     <span class="tag">Evaluation</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-4/kp4-perplexity-calc.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-4/kp4-perplexity-calc.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
@@ -592,7 +611,7 @@
                                     <span class="tag">CBOW</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-5/kp2-word2vec-demo.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-5/kp2-word2vec-demo.html" class="viz-link">Explore</a>
                         </div>
                         <div class="viz-item" data-tags="training">
                             <div class="viz-icon">🎯</div>
@@ -603,7 +622,7 @@
                                     <span class="tag">Efficiency</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-5/kp3-negative-sampling-demo.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-5/kp3-negative-sampling-demo.html" class="viz-link">Explore</a>
                         </div>
                         <div class="viz-item" data-tags="embeddings">
                             <div class="viz-icon">🧮</div>
@@ -614,7 +633,7 @@
                                     <span class="tag">Vector Math</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-5/kp4-vector-analogy-demo.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-5/kp4-vector-analogy-demo.html" class="viz-link">Explore</a>
                         </div>
                         <div class="viz-item" data-tags="embeddings">
                             <div class="viz-icon">🎭</div>
@@ -625,14 +644,14 @@
                                     <span class="tag">Context</span>
                                 </div>
                             </div>
-                            <a href="https://zzhang-cn.github.io/LLM4LLM/module-1/session-1-5/kp6-polysemy-problem-demo.html" class="viz-link">Explore</a>
+                            <a href="module-1/session-1-5/kp6-polysemy-problem-demo.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Module 2: Transformer Architecture (Coming Soon) -->
+        <!-- Module 2: Transformer Architecture -->
         <div class="module-section">
             <div class="module-header">
                 <div class="module-info">
@@ -640,65 +659,84 @@
                     <div class="module-details">
                         <h3>Transformer Architecture</h3>
                         <p>Attention mechanisms, contextual embeddings, and modern LLMs</p>
+                        <a href="module-2/" class="module-link">→ Explore Module 2</a>
                     </div>
                 </div>
                 <div class="module-stats">
-                    <div class="stat-number">8+</div>
+                    <div class="stat-number">12+</div>
                     <div class="stat-label">Visualizations</div>
                 </div>
             </div>
             <div class="sessions-grid">
+                <!-- Session 2.0: The Big Picture -->
                 <div class="session-card">
                     <div class="session-header">
-                        <div class="session-title">Session 2.0: From Static to Contextual</div>
-                        <div class="session-description">Understanding the paradigm shift to contextual representations</div>
+                        <div class="session-title">Session 2.0: Generative Search Engines</div>
+                        <div class="session-description">Understanding the paradigm shift to generative systems</div>
                     </div>
                     <div class="visualizations-list">
                         <div class="viz-item" data-tags="architecture">
                             <div class="viz-icon">🔍</div>
                             <div class="viz-info">
-                                <div class="viz-name">Generative Search Engine</div>
+                                <div class="viz-name">Search Engine vs Generative Search</div>
                                 <div class="viz-tags">
                                     <span class="tag">Concepts</span>
                                     <span class="tag">Search</span>
+                                    <span class="tag">Generation</span>
                                 </div>
                             </div>
-                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
+                            <a href="module-2/session-2-0/s2.0-search-engine-comparison.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
                 
+                <!-- Session 2.1: From Text to Transformer Inputs -->
                 <div class="session-card">
                     <div class="session-header">
-                        <div class="session-title">Session 2.1: Tokenization and Context</div>
-                        <div class="session-description">BPE tokenization and the selection problem that attention solves</div>
+                        <div class="session-title">Session 2.1: From Text to Transformer Inputs</div>
+                        <div class="session-description">Tokenization, knowledge storage, and the selection problem</div>
                     </div>
                     <div class="visualizations-list">
-                        <div class="viz-item" data-tags="architecture">
+                        <div class="viz-item" data-tags="tokenization">
                             <div class="viz-icon">✂️</div>
                             <div class="viz-info">
-                                <div class="viz-name">Tokenization Demo</div>
+                                <div class="viz-name">Tokenization Explorer</div>
                                 <div class="viz-tags">
                                     <span class="tag">Tokenization</span>
                                     <span class="tag">BPE</span>
+                                    <span class="tag">Subword</span>
                                 </div>
                             </div>
-                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
+                            <a href="module-2/session-2-1/kp1-tokenization-explorer.html" class="viz-link">Explore</a>
                         </div>
-                        <div class="viz-item" data-tags="attention">
+                        <div class="viz-item" data-tags="architecture">
+                            <div class="viz-icon">🧠</div>
+                            <div class="viz-info">
+                                <div class="viz-name">FFN Knowledge Storage</div>
+                                <div class="viz-tags">
+                                    <span class="tag">FFN</span>
+                                    <span class="tag">Knowledge</span>
+                                    <span class="tag">Storage</span>
+                                </div>
+                            </div>
+                            <a href="module-2/session-2-1/kp2-ffn-knowledge.html" class="viz-link">Explore</a>
+                        </div>
+                        <div class="viz-item" data-tags="architecture">
                             <div class="viz-icon">🎛️</div>
                             <div class="viz-info">
-                                <div class="viz-name">Selection Problem</div>
+                                <div class="viz-name">Selection Problem Demo</div>
                                 <div class="viz-tags">
                                     <span class="tag">Selection</span>
                                     <span class="tag">Context</span>
+                                    <span class="tag">Problems</span>
                                 </div>
                             </div>
-                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
+                            <a href="module-2/session-2-1/kp3-selection-problem.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
                 
+                <!-- Session 2.2: Attention Mechanisms -->
                 <div class="session-card">
                     <div class="session-header">
                         <div class="session-title">Session 2.2: Attention Mechanisms</div>
@@ -711,10 +749,11 @@
                                 <div class="viz-name">Attention Weights Visualizer</div>
                                 <div class="viz-tags">
                                     <span class="tag">Attention</span>
-                                    <span class="tag">Heatmaps</span>
+                                    <span class="tag">Weights</span>
+                                    <span class="tag">Dynamic</span>
                                 </div>
                             </div>
-                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
+                            <a href="module-2/session-2-2/kp1-attention-visualizer.html" class="viz-link">Explore</a>
                         </div>
                         <div class="viz-item" data-tags="architecture">
                             <div class="viz-icon">📍</div>
@@ -722,52 +761,68 @@
                                 <div class="viz-name">Position Embeddings</div>
                                 <div class="viz-tags">
                                     <span class="tag">Position</span>
-                                    <span class="tag">Encodings</span>
+                                    <span class="tag">Order</span>
+                                    <span class="tag">Embeddings</span>
                                 </div>
                             </div>
-                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
+                            <a href="module-2/session-2-2/kp2-position-embeddings.html" class="viz-link">Explore</a>
+                        </div>
+                        <div class="viz-item" data-tags="attention">
+                            <div class="viz-icon">👥</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Multi-Head Attention</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Multi-Head</span>
+                                    <span class="tag">Specialization</span>
+                                    <span class="tag">Parallel</span>
+                                </div>
+                            </div>
+                            <a href="module-2/session-2-2/kp3-multihead-attention.html" class="viz-link">Explore</a>
                         </div>
                         <div class="viz-item" data-tags="architecture">
                             <div class="viz-icon">🧱</div>
                             <div class="viz-info">
-                                <div class="viz-name">Transformer Block</div>
+                                <div class="viz-name">Transformer Block Builder</div>
                                 <div class="viz-tags">
                                     <span class="tag">Transformer</span>
                                     <span class="tag">Architecture</span>
+                                    <span class="tag">Complete</span>
                                 </div>
                             </div>
-                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
+                            <a href="module-2/session-2-2/kp4-transformer-block.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
                 
+                <!-- Session 2.3: Training at Scale -->
                 <div class="session-card">
                     <div class="session-header">
                         <div class="session-title">Session 2.3: Training at Scale</div>
                         <div class="session-description">Scaling laws and supervised fine-tuning</div>
                     </div>
                     <div class="visualizations-list">
-                        <div class="viz-item" data-tags="training">
+                        <div class="viz-item" data-tags="scaling,training">
                             <div class="viz-icon">📈</div>
                             <div class="viz-info">
-                                <div class="viz-name">Scaling Laws</div>
+                                <div class="viz-name">Scaling Laws Explorer</div>
                                 <div class="viz-tags">
                                     <span class="tag">Scaling</span>
                                     <span class="tag">Power Laws</span>
+                                    <span class="tag">Performance</span>
                                 </div>
                             </div>
-                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
+                            <a href="module-2/session-2-3/kp1-scaling-laws-explorer.html" class="viz-link">Explore</a>
                         </div>
                         <div class="viz-item" data-tags="training">
                             <div class="viz-icon">🎯</div>
                             <div class="viz-info">
-                                <div class="viz-name">Pre-training vs Fine-tuning</div>
+                                <div class="viz-name">SFT Transformation Demo</div>
                                 <div class="viz-tags">
                                     <span class="tag">SFT</span>
-                                    <span class="tag">Training</span>
+                                    <span class="tag">Fine-tuning</span>
                                 </div>
                             </div>
-                            <a href="#" class="viz-link" onclick="alert('Module 2 coming soon!')">Coming Soon</a>
+                            <a href="module-2/session-2-3/kp2-sft-transformation.html" class="viz-link">Explore</a>
                         </div>
                     </div>
                 </div>
