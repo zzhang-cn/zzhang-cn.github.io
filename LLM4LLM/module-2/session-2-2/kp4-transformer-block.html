@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transformer Block Builder - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+        
+        .controls-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+        
+        .visualization-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-icon {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .component-toggles {
+            margin-bottom: 2rem;
+        }
+        
+        .toggle-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .toggle-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-right: 1rem;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .toggle-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        .layer-controls {
+            margin-bottom: 2rem;
+        }
+        
+        .layer-slider {
+            width: 100%;
+            margin: 1rem 0;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .range-slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            outline: none;
+            appearance: none;
+        }
+        
+        .range-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .range-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .slider-value {
+            min-width: 40px;
+            font-weight: 500;
+            color: #667eea;
+        }
+        
+        .flow-demo {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .flow-demo h4 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .flow-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        
+        .flow-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .transformer-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem;
+            position: relative;
+        }
+        
+        .component {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .component.disabled {
+            opacity: 0.3;
+            border-color: #ccc;
+        }
+        
+        .component.attention {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .component.ffn {
+            border-color: #28a745;
+            background: #f8fff8;
+        }
+        
+        .component.norm {
+            border-color: #ffc107;
+            background: #fffdf8;
+        }
+        
+        .component-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .component-description {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .residual-connection {
+            position: absolute;
+            right: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 80px;
+            height: 2px;
+            background: #dc3545;
+            border-radius: 1px;
+        }
+        
+        .residual-connection:after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: -4px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid #dc3545;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+        
+        .residual-connection.disabled {
+            background: #ccc;
+        }
+        
+        .residual-connection.disabled:after {
+            border-left-color: #ccc;
+        }
+        
+        .add-symbol {
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+        
+        .add-symbol.disabled {
+            background: #ccc;
+        }
+        
+        .flow-arrow {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 20px solid #667eea;
+            margin: 0.5rem 0;
+        }
+        
+        .layer-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .layer-block {
+            border: 3px solid #667eea;
+            border-radius: 12px;
+            padding: 1rem;
+            background: linear-gradient(145deg, #f8f9ff, #e8f2ff);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #667eea;
+            width: 200px;
+            transition: all 0.3s ease;
+        }
+        
+        .layer-block:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .info-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-panel h4:before {
+            content: "💡";
+            margin-right: 0.5rem;
+        }
+        
+        .info-list {
+            list-style: none;
+        }
+        
+        .info-list li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .info-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 2</a> / 
+                Session 2.2 / KP4
+            </div>
+            <h1>Transformer Block Builder</h1>
+            <p>Build and understand the complete transformer block architecture</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="main-content">
+            <div class="controls-panel">
+                <h2 class="section-title">
+                    <span class="section-icon">⚙️</span>
+                    Block Components
+                </h2>
+                
+                <div class="component-toggles">
+                    <div class="toggle-group">
+                        <label class="toggle-label">Multi-Head Attention</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="attentionToggle" checked onchange="updateBlock()">
+                            <span class="slider"></span>
+                        </label>
+                        <div class="toggle-description">Dynamic selection mechanism</div>
+                    </div>
+                    
+                    <div class="toggle-group">
+                        <label class="toggle-label">Feed-Forward Network</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="ffnToggle" checked onchange="updateBlock()">
+                            <span class="slider"></span>
+                        </label>
+                        <div class="toggle-description">Knowledge storage and processing</div>
+                    </div>
+                    
+                    <div class="toggle-group">
+                        <label class="toggle-label">Layer Normalization</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="normToggle" checked onchange="updateBlock()">
+                            <span class="slider"></span>
+                        </label>
+                        <div class="toggle-description">Stabilizes training</div>
+                    </div>
+                    
+                    <div class="toggle-group">
+                        <label class="toggle-label">Residual Connections</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="residualToggle" checked onchange="updateBlock()">
+                            <span class="slider"></span>
+                        </label>
+                        <div class="toggle-description">Information highways for deep networks</div>
+                    </div>
+                </div>
+                
+                <div class="layer-controls">
+                    <h3>Number of Layers</h3>
+                    <div class="slider-container">
+                        <span>1</span>
+                        <input type="range" id="layerSlider" class="range-slider" min="1" max="12" value="6" onchange="updateLayerStack()">
+                        <span>12</span>
+                        <span class="slider-value" id="layerValue">6</span>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+                        GPT-3 has 96 layers! More layers = more capacity for complex understanding.
+                    </p>
+                </div>
+                
+                <div class="flow-demo">
+                    <h4>Information Flow Demo</h4>
+                    <button class="flow-btn" onclick="animateFlow()">▶️ Animate Information Flow</button>
+                    <p style="font-size: 0.9rem; color: #666;">
+                        See how information flows through the transformer block
+                    </p>
+                </div>
+                
+                <div class="info-panel">
+                    <h4>Component Effects</h4>
+                    <ul class="info-list" id="componentEffects">
+                        <li>All components active - full transformer power</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="visualization-panel">
+                <h2 class="section-title">
+                    <span class="section-icon">🏗️</span>
+                    Transformer Block Architecture
+                </h2>
+                
+                <div style="display: flex; justify-content: center; margin-bottom: 2rem;">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <input type="radio" name="view" value="single" checked onchange="updateView()"> Single Block
+                        <input type="radio" name="view" value="stack" onchange="updateView()"> Layer Stack
+                    </div>
+                </div>
+                
+                <div id="singleBlockView">
+                    <div class="transformer-block" id="transformerBlock">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div id="stackView" style="display: none;">
+                    <div class="layer-stack" id="layerStack">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="info-panel">
+                    <h4>Architecture Insights</h4>
+                    <ul class="info-list">
+                        <li><strong>Residual Connections:</strong> Allow information to bypass transformations</li>
+                        <li><strong>Layer Normalization:</strong> Keeps values in a stable range</li>
+                        <li><strong>Parallel Processing:</strong> Attention and FFN work on normalized inputs</li>
+                        <li><strong>Stacking Power:</strong> Each layer refines the representation</li>
+                        <li><strong>Identical Blocks:</strong> Same architecture, different learned weights</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentView = 'single';
+        let layerCount = 6;
+        let isAnimating = false;
+        
+        const components = [
+            { id: 'attention', title: 'Multi-Head Attention', desc: 'Dynamic selection of relevant information', enabled: true },
+            { id: 'norm1', title: 'Layer Norm 1', desc: 'Normalize after attention', enabled: true },
+            { id: 'ffn', title: 'Feed-Forward Network', desc: 'Knowledge processing and storage', enabled: true },
+            { id: 'norm2', title: 'Layer Norm 2', desc: 'Normalize after FFN', enabled: true }
+        ];
+        
+        function updateBlock() {
+            const attentionEnabled = document.getElementById('attentionToggle').checked;
+            const ffnEnabled = document.getElementById('ffnToggle').checked;
+            const normEnabled = document.getElementById('normToggle').checked;
+            const residualEnabled = document.getElementById('residualToggle').checked;
+            
+            components[0].enabled = attentionEnabled;
+            components[1].enabled = normEnabled;
+            components[2].enabled = ffnEnabled;
+            components[3].enabled = normEnabled;
+            
+            renderSingleBlock(residualEnabled);
+            updateComponentEffects();
+        }
+        
+        function renderSingleBlock(residualEnabled) {
+            const container = document.getElementById('transformerBlock');
+            
+            let html = '<div style="background: #667eea; color: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 600;">Input Embeddings + Position</div>';
+            
+            // Attention block with residual
+            html += '<div style="position: relative; width: 100%;">';
+            html += `<div class="component attention ${components[0].enabled ? '' : 'disabled'}">
+                        <div class="component-title">${components[0].title}</div>
+                        <div class="component-description">${components[0].desc}</div>
+                     </div>`;
+            if (residualEnabled && components[0].enabled) {
+                html += `<div class="residual-connection">
+                            <div class="add-symbol">+</div>
+                         </div>`;
+            }
+            html += '</div>';
+            
+            html += '<div class="flow-arrow"></div>';
+            
+            // Layer Norm 1
+            html += `<div class="component norm ${components[1].enabled ? '' : 'disabled'}">
+                        <div class="component-title">${components[1].title}</div>
+                        <div class="component-description">${components[1].desc}</div>
+                     </div>`;
+            
+            html += '<div class="flow-arrow"></div>';
+            
+            // FFN block with residual
+            html += '<div style="position: relative; width: 100%;">';
+            html += `<div class="component ffn ${components[2].enabled ? '' : 'disabled'}">
+                        <div class="component-title">${components[2].title}</div>
+                        <div class="component-description">${components[2].desc}</div>
+                     </div>`;
+            if (residualEnabled && components[2].enabled) {
+                html += `<div class="residual-connection">
+                            <div class="add-symbol">+</div>
+                         </div>`;
+            }
+            html += '</div>';
+            
+            html += '<div class="flow-arrow"></div>';
+            
+            // Layer Norm 2
+            html += `<div class="component norm ${components[3].enabled ? '' : 'disabled'}">
+                        <div class="component-title">${components[3].title}</div>
+                        <div class="component-description">${components[3].desc}</div>
+                     </div>`;
+            
+            html += '<div class="flow-arrow"></div>';
+            html += '<div style="background: #28a745; color: white; padding: 1rem; border-radius: 8px; margin-top: 1rem; font-weight: 600;">Output to Next Layer</div>';
+            
+            container.innerHTML = html;
+        }
+        
+        function updateLayerStack() {
+            const slider = document.getElementById('layerSlider');
+            const valueDisplay = document.getElementById('layerValue');
+            layerCount = parseInt(slider.value);
+            valueDisplay.textContent = layerCount;
+            
+            if (currentView === 'stack') {
+                renderLayerStack();
+            }
+        }
+        
+        function renderLayerStack() {
+            const container = document.getElementById('layerStack');
+            
+            let html = '<div style="background: #667eea; color: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 600; text-align: center;">Input Embeddings</div>';
+            
+            for (let i = 0; i < layerCount; i++) {
+                html += `<div class="layer-block">
+                            Transformer Block ${i + 1}
+                         </div>`;
+                if (i < layerCount - 1) {
+                    html += '<div class="flow-arrow"></div>';
+                }
+            }
+            
+            html += '<div style="background: #28a745; color: white; padding: 1rem; border-radius: 8px; margin-top: 1rem; font-weight: 600; text-align: center;">Final Output</div>';
+            
+            container.innerHTML = html;
+        }
+        
+        function updateView() {
+            const radios = document.querySelectorAll('input[name="view"]');
+            currentView = Array.from(radios).find(r => r.checked).value;
+            
+            if (currentView === 'single') {
+                document.getElementById('singleBlockView').style.display = 'block';
+                document.getElementById('stackView').style.display = 'none';
+            } else {
+                document.getElementById('singleBlockView').style.display = 'none';
+                document.getElementById('stackView').style.display = 'block';
+                renderLayerStack();
+            }
+        }
+        
+        function updateComponentEffects() {
+            const attentionEnabled = document.getElementById('attentionToggle').checked;
+            const ffnEnabled = document.getElementById('ffnToggle').checked;
+            const normEnabled = document.getElementById('normToggle').checked;
+            const residualEnabled = document.getElementById('residualToggle').checked;
+            
+            const effects = [];
+            
+            if (!attentionEnabled) {
+                effects.push('❌ No attention - can\'t focus on relevant information');
+            }
+            if (!ffnEnabled) {
+                effects.push('❌ No FFN - can\'t process or store knowledge');
+            }
+            if (!normEnabled) {
+                effects.push('❌ No layer norm - training becomes unstable');
+            }
+            if (!residualEnabled) {
+                effects.push('❌ No residuals - deep networks can\'t train effectively');
+            }
+            
+            if (effects.length === 0) {
+                effects.push('✅ All components active - full transformer power');
+            }
+            
+            document.getElementById('componentEffects').innerHTML = effects.map(effect => `<li>${effect}</li>`).join('');
+        }
+        
+        function animateFlow() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const components = document.querySelectorAll('.component:not(.disabled)');
+            const arrows = document.querySelectorAll('.flow-arrow');
+            
+            // Reset all animations
+            components.forEach(comp => comp.style.transform = 'scale(1)');
+            arrows.forEach(arrow => arrow.style.borderTopColor = '#667eea');
+            
+            let index = 0;
+            
+            function animateNext() {
+                if (index < components.length) {
+                    // Highlight current component
+                    components[index].style.transform = 'scale(1.05)';
+                    components[index].style.boxShadow = '0 4px 20px rgba(102, 126, 234, 0.4)';
+                    
+                    // Animate arrow after component
+                    if (index < arrows.length) {
+                        setTimeout(() => {
+                            arrows[index].style.borderTopColor = '#28a745';
+                        }, 500);
+                    }
+                    
+                    // Reset previous component
+                    if (index > 0) {
+                        components[index - 1].style.transform = 'scale(1)';
+                        components[index - 1].style.boxShadow = 'none';
+                    }
+                    
+                    index++;
+                    setTimeout(animateNext, 1000);
+                } else {
+                    // Reset last component
+                    if (components.length > 0) {
+                        components[components.length - 1].style.transform = 'scale(1)';
+                        components[components.length - 1].style.boxShadow = 'none';
+                    }
+                    
+                    // Reset arrows
+                    setTimeout(() => {
+                        arrows.forEach(arrow => arrow.style.borderTopColor = '#667eea');
+                        isAnimating = false;
+                    }, 1000);
+                }
+            }
+            
+            animateNext();
+        }
+        
+        // Initialize
+        updateBlock();
+        updateLayerStack();
+    </script>
+</body>
+</html>
