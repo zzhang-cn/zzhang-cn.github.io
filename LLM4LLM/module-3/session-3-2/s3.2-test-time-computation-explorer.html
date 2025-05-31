@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test-Time Computation Explorer - LLM4LLM</title>
+    <title>Chain-of-Thought vs Direct Prediction - LLM4LLM</title>
     <style>
         * {
             margin: 0;
@@ -16,6 +16,24 @@
             line-height: 1.6;
             color: #333;
             background: #f8f9fa;
+        }
+        
+        .breadcrumb {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem 0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+        }
+        
+        .breadcrumb a:hover {
+            opacity: 1;
+            text-decoration: underline;
         }
         
         .header {
@@ -41,250 +59,188 @@
             padding: 2rem;
         }
         
-        .control-panel {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        }
-        
-        .slider-section {
-            margin-bottom: 2rem;
-        }
-        
-        .slider-label {
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .computation-slider {
-            width: 100%;
-            height: 8px;
-            border-radius: 4px;
-            background: #e9ecef;
-            outline: none;
-            margin: 1rem 0;
-        }
-        
-        .computation-slider::-webkit-slider-thumb {
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .computation-slider::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            border: none;
-        }
-        
-        .slider-values {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            color: #666;
-            margin-top: 0.5rem;
-        }
-        
-        .current-value {
-            text-align: center;
-            margin: 1rem 0;
-            padding: 1rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
-        
-        .value-display {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #667eea;
-        }
-        
-        .problem-area {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        }
-        
         .problem-selector {
-            display: flex;
-            gap: 1rem;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
             margin-bottom: 2rem;
-            flex-wrap: wrap;
-            justify-content: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            text-align: center;
         }
         
-        .problem-btn {
+        .problem-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .problem-card {
             background: #f8f9fa;
             border: 2px solid #e9ecef;
             border-radius: 8px;
-            padding: 1rem 1.5rem;
+            padding: 1.5rem;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
         }
         
-        .problem-btn:hover {
+        .problem-card:hover {
             border-color: #667eea;
             transform: translateY(-2px);
         }
         
-        .problem-btn.active {
+        .problem-card.active {
             border-color: #667eea;
             background: #e8f2ff;
         }
         
-        .problem-text {
+        .problem-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .problem-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .problem-desc {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .approach-side {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .direct-side {
+            border-top: 4px solid #dc3545;
+        }
+        
+        .cot-side {
+            border-top: 4px solid #28a745;
+        }
+        
+        .side-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .direct-side .side-title {
+            color: #dc3545;
+        }
+        
+        .cot-side .side-title {
+            color: #28a745;
+        }
+        
+        .problem-display {
             background: #f8f9fa;
             border-radius: 8px;
             padding: 1.5rem;
             margin-bottom: 2rem;
             border-left: 4px solid #667eea;
+        }
+        
+        .problem-text {
             font-size: 1.1rem;
-        }
-        
-        .thinking-display {
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 2rem;
-            min-height: 300px;
-            position: relative;
-        }
-        
-        .thinking-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .thinking-icon {
-            font-size: 1.5rem;
-        }
-        
-        .thinking-title {
-            font-weight: 600;
+            font-weight: 500;
             color: #333;
         }
         
-        .computation-time {
-            background: #667eea;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            margin-left: auto;
+        .thinking-process {
+            margin: 1.5rem 0;
+            min-height: 200px;
         }
         
-        .thinking-paths {
+        .direct-thinking {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .direct-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+        
+        .cot-steps {
             display: flex;
             flex-direction: column;
             gap: 1rem;
         }
         
-        .thinking-path {
-            border: 1px solid #e9ecef;
-            border-radius: 6px;
+        .cot-step {
+            background: #f0f8f0;
+            border: 1px solid #d4edda;
+            border-radius: 8px;
             padding: 1rem;
             opacity: 0.3;
             transition: all 0.5s ease;
+            border-left: 4px solid #28a745;
         }
         
-        .thinking-path.active {
+        .cot-step.active {
             opacity: 1;
-            border-color: #667eea;
-            background: #f8f9fa;
+            transform: translateX(5px);
         }
         
-        .thinking-path.best {
-            border-color: #28a745;
-            background: #f0f8f0;
-        }
-        
-        .path-label {
+        .step-label {
             font-weight: 600;
+            color: #28a745;
             margin-bottom: 0.5rem;
             font-size: 0.9rem;
         }
         
-        .path-content {
-            color: #666;
-            font-size: 0.9rem;
+        .step-content {
+            color: #333;
         }
         
-        .verification-section {
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .verification-result {
-            background: #f0f8f0;
-            border: 1px solid #28a745;
-            border-radius: 6px;
-            padding: 1rem;
-            color: #28a745;
-            font-weight: 600;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-        
-        .verification-result.show {
-            opacity: 1;
-        }
-        
-        .performance-metrics {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-top: 2rem;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        }
-        
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .metric-card {
+        .answer-section {
             background: #f8f9fa;
             border-radius: 8px;
             padding: 1.5rem;
+            margin-top: 2rem;
             text-align: center;
-            border-left: 4px solid #667eea;
         }
         
-        .metric-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #667eea;
+        .answer-label {
+            font-weight: 600;
             margin-bottom: 0.5rem;
+            color: #333;
         }
         
-        .metric-label {
-            color: #666;
-            font-size: 0.9rem;
+        .answer-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .direct-answer {
+            color: #dc3545;
+        }
+        
+        .cot-answer {
+            color: #28a745;
         }
         
         .controls {
@@ -313,299 +269,419 @@
             cursor: not-allowed;
         }
         
-        @media (max-width: 768px) {
+        .insights-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .insight-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insight-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .accuracy-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .accuracy-low {
+            background: #fdf2f2;
+            color: #dc3545;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .accuracy-high {
+            background: #f0f8f0;
+            color: #28a745;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .typing-animation {
+            border-right: 2px solid #333;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        @media (max-width: 968px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .container {
                 padding: 1rem;
             }
             
-            .problem-selector {
-                flex-direction: column;
-            }
-            
-            .metrics-grid {
-                grid-template-columns: 1fr 1fr;
+            .problem-types {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Test-Time Computation Explorer</h1>
-        <p>See how AI models can "think longer" for better solutions</p>
+        <div class="breadcrumb">
+            <a href="../../">← Back to All Modules</a> | 
+            <a href="../">← Back to Module 3</a>
+        </div>
+        <h1>Chain-of-Thought vs Direct Prediction</h1>
+        <p>See how step-by-step reasoning improves AI problem-solving</p>
     </div>
     
     <div class="container">
-        <!-- Control Panel -->
-        <div class="control-panel">
-            <h2>Computation Budget</h2>
-            <div class="slider-section">
-                <div class="slider-label">
-                    🧠 Thinking Time Allocation
+        <div class="problem-selector">
+            <h2>Choose a Problem Type:</h2>
+            <div class="problem-types">
+                <div class="problem-card active" onclick="selectProblem('math')" id="card-math">
+                    <div class="problem-icon">🧮</div>
+                    <div class="problem-title">Math Problem</div>
+                    <div class="problem-desc">Multi-step calculation</div>
                 </div>
-                <input 
-                    type="range" 
-                    min="1" 
-                    max="10" 
-                    value="3" 
-                    class="computation-slider" 
-                    id="computationSlider"
-                    onchange="updateComputation(this.value)"
-                >
-                <div class="slider-values">
-                    <span>Quick (1 path)</span>
-                    <span>Balanced (5 paths)</span>
-                    <span>Thorough (10+ paths)</span>
+                <div class="problem-card" onclick="selectProblem('logic')" id="card-logic">
+                    <div class="problem-icon">🧩</div>
+                    <div class="problem-title">Logic Puzzle</div>
+                    <div class="problem-desc">Deductive reasoning</div>
                 </div>
-                <div class="current-value">
-                    <div>Current Setting:</div>
-                    <div class="value-display" id="currentSetting">Balanced Exploration</div>
+                <div class="problem-card" onclick="selectProblem('planning')" id="card-planning">
+                    <div class="problem-icon">🗺️</div>
+                    <div class="problem-title">Planning Task</div>
+                    <div class="problem-desc">Sequential decision-making</div>
+                </div>
+                <div class="problem-card" onclick="selectProblem('analysis')" id="card-analysis">
+                    <div class="problem-icon">📊</div>
+                    <div class="problem-title">Data Analysis</div>
+                    <div class="problem-desc">Interpretation and insight</div>
                 </div>
             </div>
         </div>
         
-        <!-- Problem Area -->
-        <div class="problem-area">
-            <h2>Problem Selection</h2>
-            <div class="problem-selector">
-                <div class="problem-btn active" onclick="selectProblem('chess')" id="btn-chess">
-                    ♟️ Chess Move
+        <div class="comparison-grid">
+            <!-- Direct Prediction Side -->
+            <div class="approach-side direct-side">
+                <div class="accuracy-indicator accuracy-low">
+                    ❌ Often Wrong
                 </div>
-                <div class="problem-btn" onclick="selectProblem('math')" id="btn-math">
-                    🧮 Math Problem
+                <h2 class="side-title">⚡ Direct Prediction</h2>
+                
+                <div class="problem-display">
+                    <div class="problem-text" id="directProblem">
+                        If a train travels 60 mph for 2.5 hours, then 80 mph for 1.5 hours, what is the total distance?
+                    </div>
                 </div>
-                <div class="problem-btn" onclick="selectProblem('coding')" id="btn-coding">
-                    💻 Code Debug
+                
+                <div class="thinking-process">
+                    <div class="direct-thinking">
+                        <div class="direct-icon">🤔</div>
+                        <div>Model immediately tries to predict the answer...</div>
+                        <div style="margin-top: 1rem; color: #333; font-style: normal;">
+                            "Based on similar problems in training data..."
+                        </div>
+                    </div>
                 </div>
-                <div class="problem-btn" onclick="selectProblem('reasoning')" id="btn-reasoning">
-                    🧩 Logic Puzzle
+                
+                <div class="answer-section">
+                    <div class="answer-label">Direct Answer:</div>
+                    <div class="answer-text direct-answer" id="directAnswer">
+                        270 miles
+                    </div>
+                    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">
+                        (Often incorrect due to pattern matching)
+                    </div>
                 </div>
             </div>
             
-            <div class="problem-text" id="problemText">
-                You're playing chess as White. Your opponent just moved their queen to attack your king. You have three possible moves: move the king, block with a rook, or capture the queen with your knight. What's the best move?
-            </div>
-            
-            <!-- Thinking Display -->
-            <div class="thinking-display">
-                <div class="thinking-header">
-                    <div class="thinking-icon">🤔</div>
-                    <div class="thinking-title">AI Reasoning Process</div>
-                    <div class="computation-time" id="computationTime">Exploring 5 paths...</div>
+            <!-- Chain-of-Thought Side -->
+            <div class="approach-side cot-side">
+                <div class="accuracy-indicator accuracy-high">
+                    ✅ Usually Correct
+                </div>
+                <h2 class="side-title">🔗 Chain-of-Thought</h2>
+                
+                <div class="problem-display">
+                    <div class="problem-text" id="cotProblem">
+                        If a train travels 60 mph for 2.5 hours, then 80 mph for 1.5 hours, what is the total distance?
+                    </div>
                 </div>
                 
-                <div class="thinking-paths" id="thinkingPaths">
-                    <!-- Paths will be dynamically generated -->
+                <div class="thinking-process">
+                    <div class="cot-steps" id="cotSteps">
+                        <div class="cot-step" id="step1">
+                            <div class="step-label">Step 1: Break down the problem</div>
+                            <div class="step-content">I need to calculate distance for two separate segments and add them together.</div>
+                        </div>
+                        
+                        <div class="cot-step" id="step2">
+                            <div class="step-label">Step 2: First segment</div>
+                            <div class="step-content">Distance = Speed × Time = 60 mph × 2.5 hours = 150 miles</div>
+                        </div>
+                        
+                        <div class="cot-step" id="step3">
+                            <div class="step-label">Step 3: Second segment</div>
+                            <div class="step-content">Distance = Speed × Time = 80 mph × 1.5 hours = 120 miles</div>
+                        </div>
+                        
+                        <div class="cot-step" id="step4">
+                            <div class="step-label">Step 4: Total distance</div>
+                            <div class="step-content">Total = 150 miles + 120 miles = 270 miles</div>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="verification-section">
-                    <div class="verification-result" id="verificationResult">
-                        ✅ Best solution verified through multiple reasoning paths
+                <div class="answer-section">
+                    <div class="answer-label">Reasoned Answer:</div>
+                    <div class="answer-text cot-answer" id="cotAnswer">
+                        270 miles
+                    </div>
+                    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">
+                        (Correct through step-by-step reasoning)
                     </div>
                 </div>
             </div>
         </div>
         
         <div class="controls">
-            <button class="btn" onclick="runThinking()" id="runBtn">Start Thinking Process</button>
-            <button class="btn" onclick="resetThinking()" id="resetBtn">Reset</button>
+            <button class="btn" onclick="runDemo()" id="runBtn">Run Reasoning Demo</button>
+            <button class="btn" onclick="resetDemo()" id="resetBtn">Reset</button>
         </div>
         
-        <!-- Performance Metrics -->
-        <div class="performance-metrics">
-            <h2>Performance Metrics</h2>
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-value" id="accuracyMetric">85%</div>
-                    <div class="metric-label">Solution Accuracy</div>
+        <div class="insights-section">
+            <h2>Key Insights</h2>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-title">🎯 Accuracy Improvement</div>
+                    <div>Chain-of-thought dramatically improves accuracy on complex problems by enabling error detection and correction at each step.</div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="pathsMetric">5</div>
-                    <div class="metric-label">Reasoning Paths</div>
+                <div class="insight-card">
+                    <div class="insight-title">🔍 Transparency</div>
+                    <div>We can see exactly how the model arrives at its answer, making it easier to identify and fix reasoning errors.</div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="timeMetric">2.3s</div>
-                    <div class="metric-label">Computation Time</div>
+                <div class="insight-card">
+                    <div class="insight-title">🧠 Decomposition</div>
+                    <div>Complex problems are broken into manageable steps, mirroring how humans approach difficult tasks.</div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="confidenceMetric">92%</div>
-                    <div class="metric-label">Confidence Level</div>
+                <div class="insight-card">
+                    <div class="insight-title">⚡ Computational Cost</div>
+                    <div>Chain-of-thought uses more tokens and computation but provides much better results for reasoning tasks.</div>
                 </div>
             </div>
         </div>
     </div>
     
     <script>
-        let currentProblem = 'chess';
-        let computationLevel = 3;
+        let currentProblem = 'math';
         let isRunning = false;
         
         const problems = {
-            chess: {
-                text: "You're playing chess as White. Your opponent just moved their queen to attack your king. You have three possible moves: move the king, block with a rook, or capture the queen with your knight. What's the best move?",
-                paths: [
-                    { label: "Path 1: Move King", content: "King to safety... but this allows opponent to maintain attacking position", quality: "safe" },
-                    { label: "Path 2: Block with Rook", content: "Rook blocks attack... but this pins the rook and limits options", quality: "defensive" },
-                    { label: "Path 3: Capture Queen", content: "Knight takes queen... but need to check if knight is protected", quality: "aggressive" },
-                    { label: "Path 4: Counter-attack", content: "What if we ignore the threat and attack their king instead?", quality: "risky" },
-                    { label: "Path 5: Deeper Analysis", content: "After capturing queen, opponent recaptures with pawn, we're up material", quality: "analytical" },
-                    { label: "Path 6: Verification", content: "Double-checking: knight capture is safe and wins material", quality: "best" }
-                ]
-            },
-            
             math: {
-                text: "A rectangular garden has a perimeter of 100 meters. If the length is 10 meters more than twice the width, what are the dimensions?",
-                paths: [
-                    { label: "Path 1: Basic Setup", content: "Let width = w, length = 2w + 10", quality: "setup" },
-                    { label: "Path 2: Perimeter Equation", content: "Perimeter = 2(length + width) = 2(2w + 10 + w) = 100", quality: "formula" },
-                    { label: "Path 3: Simplify", content: "2(3w + 10) = 100, so 6w + 20 = 100", quality: "algebra" },
-                    { label: "Path 4: Solve for w", content: "6w = 80, therefore w = 13.33 meters", quality: "solution" },
-                    { label: "Path 5: Find Length", content: "Length = 2(13.33) + 10 = 36.67 meters", quality: "completion" },
-                    { label: "Path 6: Verify", content: "Check: 2(13.33 + 36.67) = 2(50) = 100 ✓", quality: "best" }
+                question: "If a train travels 60 mph for 2.5 hours, then 80 mph for 1.5 hours, what is the total distance?",
+                directAnswer: "245 miles",
+                directCorrect: false,
+                cotAnswer: "270 miles",
+                cotSteps: [
+                    {
+                        label: "Step 1: Break down the problem",
+                        content: "I need to calculate distance for two separate segments and add them together."
+                    },
+                    {
+                        label: "Step 2: First segment",
+                        content: "Distance = Speed × Time = 60 mph × 2.5 hours = 150 miles"
+                    },
+                    {
+                        label: "Step 3: Second segment", 
+                        content: "Distance = Speed × Time = 80 mph × 1.5 hours = 120 miles"
+                    },
+                    {
+                        label: "Step 4: Total distance",
+                        content: "Total = 150 miles + 120 miles = 270 miles"
+                    }
                 ]
             },
             
-            coding: {
-                text: "This Python function should return the maximum value in a list, but it's returning the wrong answer. Can you find and fix the bug?",
-                paths: [
-                    { label: "Path 1: Read Code", content: "Function iterates through list comparing elements", quality: "analysis" },
-                    { label: "Path 2: Trace Execution", content: "Variable 'max_val' starts at 0, but what if all numbers are negative?", quality: "insight" },
-                    { label: "Path 3: Test Edge Cases", content: "With [-5, -2, -8], function returns 0 instead of -2", quality: "debugging" },
-                    { label: "Path 4: Identify Bug", content: "Problem: initializing max_val to 0 instead of first element", quality: "root_cause" },
-                    { label: "Path 5: Fix Implementation", content: "Change: max_val = nums[0] if nums else None", quality: "solution" },
-                    { label: "Path 6: Comprehensive Test", content: "Test with positive, negative, mixed, and empty lists", quality: "best" }
+            logic: {
+                question: "Alice is taller than Bob. Bob is taller than Charlie. Is Alice taller than Charlie?",
+                directAnswer: "Probably",
+                directCorrect: false,
+                cotAnswer: "Yes",
+                cotSteps: [
+                    {
+                        label: "Step 1: Identify relationships",
+                        content: "I have two given relationships: Alice > Bob and Bob > Charlie"
+                    },
+                    {
+                        label: "Step 2: Apply transitivity",
+                        content: "If A > B and B > C, then by the transitive property, A > C"
+                    },
+                    {
+                        label: "Step 3: Apply to our case",
+                        content: "Since Alice > Bob and Bob > Charlie, then Alice > Charlie"
+                    },
+                    {
+                        label: "Step 4: Conclusion",
+                        content: "Therefore, Alice is definitely taller than Charlie"
+                    }
                 ]
             },
             
-            reasoning: {
-                text: "Five friends sit in a row. Alice sits next to Bob. Charlie sits at one end. Dave sits between Alice and Emily. Where does each person sit?",
-                paths: [
-                    { label: "Path 1: List Constraints", content: "Alice next to Bob, Charlie at end, Dave between Alice & Emily", quality: "analysis" },
-                    { label: "Path 2: Try Charlie Left", content: "Charlie-Dave-Alice-Bob-Emily... but Dave isn't between Alice & Emily", quality: "attempt" },
-                    { label: "Path 3: Try Charlie Right", content: "?-?-?-?-Charlie... work backwards", quality: "strategy" },
-                    { label: "Path 4: Place Dave", content: "Dave between Alice & Emily: Alice-Dave-Emily or Emily-Dave-Alice", quality: "progress" },
-                    { label: "Path 5: Add Bob Constraint", content: "Bob next to Alice: Bob-Alice-Dave-Emily-Charlie", quality: "solution" },
-                    { label: "Path 6: Verify All Constraints", content: "✓ Alice next to Bob ✓ Charlie at end ✓ Dave between Alice & Emily", quality: "best" }
+            planning: {
+                question: "You need to get to the airport, but your car won't start and it's raining. What's your best plan?",
+                directAnswer: "Call an Uber",
+                directCorrect: false,
+                cotAnswer: "Call rideshare, have backup plan",
+                cotSteps: [
+                    {
+                        label: "Step 1: Assess the situation",
+                        content: "Car is broken, weather is bad, time-sensitive destination (airport)"
+                    },
+                    {
+                        label: "Step 2: Consider options",
+                        content: "Rideshare, taxi, public transit, friend/family, car service"
+                    },
+                    {
+                        label: "Step 3: Evaluate reliability",
+                        content: "Rideshare apps show availability and ETA; public transit may be delayed by rain"
+                    },
+                    {
+                        label: "Step 4: Create plan with backup",
+                        content: "Book rideshare immediately, but also call taxi company as backup in case of cancellations"
+                    }
+                ]
+            },
+            
+            analysis: {
+                question: "Sales dropped 15% last month. What might explain this and what should we investigate?",
+                directAnswer: "Marketing isn't working",
+                directCorrect: false,
+                cotAnswer: "Multiple factors need investigation",
+                cotSteps: [
+                    {
+                        label: "Step 1: Categorize potential causes",
+                        content: "Internal factors (pricing, product, marketing) vs external factors (market, competition, seasonality)"
+                    },
+                    {
+                        label: "Step 2: Internal possibilities",
+                        content: "Recent price changes? Product quality issues? Marketing campaign changes? Sales team changes?"
+                    },
+                    {
+                        label: "Step 3: External possibilities", 
+                        content: "New competitors? Economic conditions? Seasonal patterns? Industry trends?"
+                    },
+                    {
+                        label: "Step 4: Investigation plan",
+                        content: "Analyze by customer segment, geographic region, product line, and compare to industry benchmarks"
+                    }
                 ]
             }
         };
-        
-        const computationSettings = {
-            1: { name: "Lightning Fast", paths: 1, accuracy: 45, time: 0.1, confidence: 60 },
-            2: { name: "Quick Response", paths: 2, accuracy: 60, time: 0.3, confidence: 70 },
-            3: { name: "Balanced Exploration", paths: 3, accuracy: 75, time: 0.8, confidence: 80 },
-            4: { name: "Careful Analysis", paths: 4, accuracy: 82, time: 1.2, confidence: 85 },
-            5: { name: "Thorough Search", paths: 5, accuracy: 88, time: 1.8, confidence: 88 },
-            6: { name: "Deep Thinking", paths: 6, accuracy: 92, time: 2.5, confidence: 92 },
-            7: { name: "Comprehensive", paths: 7, accuracy: 94, time: 3.2, confidence: 94 },
-            8: { name: "Exhaustive", paths: 8, accuracy: 96, time: 4.1, confidence: 96 },
-            9: { name: "Maximum Depth", paths: 9, accuracy: 97, time: 5.2, confidence: 97 },
-            10: { name: "Complete Search", paths: 10, accuracy: 98, time: 6.8, confidence: 98 }
-        };
-        
-        function updateComputation(level) {
-            computationLevel = level;
-            const setting = computationSettings[level];
-            
-            document.getElementById('currentSetting').textContent = setting.name;
-            document.getElementById('computationTime').textContent = `Exploring ${setting.paths} paths...`;
-            
-            // Update metrics
-            document.getElementById('accuracyMetric').textContent = setting.accuracy + '%';
-            document.getElementById('pathsMetric').textContent = setting.paths;
-            document.getElementById('timeMetric').textContent = setting.time + 's';
-            document.getElementById('confidenceMetric').textContent = setting.confidence + '%';
-            
-            // Update thinking paths display
-            updateThinkingPaths();
-        }
         
         function selectProblem(problemType) {
             currentProblem = problemType;
             
-            // Update button selection
-            document.querySelectorAll('.problem-btn').forEach(btn => {
-                btn.classList.remove('active');
+            // Update card selection
+            document.querySelectorAll('.problem-card').forEach(card => {
+                card.classList.remove('active');
             });
-            document.getElementById('btn-' + problemType).classList.add('active');
+            document.getElementById('card-' + problemType).classList.add('active');
             
-            // Update problem text
-            document.getElementById('problemText').textContent = problems[problemType].text;
-            
-            // Update thinking paths
-            updateThinkingPaths();
-            resetThinking();
+            // Update content
+            updateProblemContent();
+            resetDemo();
         }
         
-        function updateThinkingPaths() {
-            const pathsContainer = document.getElementById('thinkingPaths');
+        function updateProblemContent() {
             const problem = problems[currentProblem];
-            const setting = computationSettings[computationLevel];
-            const numPaths = Math.min(setting.paths, problem.paths.length);
             
-            pathsContainer.innerHTML = '';
+            // Update problem text
+            document.getElementById('directProblem').textContent = problem.question;
+            document.getElementById('cotProblem').textContent = problem.question;
             
-            for (let i = 0; i < numPaths; i++) {
-                const path = problem.paths[i];
-                const pathDiv = document.createElement('div');
-                pathDiv.className = `thinking-path ${path.quality}`;
-                pathDiv.id = `path-${i}`;
-                pathDiv.innerHTML = `
-                    <div class="path-label">${path.label}</div>
-                    <div class="path-content">${path.content}</div>
+            // Update answers
+            document.getElementById('directAnswer').textContent = problem.directAnswer;
+            document.getElementById('cotAnswer').textContent = problem.cotAnswer;
+            
+            // Update CoT steps
+            const stepsContainer = document.getElementById('cotSteps');
+            stepsContainer.innerHTML = '';
+            
+            problem.cotSteps.forEach((step, index) => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'cot-step';
+                stepDiv.id = `step${index + 1}`;
+                stepDiv.innerHTML = `
+                    <div class="step-label">${step.label}</div>
+                    <div class="step-content">${step.content}</div>
                 `;
-                pathsContainer.appendChild(pathDiv);
+                stepsContainer.appendChild(stepDiv);
+            });
+            
+            // Update accuracy indicators
+            const directAccuracy = document.querySelector('.direct-side .accuracy-indicator');
+            const cotAccuracy = document.querySelector('.cot-side .accuracy-indicator');
+            
+            if (problem.directCorrect) {
+                directAccuracy.className = 'accuracy-indicator accuracy-high';
+                directAccuracy.innerHTML = '✅ Correct';
+            } else {
+                directAccuracy.className = 'accuracy-indicator accuracy-low';
+                directAccuracy.innerHTML = '❌ Often Wrong';
             }
         }
         
-        async function runThinking() {
+        async function runDemo() {
             if (isRunning) return;
             
             isRunning = true;
             document.getElementById('runBtn').disabled = true;
             
-            // Reset all paths
-            document.querySelectorAll('.thinking-path').forEach(path => {
-                path.classList.remove('active', 'best');
+            // Reset steps
+            document.querySelectorAll('.cot-step').forEach(step => {
+                step.classList.remove('active');
             });
-            document.getElementById('verificationResult').classList.remove('show');
             
-            const setting = computationSettings[computationLevel];
-            const numPaths = Math.min(setting.paths, problems[currentProblem].paths.length);
-            
-            // Activate paths one by one
-            for (let i = 0; i < numPaths; i++) {
-                await sleep(800);
-                document.getElementById(`path-${i}`).classList.add('active');
+            // Activate steps one by one
+            const problem = problems[currentProblem];
+            for (let i = 0; i < problem.cotSteps.length; i++) {
+                await sleep(1500);
+                document.getElementById(`step${i + 1}`).classList.add('active');
             }
-            
-            // Highlight best path
-            await sleep(1000);
-            if (numPaths > 0) {
-                const lastPath = document.getElementById(`path-${numPaths - 1}`);
-                if (lastPath) {
-                    lastPath.classList.add('best');
-                }
-            }
-            
-            // Show verification
-            await sleep(500);
-            document.getElementById('verificationResult').classList.add('show');
             
             isRunning = false;
             document.getElementById('runBtn').disabled = false;
         }
         
-        function resetThinking() {
+        function resetDemo() {
             isRunning = false;
             document.getElementById('runBtn').disabled = false;
             
-            // Reset all paths
-            document.querySelectorAll('.thinking-path').forEach(path => {
-                path.classList.remove('active', 'best');
+            // Reset all steps
+            document.querySelectorAll('.cot-step').forEach(step => {
+                step.classList.remove('active');
             });
-            
-            // Hide verification
-            document.getElementById('verificationResult').classList.remove('show');
         }
         
         function sleep(ms) {
@@ -614,8 +690,7 @@
         
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            updateComputation(3);
-            updateThinkingPaths();
+            updateProblemContent();
         });
     </script>
 </body>
