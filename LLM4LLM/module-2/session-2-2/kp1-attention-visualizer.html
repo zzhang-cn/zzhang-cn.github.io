@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attention Mechanism Visualizer - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .controls-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+        
+        .visualization-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-icon {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        .text-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+        
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .preset-btn {
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+        
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .view-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .view-btn {
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .view-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .view-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .view-btn.active:hover {
+            background: #5a6fd8;
+        }
+        
+        .attention-matrix {
+            margin: 1rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+        }
+        
+        .matrix-header {
+            background: #f8f9fa;
+            padding: 0.5rem;
+            font-weight: 500;
+            text-align: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .matrix-labels {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .matrix-label {
+            flex: 1;
+            padding: 0.5rem 0.25rem;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-right: 1px solid #e9ecef;
+            min-width: 60px;
+        }
+        
+        .matrix-label:last-child {
+            border-right: none;
+        }
+        
+        .matrix-row {
+            display: flex;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .matrix-row:last-child {
+            border-bottom: none;
+        }
+        
+        .row-label {
+            background: #f8f9fa;
+            padding: 0.5rem 0.25rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+            border-right: 1px solid #e9ecef;
+            min-width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .matrix-cell {
+            flex: 1;
+            padding: 0.25rem;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-right: 1px solid #e9ecef;
+            min-width: 60px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .matrix-cell:last-child {
+            border-right: none;
+        }
+        
+        .matrix-cell:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .computation-steps {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .step {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .step-content {
+            color: #666;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .math-formula {
+            background: #e8f2ff;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            margin: 0.5rem 0;
+        }
+        
+        .comparison-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .comparison-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .comparison-card.attention {
+            border-color: #28a745;
+        }
+        
+        .comparison-card.concatenation {
+            border-color: #dc3545;
+        }
+        
+        .comparison-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .comparison-card.attention .comparison-title {
+            color: #28a745;
+        }
+        
+        .comparison-card.concatenation .comparison-title {
+            color: #dc3545;
+        }
+        
+        .weight-bar {
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin: 0.25rem 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .weight-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .insights-panel h4:before {
+            content: "💡";
+            margin-right: 0.5rem;
+        }
+        
+        .insights-list {
+            list-style: none;
+        }
+        
+        .insights-list li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .view-controls {
+                flex-direction: column;
+            }
+            
+            .matrix-cell, .matrix-label, .row-label {
+                min-width: 40px;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 2</a> / 
+                Session 2.2 / KP1
+            </div>
+            <h1>Interactive Attention Mechanism Visualizer</h1>
+            <p>Discover how attention solves the selection problem through dynamic, content-based focus</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="main-content">
+            <div class="controls-panel">
+                <h2 class="section-title">
+                    <span class="section-icon">⚙️</span>
+                    Input Controls
+                </h2>
+                
+                <div class="control-group">
+                    <label class="control-label">Enter your sentence:</label>
+                    <textarea class="text-input" id="textInput" rows="3">The cat that was sleeping sat on the mat</textarea>
+                </div>
+                
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="loadPreset('basic')">
+                        "The cat sat on the mat" - Basic attention
+                    </button>
+                    <button class="preset-btn" onclick="loadPreset('long_dependency')">
+                        "The cat that was sleeping sat on the mat" - Long dependency
+                    </button>
+                    <button class="preset-btn" onclick="loadPreset('complex')">
+                        "The scientist who discovered penicillin was awarded the prize" - Complex relationships
+                    </button>
+                    <button class="preset-btn" onclick="loadPreset('ambiguous')">
+                        "John gave Mary the book because she needed it" - Pronoun resolution
+                    </button>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">View Mode:</label>
+                    <div class="view-controls">
+                        <button class="view-btn active" id="matrixBtn" onclick="setView('matrix')">Attention Matrix</button>
+                        <button class="view-btn" id="stepsBtn" onclick="setView('steps')">Step-by-Step</button>
+                        <button class="view-btn" id="comparisonBtn" onclick="setView('comparison')">vs Concatenation</button>
+                    </div>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Key Concepts</h4>
+                    <ul class="insights-list">
+                        <li><strong>Dynamic Selection:</strong> Attention weights change based on content, not position</li>
+                        <li><strong>Query-Key Matching:</strong> Each word "asks" (query) what it should attend to, others "offer" (keys)</li>
+                        <li><strong>Value Weighting:</strong> Relevant words contribute more to the final representation</li>
+                        <li><strong>Contextual Relevance:</strong> Same word can attend differently in different contexts</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="visualization-panel">
+                <h2 class="section-title">
+                    <span class="section-icon">🎯</span>
+                    Attention Visualization
+                </h2>
+                
+                <!-- Matrix View -->
+                <div id="matrixView" class="view-content">
+                    <div class="attention-matrix" id="attentionMatrix">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                        <strong>How to read:</strong> Each row shows what that word attends to. Darker colors = higher attention. 
+                        Hover over cells to see exact attention weights.
+                    </p>
+                </div>
+                
+                <!-- Step-by-Step View -->
+                <div id="stepsView" class="view-content" style="display: none;">
+                    <div class="computation-steps" id="computationSteps">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Comparison View -->
+                <div id="comparisonView" class="view-content" style="display: none;">
+                    <div class="comparison-panel">
+                        <div class="comparison-card concatenation">
+                            <div class="comparison-title">🔗 Bengio's Concatenation (Equal Weights)</div>
+                            <div id="concatenationWeights"></div>
+                            <p style="margin-top: 1rem; font-size: 0.9rem;">
+                                All words get equal importance regardless of relevance.
+                            </p>
+                        </div>
+                        
+                        <div class="comparison-card attention">
+                            <div class="comparison-title">🎯 Attention Mechanism (Dynamic Weights)</div>
+                            <div id="attentionWeights"></div>
+                            <p style="margin-top: 1rem; font-size: 0.9rem;">
+                                Words get importance based on their relevance to the current focus.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="insights-panel">
+                        <h4>Why Attention Works Better</h4>
+                        <ul class="insights-list">
+                            <li>Attention can focus on relevant words regardless of position</li>
+                            <li>Long-range dependencies are captured naturally</li>
+                            <li>Context determines relevance, not just proximity</li>
+                            <li>Different words can have different importance for different predictions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentTokens = [];
+        let attentionWeights = [];
+        let currentView = 'matrix';
+        
+        const presets = {
+            basic: "The cat sat on the mat",
+            long_dependency: "The cat that was sleeping sat on the mat", 
+            complex: "The scientist who discovered penicillin was awarded the prize",
+            ambiguous: "John gave Mary the book because she needed it"
+        };
+        
+        function loadPreset(type) {
+            document.getElementById('textInput').value = presets[type];
+            analyzeText();
+        }
+        
+        function setView(view) {
+            currentView = view;
+            
+            // Update button states
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            const targetBtn = document.getElementById(view + 'Btn');
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+            }
+            
+            // Show/hide views
+            document.querySelectorAll('.view-content').forEach(div => div.style.display = 'none');
+            const targetView = document.getElementById(view + 'View');
+            if (targetView) {
+                targetView.style.display = 'block';
+            }
+            
+            // Update the visualization for the new view
+            updateVisualization();
+        }
+        
+        function tokenize(text) {
+            // Simple tokenization - split by spaces and punctuation
+            return text.toLowerCase()
+                      .replace(/[.,!?;]/g, ' $& ')
+                      .split(/\s+/)
+                      .filter(token => token.length > 0);
+        }
+        
+        function generateAttentionWeights(tokens) {
+            const numTokens = tokens.length;
+            const weights = [];
+            
+            for (let i = 0; i < numTokens; i++) {
+                const row = [];
+                for (let j = 0; j < numTokens; j++) {
+                    // Simulate realistic attention patterns
+                    let weight = Math.random() * 0.3; // Base random weight
+                    
+                    // Self-attention (diagonal)
+                    if (i === j) {
+                        weight += 0.2;
+                    }
+                    
+                    // Adjacent words get higher attention
+                    if (Math.abs(i - j) === 1) {
+                        weight += 0.15;
+                    }
+                    
+                    // Special patterns based on word types
+                    const currentWord = tokens[i];
+                    const targetWord = tokens[j];
+                    
+                    // Articles attend to nouns
+                    if ((currentWord === 'the' || currentWord === 'a') && 
+                        (targetWord === 'cat' || targetWord === 'mat' || targetWord === 'scientist' || targetWord === 'book')) {
+                        weight += 0.3;
+                    }
+                    
+                    // Pronouns attend to their antecedents
+                    if (currentWord === 'it' && (targetWord === 'book' || targetWord === 'mat')) {
+                        weight += 0.4;
+                    }
+                    
+                    if (currentWord === 'she' && (targetWord === 'mary')) {
+                        weight += 0.5;
+                    }
+                    
+                    // Verbs attend to subjects and objects
+                    if (currentWord === 'sat' && (targetWord === 'cat')) {
+                        weight += 0.4;
+                    }
+                    
+                    if (currentWord === 'discovered' && (targetWord === 'scientist' || targetWord === 'penicillin')) {
+                        weight += 0.4;
+                    }
+                    
+                    // Relative pronouns create long-range dependencies
+                    if (currentWord === 'who' && targetWord === 'scientist') {
+                        weight += 0.6;
+                    }
+                    
+                    if (currentWord === 'that' && targetWord === 'cat') {
+                        weight += 0.5;
+                    }
+                    
+                    row.push(Math.min(weight, 1.0)); // Cap at 1.0
+                }
+                
+                // Normalize to sum to 1 (softmax-like)
+                const sum = row.reduce((a, b) => a + b, 0);
+                const normalized = row.map(w => w / sum);
+                weights.push(normalized);
+            }
+            
+            return weights;
+        }
+        
+        function analyzeText() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) return;
+            
+            currentTokens = tokenize(text);
+            attentionWeights = generateAttentionWeights(currentTokens);
+            
+            updateVisualization();
+        }
+        
+        function updateVisualization() {
+            if (currentView === 'matrix') {
+                updateMatrixView();
+            } else if (currentView === 'steps') {
+                updateStepsView();
+            } else if (currentView === 'comparison') {
+                updateComparisonView();
+            }
+        }
+        
+        function updateMatrixView() {
+            const container = document.getElementById('attentionMatrix');
+            
+            if (currentTokens.length === 0) {
+                container.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Enter text to see attention patterns</div>';
+                return;
+            }
+            
+            let html = '<div class="matrix-header">Attention Weights Matrix</div>';
+            
+            // Column headers
+            html += '<div class="matrix-labels">';
+            html += '<div class="matrix-label" style="background: #667eea; color: white;">Attending to →</div>';
+            currentTokens.forEach(token => {
+                html += `<div class="matrix-label">${token}</div>`;
+            });
+            html += '</div>';
+            
+            // Matrix rows
+            currentTokens.forEach((token, i) => {
+                html += '<div class="matrix-row">';
+                html += `<div class="row-label">${token}</div>`;
+                
+                attentionWeights[i].forEach((weight, j) => {
+                    const intensity = Math.round(weight * 255);
+                    const alpha = weight;
+                    const bgColor = `rgba(102, 126, 234, ${alpha})`;
+                    const textColor = alpha > 0.5 ? 'white' : '#333';
+                    
+                    html += `<div class="matrix-cell" 
+                                 style="background-color: ${bgColor}; color: ${textColor};"
+                                 onmouseover="showTooltip(event, '${token}', '${currentTokens[j]}', ${weight.toFixed(3)})"
+                                 onmouseout="hideTooltip()">
+                                 ${weight.toFixed(2)}
+                             </div>`;
+                });
+                
+                html += '</div>';
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function updateStepsView() {
+            const container = document.getElementById('computationSteps');
+            
+            if (currentTokens.length === 0) {
+                container.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Enter text to see computation steps</div>';
+                return;
+            }
+            
+            let html = '';
+            
+            // Step 1: Input tokens
+            html += `<div class="step">
+                <div class="step-title">Step 1: Input Tokens</div>
+                <div class="step-content">
+                    Tokens: [${currentTokens.map(t => `"${t}"`).join(', ')}]
+                </div>
+            </div>`;
+            
+            // Step 2: Query, Key, Value creation
+            html += `<div class="step">
+                <div class="step-title">Step 2: Create Queries, Keys, and Values</div>
+                <div class="step-content">
+                    Each token creates:
+                    <div class="math-formula">
+                        Q = token_embedding × W_q  (What am I looking for?)
+                        K = token_embedding × W_k  (What do I have to offer?)
+                        V = token_embedding × W_v  (What information do I contain?)
+                    </div>
+                </div>
+            </div>`;
+            
+            // Step 3: Attention scores
+            html += `<div class="step">
+                <div class="step-title">Step 3: Calculate Attention Scores</div>
+                <div class="step-content">
+                    For each token pair, compute similarity:
+                    <div class="math-formula">
+                        Score(i,j) = Q_i · K_j / √d_k
+                    </div>
+                    Higher scores = more relevant connections
+                </div>
+            </div>`;
+            
+            // Step 4: Softmax normalization
+            html += `<div class="step">
+                <div class="step-title">Step 4: Apply Softmax (Normalization)</div>
+                <div class="step-content">
+                    Convert scores to probabilities that sum to 1:
+                    <div class="math-formula">
+                        Attention(i,j) = exp(Score(i,j)) / Σ exp(Score(i,k))
+                    </div>
+                    This creates the attention weights you see in the matrix.
+                </div>
+            </div>`;
+            
+            // Step 5: Weighted combination
+            html += `<div class="step">
+                <div class="step-title">Step 5: Weighted Value Combination</div>
+                <div class="step-content">
+                    Combine values using attention weights:
+                    <div class="math-formula">
+                        Output_i = Σ Attention(i,j) × V_j
+                    </div>
+                    Each token gets a representation that focuses on relevant context.
+                </div>
+            </div>`;
+            
+            container.innerHTML = html;
+        }
+        
+        function updateComparisonView() {
+            const concatenationContainer = document.getElementById('concatenationWeights');
+            const attentionContainer = document.getElementById('attentionWeights');
+            
+            if (currentTokens.length === 0) {
+                concatenationContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Enter text to see comparison</div>';
+                attentionContainer.innerHTML = '<div style="padding: 1rem; text-align: center; color: #666;">Enter text to see comparison</div>';
+                return;
+            }
+            
+            // Equal weights for concatenation
+            const equalWeight = 1.0 / currentTokens.length;
+            
+            // Concatenation weights (all equal)
+            let concatHtml = '';
+            currentTokens.forEach(token => {
+                concatHtml += `
+                    <div style="display: flex; align-items: center; margin: 0.5rem 0;">
+                        <span style="min-width: 80px; font-weight: 500;">${token}:</span>
+                        <div class="weight-bar" style="flex: 1; margin-left: 1rem;">
+                            <div class="weight-fill" style="width: 100%; background: #dc3545;">
+                                ${(equalWeight * 100).toFixed(1)}%
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            concatenationContainer.innerHTML = concatHtml;
+            
+            // Attention weights (example for first token)
+            let attentionHtml = '';
+            const firstTokenWeights = attentionWeights[0] || [];
+            currentTokens.forEach((token, i) => {
+                const weight = firstTokenWeights[i] || 0;
+                attentionHtml += `
+                    <div style="display: flex; align-items: center; margin: 0.5rem 0;">
+                        <span style="min-width: 80px; font-weight: 500;">${token}:</span>
+                        <div class="weight-bar" style="flex: 1; margin-left: 1rem;">
+                            <div class="weight-fill" style="width: ${weight * 100}%; background: #28a745;">
+                                ${(weight * 100).toFixed(1)}%
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            attentionContainer.innerHTML = attentionHtml + 
+                `<p style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
+                    (Showing attention from "${currentTokens[0]}" to all tokens)
+                </p>`;
+        }
+        
+        function showTooltip(event, fromToken, toToken, weight) {
+            // Simple tooltip implementation
+            const tooltip = document.createElement('div');
+            tooltip.id = 'attention-tooltip';
+            tooltip.style.cssText = `
+                position: absolute;
+                background: #333;
+                color: white;
+                padding: 0.5rem;
+                border-radius: 4px;
+                font-size: 0.8rem;
+                z-index: 1000;
+                pointer-events: none;
+                max-width: 200px;
+            `;
+            tooltip.innerHTML = `
+                <strong>"${fromToken}" → "${toToken}"</strong><br>
+                Attention Weight: ${weight}<br>
+                <small>${weight > 0.3 ? 'High' : weight > 0.1 ? 'Medium' : 'Low'} attention</small>
+            `;
+            
+            document.body.appendChild(tooltip);
+            
+            tooltip.style.left = (event.pageX + 10) + 'px';
+            tooltip.style.top = (event.pageY - 10) + 'px';
+        }
+        
+        function hideTooltip() {
+            const tooltip = document.getElementById('attention-tooltip');
+            if (tooltip) {
+                tooltip.remove();
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('textInput').addEventListener('input', analyzeText);
+        
+        // Initialize
+        analyzeText();
+    </script>
+</body>
+</html>
