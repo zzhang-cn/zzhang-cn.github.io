@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 2: Transformer Architecture - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .breadcrumb {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem 0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+        }
+        
+        .breadcrumb a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .intro-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .intro-section h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+        
+        .intro-section p {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .session-section {
+            margin-bottom: 3rem;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .session-header {
+            background: #667eea;
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .session-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .session-number {
+            background: rgba(255,255,255,0.2);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+        
+        .session-details h3 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .session-details p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .session-stats {
+            text-align: right;
+            opacity: 0.8;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+        }
+        
+        .visualizations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+        
+        .viz-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background: white;
+        }
+        
+        .viz-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        
+        .viz-header {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .viz-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .viz-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .viz-content {
+            padding: 1rem;
+        }
+        
+        .viz-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        
+        .viz-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .tag {
+            background: #e9ecef;
+            color: #667eea;
+            padding: 0.125rem 0.375rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            border: 1px solid #e9ecef;
+        }
+        
+        .viz-link {
+            display: inline-block;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border: 1px solid #667eea;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .viz-link:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .stats-overview {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-card .label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .coming-soon {
+            opacity: 0.6;
+            position: relative;
+        }
+        
+        .coming-soon::after {
+            content: "Coming Soon";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .visualizations-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .session-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .session-stats {
+                text-align: center;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="breadcrumb">
+            <a href="../">← Back to All Modules</a>
+        </div>
+        <h1>Module 2: Transformer Architecture</h1>
+        <p>From static embeddings to dynamic attention - understanding the architecture that powers modern LLMs</p>
+    </div>
+    
+    <div class="container">
+        <div class="intro-section">
+            <h2>Interactive Transformer Explorations</h2>
+            <p>This module takes you inside the transformer architecture through hands-on visualizations. See how attention mechanisms enable dynamic focus, how position embeddings solve order problems, and how the complete transformer block processes language.</p>
+        </div>
+        
+        <div class="stats-overview">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="number">12+</div>
+                    <div class="label">Interactive Demos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">4</div>
+                    <div class="label">Core Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">8+</div>
+                    <div class="label">Key Concepts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">0</div>
+                    <div class="label">Prerequisites</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Session 2.0: The Big Picture -->
+        <div class="session-section">
+            <div class="session-header">
+                <div class="session-info">
+                    <div class="session-number">2.0</div>
+                    <div class="session-details">
+                        <h3>The Big Picture: Generative Search Engines</h3>
+                        <p>Conceptual overview of transformers as generative search systems</p>
+                    </div>
+                </div>
+                <div class="session-stats">
+                    <div class="stat-number">2</div>
+                    <div class="stat-label">Visualizations</div>
+                </div>
+            </div>
+            <div class="visualizations-grid">
+                <div class="viz-card">
+                    <div class="viz-header">
+                        <div class="viz-title">Generative Search Engine Demo</div>
+                        <div class="viz-description">See how transformers differ from traditional search engines</div>
+                    </div>
+                    <div class="viz-content">
+                        <div class="viz-tags">
+                            <span class="tag">Concepts</span>
+                            <span class="tag">Search</span>
+                            <span class="tag">Generation</span>
+                        </div>
+                        <a href="https://zzhang-cn.github.io/LLM4LLM/module-2/session-2-0/s2.0-search-engine-comparison.html" class="viz-link">Explore Demo</a>
+                    </div>
+                </div>
+                
+                <div class="viz-card coming-soon">
+                    <div class="viz-header">
+                        <div class="viz-title">Attention vs Knowledge Storage</div>
+                        <div class="viz-description">Interactive comparison of attention mechanism and FFN knowledge storage</div>
+                    </div>
+                    <div class="viz-content">
+                        <div class="viz-tags">
+                            <span class="tag">Architecture</span>
+                            <span class="tag">Concepts</span>
+                        </div>
+                        <div class="viz-link">Coming Soon</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Session 2.1: From Text to Transformer Inputs -->
+        <div class="session-section">
+            <div class="session-header">
+                <div class="session-info">
+                    <div class="session-number">2.1</div>
+                    <div class="session-details">
+                        <h3>From Text to Transformer Inputs</h3>
+                        <p>Tokenization, knowledge storage, and the selection problem</p>
+                    </div>
+                </div>
+                <div class="session-stats">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Visualizations</div>
+                </div>
+            </div>
+            <div class="visualizations-grid">
+                <div class="viz-card">
+                    <div class="viz-header">
+                        <div class="viz-title">Tokenization Explorer</div>
+                        <div class="viz-description">Discover how subword tokenization handles the long tail of language</div>
+                    </div>
+                    <div class="viz-content">
+                        <div class="viz-tags">
+                            <span class="tag">Tokenization</span>
+                            <span class="tag">BPE</span>
+                            <span class="tag">Power Laws</span>
+                        </div>
+                        <a href="https://zzhang-cn.github.io/LLM4LLM/module-2/session-2-1/kp1-tokenization-explorer.html" class="viz-link">Explore Tokenization</a>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-header">
+                        <div class="viz-title">FFN Knowledge Storage</div>
+                        <div class="viz-description">See how feed-forward networks store knowledge through expand-contract architecture</div>
+                    </div>
+                    <div class="viz-content">
+                        <div class="viz-tags">
+                            <span class="tag">FFN</span>
+                            <span class="tag">Knowledge</span>
+                            <span class="tag">Architecture</span>
+                        </div>
+                        <a href="https://zzhang-cn.github.io/LLM4LLM/module-2/session-2-1/kp2-ffn-knowledge.html" class="viz-link">Explore Storage</a>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-header">
+                        <div class="viz-title">Selection Problem Demo</div>
+                        <div class="viz-description">Why Bengio's fixed concatenation fails for dynamic language understanding</div>
+                    </div>
+                    <div class="viz-content">
+                        <div class="viz-tags">
+                            <span class="tag">Selection</span>
+                            <span class="tag">Context</span>
+                            <span class="tag">Problems</span>
+                        </div>
+                        <a href="https://zzhang-cn.github.io/LLM4LLM/module-2/session-2-1/kp3-selection-problem.html" class="viz-link">See the Problem</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Session 2.2: Attention and the Transformer Block -->
+        <div class="session-section">
+            <div class="session-header">
+                <div class="session-info">
+                    <div class="session-number">2.2</div>
+                    <div class="session-details">
+                        <h3>Attention and the Transformer Block</h3>
+                        <p>Understanding attention mechanisms and complete transformer architecture</p>
+                    </div>
+                </div>
+                <div class="session-stats">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Visualizations</div>
+                </div>
+            </div>
+            <div class="visualizations-grid">
+                <div class="viz-card">
+                    <div class="viz-header">
+                        <div class="viz-title">Attention Visualizer</div>
+                        <div class="viz-description">Interactive exploration of attention weights and dynamic selection</div>
+                    </div>
+                    <div class="viz-content">
+                        <div class="viz-tags">
+                            <span class="tag">Attention</span>
+                            <span class="tag">Weights</span>
+                            <span class="tag">Selection</span>
+                        </div>
+                        <a href="https://zzhang-cn.github.io/LLM4LLM/module-2/session-2-2/kp1-attention-visualizer.html" class="viz-link">Explore Attention</a>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-header">
+                        <div class="viz-title">Position Embeddings</div>
+                        <div class="viz-description">Why attention needs position information to understand word order</div>
+                    </div>
+                    <div class="viz-content">
+                        <div class="viz-tags">
+                            <span class="tag">Position</span>
+                            <span class="tag">Order</span>
+                            <span class="tag">Embeddings</span>
+                        </div>
+                        <a href="https://zzhang-cn.github.io/LLM4LLM/module-2/session-2-2/kp2-position-embeddings.html" class="viz-link">Explore Position</a>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-header">
+                        <div class="viz-title">Multi-Head Attention</div>
+                        <div class="viz-description">How different heads specialize in different types of relationships</div>
+                    </div>
+                    <div class="viz-content">
+                        <div class="viz-tags">
+                            <span class="tag">Multi-Head</span>
+                            <span class="tag">Specialization</span>
+                            <span class="tag">Parallel</span>
+                        </div>
+                        <a href="https://zzhang-cn.github.io/LLM4LLM/module-2/session-2-2/kp3-multihead-attention.html" class="viz-link">Explore Heads</a>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-header">
+                        <div class="viz-title">Transformer Block Builder</div>
+                        <div class="viz-description">Build and understand the complete transformer block architecture</div>
+                    </div>
+                    <div class="viz-content">
+                        <div class="viz-tags">
+                            <span class="tag">Architecture</span>
+                            <span class="tag">Builder</span>
+                            <span class="tag">Complete</span>
+                        </div>
+                        <a href="https://zzhang-cn.github.io/LLM4LLM/module-2/session-2-2/kp4-transformer-block.html" class="viz-link">Build Blocks</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Session 2.3: Training and Scaling -->
+        <div class="session-section">
+            <div class="session-header">
+                <div class="session-info">
+                    <div class="session-number">2.3</div>
+                    <div class="session-details">
+                        <h3>Training and Scaling Modern LLMs</h3>
+                        <p>Scaling laws and supervised fine-tuning transformation</p>
+                    </div>
+                </div>
+                <div class="session-stats">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Visualizations</div>
+                </div>
+            </div>
+            <div class="visualizations-grid">
+                <div class="viz-card">
+                    <div class="viz-header">
+                        <div class="viz-title">Scaling Laws Explorer</div>
+                        <div class="viz-description">Discover how AI performance improves predictably with scale</div>
+                    </div>
+                    <div class="viz-content">
+                        <div class="viz-tags">
+                            <span class="tag">Scaling</span>
+                            <span class="tag">Power Laws</span>
+                            <span class="tag">Performance</span>
+                        </div>
+                        <a href="https://zzhang-cn.github.io/LLM4LLM/module-2/session-2-3/kp1-scaling-laws-explorer.html" class="viz-link">Explore Scaling</a>
+                    </div>
+                </div>
+                
+                <div class="viz-card">
+                    <div class="viz-header">
+                        <div class="viz-title">SFT Transformation</div>
+                        <div class="viz-description">See how supervised fine-tuning transforms text predictors into assistants</div>
+                    </div>
+                    <div class="viz-content">
+                        <div class="viz-tags">
+                            <span class="tag">SFT</span>
+                            <span class="tag">Training</span>
+                            <span class="tag">Assistant</span>
+                        </div>
+                        <a href="https://zzhang-cn.github.io/LLM4LLM/module-2/session-2-3/kp2-sft-transformation.html" class="viz-link">See Transformation</a>
+                    </div>
+                </div>
+                
+                <div class="viz-card coming-soon">
+                    <div class="viz-header">
+                        <div class="viz-title">Pre-training vs Fine-tuning</div>
+                        <div class="viz-description">Interactive comparison of training phases and their effects</div>
+                    </div>
+                    <div class="viz-content">
+                        <div class="viz-tags">
+                            <span class="tag">Pre-training</span>
+                            <span class="tag">Fine-tuning</span>
+                            <span class="tag">Comparison</span>
+                        </div>
+                        <div class="viz-link">Coming Soon</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
