@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chain-of-Thought vs Direct Prediction - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .problem-selector {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .problem-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .problem-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .problem-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .problem-card.active {
+            border-color: #667eea;
+            background: #e8f2ff;
+        }
+        
+        .problem-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .problem-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .problem-desc {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .approach-side {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .direct-side {
+            border-top: 4px solid #dc3545;
+        }
+        
+        .cot-side {
+            border-top: 4px solid #28a745;
+        }
+        
+        .side-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .direct-side .side-title {
+            color: #dc3545;
+        }
+        
+        .cot-side .side-title {
+            color: #28a745;
+        }
+        
+        .problem-display {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .problem-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .thinking-process {
+            margin: 1.5rem 0;
+            min-height: 200px;
+        }
+        
+        .direct-thinking {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .direct-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+        
+        .cot-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .cot-step {
+            background: #f0f8f0;
+            border: 1px solid #d4edda;
+            border-radius: 8px;
+            padding: 1rem;
+            opacity: 0.3;
+            transition: all 0.5s ease;
+            border-left: 4px solid #28a745;
+        }
+        
+        .cot-step.active {
+            opacity: 1;
+            transform: translateX(5px);
+        }
+        
+        .step-label {
+            font-weight: 600;
+            color: #28a745;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .step-content {
+            color: #333;
+        }
+        
+        .answer-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+        
+        .answer-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .answer-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .direct-answer {
+            color: #dc3545;
+        }
+        
+        .cot-answer {
+            color: #28a745;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 0 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .insights-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .insight-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insight-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .accuracy-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .accuracy-low {
+            background: #fdf2f2;
+            color: #dc3545;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .accuracy-high {
+            background: #f0f8f0;
+            color: #28a745;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .typing-animation {
+            border-right: 2px solid #333;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        @media (max-width: 968px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .problem-types {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Chain-of-Thought vs Direct Prediction</h1>
+        <p>See how step-by-step reasoning improves AI problem-solving</p>
+    </div>
+    
+    <div class="container">
+        <div class="problem-selector">
+            <h2>Choose a Problem Type:</h2>
+            <div class="problem-types">
+                <div class="problem-card active" onclick="selectProblem('math')" id="card-math">
+                    <div class="problem-icon">🧮</div>
+                    <div class="problem-title">Math Problem</div>
+                    <div class="problem-desc">Multi-step calculation</div>
+                </div>
+                <div class="problem-card" onclick="selectProblem('logic')" id="card-logic">
+                    <div class="problem-icon">🧩</div>
+                    <div class="problem-title">Logic Puzzle</div>
+                    <div class="problem-desc">Deductive reasoning</div>
+                </div>
+                <div class="problem-card" onclick="selectProblem('planning')" id="card-planning">
+                    <div class="problem-icon">🗺️</div>
+                    <div class="problem-title">Planning Task</div>
+                    <div class="problem-desc">Sequential decision-making</div>
+                </div>
+                <div class="problem-card" onclick="selectProblem('analysis')" id="card-analysis">
+                    <div class="problem-icon">📊</div>
+                    <div class="problem-title">Data Analysis</div>
+                    <div class="problem-desc">Interpretation and insight</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="comparison-grid">
+            <!-- Direct Prediction Side -->
+            <div class="approach-side direct-side">
+                <div class="accuracy-indicator accuracy-low">
+                    ❌ Often Wrong
+                </div>
+                <h2 class="side-title">⚡ Direct Prediction</h2>
+                
+                <div class="problem-display">
+                    <div class="problem-text" id="directProblem">
+                        If a train travels 60 mph for 2.5 hours, then 80 mph for 1.5 hours, what is the total distance?
+                    </div>
+                </div>
+                
+                <div class="thinking-process">
+                    <div class="direct-thinking">
+                        <div class="direct-icon">🤔</div>
+                        <div>Model immediately tries to predict the answer...</div>
+                        <div style="margin-top: 1rem; color: #333; font-style: normal;">
+                            "Based on similar problems in training data..."
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="answer-section">
+                    <div class="answer-label">Direct Answer:</div>
+                    <div class="answer-text direct-answer" id="directAnswer">
+                        270 miles
+                    </div>
+                    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">
+                        (Often incorrect due to pattern matching)
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chain-of-Thought Side -->
+            <div class="approach-side cot-side">
+                <div class="accuracy-indicator accuracy-high">
+                    ✅ Usually Correct
+                </div>
+                <h2 class="side-title">🔗 Chain-of-Thought</h2>
+                
+                <div class="problem-display">
+                    <div class="problem-text" id="cotProblem">
+                        If a train travels 60 mph for 2.5 hours, then 80 mph for 1.5 hours, what is the total distance?
+                    </div>
+                </div>
+                
+                <div class="thinking-process">
+                    <div class="cot-steps" id="cotSteps">
+                        <div class="cot-step" id="step1">
+                            <div class="step-label">Step 1: Break down the problem</div>
+                            <div class="step-content">I need to calculate distance for two separate segments and add them together.</div>
+                        </div>
+                        
+                        <div class="cot-step" id="step2">
+                            <div class="step-label">Step 2: First segment</div>
+                            <div class="step-content">Distance = Speed × Time = 60 mph × 2.5 hours = 150 miles</div>
+                        </div>
+                        
+                        <div class="cot-step" id="step3">
+                            <div class="step-label">Step 3: Second segment</div>
+                            <div class="step-content">Distance = Speed × Time = 80 mph × 1.5 hours = 120 miles</div>
+                        </div>
+                        
+                        <div class="cot-step" id="step4">
+                            <div class="step-label">Step 4: Total distance</div>
+                            <div class="step-content">Total = 150 miles + 120 miles = 270 miles</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="answer-section">
+                    <div class="answer-label">Reasoned Answer:</div>
+                    <div class="answer-text cot-answer" id="cotAnswer">
+                        270 miles
+                    </div>
+                    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">
+                        (Correct through step-by-step reasoning)
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="runDemo()" id="runBtn">Run Reasoning Demo</button>
+            <button class="btn" onclick="resetDemo()" id="resetBtn">Reset</button>
+        </div>
+        
+        <div class="insights-section">
+            <h2>Key Insights</h2>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-title">🎯 Accuracy Improvement</div>
+                    <div>Chain-of-thought dramatically improves accuracy on complex problems by enabling error detection and correction at each step.</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">🔍 Transparency</div>
+                    <div>We can see exactly how the model arrives at its answer, making it easier to identify and fix reasoning errors.</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">🧠 Decomposition</div>
+                    <div>Complex problems are broken into manageable steps, mirroring how humans approach difficult tasks.</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-title">⚡ Computational Cost</div>
+                    <div>Chain-of-thought uses more tokens and computation but provides much better results for reasoning tasks.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentProblem = 'math';
+        let isRunning = false;
+        
+        const problems = {
+            math: {
+                question: "If a train travels 60 mph for 2.5 hours, then 80 mph for 1.5 hours, what is the total distance?",
+                directAnswer: "245 miles",
+                directCorrect: false,
+                cotAnswer: "270 miles",
+                cotSteps: [
+                    {
+                        label: "Step 1: Break down the problem",
+                        content: "I need to calculate distance for two separate segments and add them together."
+                    },
+                    {
+                        label: "Step 2: First segment",
+                        content: "Distance = Speed × Time = 60 mph × 2.5 hours = 150 miles"
+                    },
+                    {
+                        label: "Step 3: Second segment", 
+                        content: "Distance = Speed × Time = 80 mph × 1.5 hours = 120 miles"
+                    },
+                    {
+                        label: "Step 4: Total distance",
+                        content: "Total = 150 miles + 120 miles = 270 miles"
+                    }
+                ]
+            },
+            
+            logic: {
+                question: "Alice is taller than Bob. Bob is taller than Charlie. Is Alice taller than Charlie?",
+                directAnswer: "Probably",
+                directCorrect: false,
+                cotAnswer: "Yes",
+                cotSteps: [
+                    {
+                        label: "Step 1: Identify relationships",
+                        content: "I have two given relationships: Alice > Bob and Bob > Charlie"
+                    },
+                    {
+                        label: "Step 2: Apply transitivity",
+                        content: "If A > B and B > C, then by the transitive property, A > C"
+                    },
+                    {
+                        label: "Step 3: Apply to our case",
+                        content: "Since Alice > Bob and Bob > Charlie, then Alice > Charlie"
+                    },
+                    {
+                        label: "Step 4: Conclusion",
+                        content: "Therefore, Alice is definitely taller than Charlie"
+                    }
+                ]
+            },
+            
+            planning: {
+                question: "You need to get to the airport, but your car won't start and it's raining. What's your best plan?",
+                directAnswer: "Call an Uber",
+                directCorrect: false,
+                cotAnswer: "Call rideshare, have backup plan",
+                cotSteps: [
+                    {
+                        label: "Step 1: Assess the situation",
+                        content: "Car is broken, weather is bad, time-sensitive destination (airport)"
+                    },
+                    {
+                        label: "Step 2: Consider options",
+                        content: "Rideshare, taxi, public transit, friend/family, car service"
+                    },
+                    {
+                        label: "Step 3: Evaluate reliability",
+                        content: "Rideshare apps show availability and ETA; public transit may be delayed by rain"
+                    },
+                    {
+                        label: "Step 4: Create plan with backup",
+                        content: "Book rideshare immediately, but also call taxi company as backup in case of cancellations"
+                    }
+                ]
+            },
+            
+            analysis: {
+                question: "Sales dropped 15% last month. What might explain this and what should we investigate?",
+                directAnswer: "Marketing isn't working",
+                directCorrect: false,
+                cotAnswer: "Multiple factors need investigation",
+                cotSteps: [
+                    {
+                        label: "Step 1: Categorize potential causes",
+                        content: "Internal factors (pricing, product, marketing) vs external factors (market, competition, seasonality)"
+                    },
+                    {
+                        label: "Step 2: Internal possibilities",
+                        content: "Recent price changes? Product quality issues? Marketing campaign changes? Sales team changes?"
+                    },
+                    {
+                        label: "Step 3: External possibilities", 
+                        content: "New competitors? Economic conditions? Seasonal patterns? Industry trends?"
+                    },
+                    {
+                        label: "Step 4: Investigation plan",
+                        content: "Analyze by customer segment, geographic region, product line, and compare to industry benchmarks"
+                    }
+                ]
+            }
+        };
+        
+        function selectProblem(problemType) {
+            currentProblem = problemType;
+            
+            // Update card selection
+            document.querySelectorAll('.problem-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.getElementById('card-' + problemType).classList.add('active');
+            
+            // Update content
+            updateProblemContent();
+            resetDemo();
+        }
+        
+        function updateProblemContent() {
+            const problem = problems[currentProblem];
+            
+            // Update problem text
+            document.getElementById('directProblem').textContent = problem.question;
+            document.getElementById('cotProblem').textContent = problem.question;
+            
+            // Update answers
+            document.getElementById('directAnswer').textContent = problem.directAnswer;
+            document.getElementById('cotAnswer').textContent = problem.cotAnswer;
+            
+            // Update CoT steps
+            const stepsContainer = document.getElementById('cotSteps');
+            stepsContainer.innerHTML = '';
+            
+            problem.cotSteps.forEach((step, index) => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'cot-step';
+                stepDiv.id = `step${index + 1}`;
+                stepDiv.innerHTML = `
+                    <div class="step-label">${step.label}</div>
+                    <div class="step-content">${step.content}</div>
+                `;
+                stepsContainer.appendChild(stepDiv);
+            });
+            
+            // Update accuracy indicators
+            const directAccuracy = document.querySelector('.direct-side .accuracy-indicator');
+            const cotAccuracy = document.querySelector('.cot-side .accuracy-indicator');
+            
+            if (problem.directCorrect) {
+                directAccuracy.className = 'accuracy-indicator accuracy-high';
+                directAccuracy.innerHTML = '✅ Correct';
+            } else {
+                directAccuracy.className = 'accuracy-indicator accuracy-low';
+                directAccuracy.innerHTML = '❌ Often Wrong';
+            }
+        }
+        
+        async function runDemo() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            document.getElementById('runBtn').disabled = true;
+            
+            // Reset steps
+            document.querySelectorAll('.cot-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Activate steps one by one
+            const problem = problems[currentProblem];
+            for (let i = 0; i < problem.cotSteps.length; i++) {
+                await sleep(1500);
+                document.getElementById(`step${i + 1}`).classList.add('active');
+            }
+            
+            isRunning = false;
+            document.getElementById('runBtn').disabled = false;
+        }
+        
+        function resetDemo() {
+            isRunning = false;
+            document.getElementById('runBtn').disabled = false;
+            
+            // Reset all steps
+            document.querySelectorAll('.cot-step').forEach(step => {
+                step.classList.remove('active');
+            });
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateProblemContent();
+        });
+    </script>
+</body>
+</html>
