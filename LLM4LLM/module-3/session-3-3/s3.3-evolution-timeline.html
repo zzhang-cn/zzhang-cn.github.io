@@ -18,6 +18,24 @@
             background: #f8f9fa;
         }
         
+        .breadcrumb {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem 0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+        }
+        
+        .breadcrumb a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -286,6 +304,10 @@
 </head>
 <body>
     <div class="header">
+        <div class="breadcrumb">
+            <a href="../../">← Back to All Modules</a> | 
+            <a href="../">← Back to Module 3</a>
+        </div>
         <h1>The Complete LLM Evolution Journey</h1>
         <p>From simple n-grams to sophisticated reasoning systems</p>
     </div>
