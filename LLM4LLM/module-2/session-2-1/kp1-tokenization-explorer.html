@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tokenization Explorer - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .controls-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+        
+        .visualization-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-icon {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        .text-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+        
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .preset-btn {
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+        
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .vocab-slider {
+            width: 100%;
+            margin: 1rem 0;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            outline: none;
+            appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .slider-value {
+            min-width: 60px;
+            font-weight: 500;
+            color: #667eea;
+        }
+        
+        .tokenization-methods {
+            display: grid;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .method-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .method-card.active {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .method-card:hover {
+            border-color: #667eea;
+        }
+        
+        .method-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .method-description {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .tokenization-output {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .token-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .token {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .token:hover {
+            background: #5a6fd8;
+            transform: scale(1.05);
+        }
+        
+        .token.common {
+            background: #28a745;
+        }
+        
+        .token.rare {
+            background: #dc3545;
+        }
+        
+        .token.medium {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin: 1rem 0;
+        }
+        
+        .comparison-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .comparison-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .comparison-card.character {
+            border-color: #dc3545;
+        }
+        
+        .comparison-card.word {
+            border-color: #ffc107;
+        }
+        
+        .comparison-card.subword {
+            border-color: #28a745;
+        }
+        
+        .comparison-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .comparison-card.character .comparison-title {
+            color: #dc3545;
+        }
+        
+        .comparison-card.word .comparison-title {
+            color: #856404;
+        }
+        
+        .comparison-card.subword .comparison-title {
+            color: #28a745;
+        }
+        
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .insights-panel h4:before {
+            content: "💡";
+            margin-right: 0.5rem;
+        }
+        
+        .insights-list {
+            list-style: none;
+        }
+        
+        .insights-list li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .frequency-legend {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .preset-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 2</a> / 
+                Session 2.1 / KP1
+            </div>
+            <h1>Tokenization Explorer</h1>
+            <p>Discover how subword tokenization elegantly handles the long tail of language</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="main-content">
+            <div class="controls-panel">
+                <h2 class="section-title">
+                    <span class="section-icon">⚙️</span>
+                    Input & Controls
+                </h2>
+                
+                <div class="control-group">
+                    <label class="control-label">Enter text to tokenize:</label>
+                    <textarea class="text-input" id="textInput" placeholder="Type or paste your text here...">The quick brown fox jumps over the lazy dog. Machine learning utilizes sophisticated neural networks for pattern recognition.</textarea>
+                </div>
+                
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="loadPreset('simple')">Simple Text</button>
+                    <button class="preset-btn" onclick="loadPreset('technical')">Technical Text</button>
+                    <button class="preset-btn" onclick="loadPreset('rare')">Rare Words</button>
+                    <button class="preset-btn" onclick="loadPreset('mixed')">Mixed Content</button>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Vocabulary Size:</label>
+                    <div class="slider-container">
+                        <input type="range" id="vocabSlider" class="slider" min="100" max="10000" value="1000" step="100">
+                        <span class="slider-value" id="vocabValue">1000</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                        Smaller vocabulary = more splitting, Larger vocabulary = less splitting
+                    </p>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Tokenization Method:</label>
+                    <div class="tokenization-methods">
+                        <div class="method-card" id="methodChar" onclick="setMethod('character')">
+                            <div class="method-title">Character-Level</div>
+                            <div class="method-description">Split every character individually</div>
+                        </div>
+                        <div class="method-card" id="methodWord" onclick="setMethod('word')">
+                            <div class="method-title">Word-Level</div>
+                            <div class="method-description">Keep words intact (fails on rare words)</div>
+                        </div>
+                        <div class="method-card active" id="methodSubword" onclick="setMethod('subword')">
+                            <div class="method-title">Subword (BPE)</div>
+                            <div class="method-description">Optimal balance: common words intact, rare words split</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="tokenCount">0</div>
+                        <div class="stat-label">Tokens</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="vocabUsed">0</div>
+                        <div class="stat-label">Vocab Used</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="efficiency">0%</div>
+                        <div class="stat-label">Efficiency</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="visualization-panel">
+                <h2 class="section-title">
+                    <span class="section-icon">🔤</span>
+                    Tokenization Results
+                </h2>
+                
+                <div class="tokenization-output">
+                    <h4>Tokenized Output:</h4>
+                    <div class="frequency-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #28a745;"></div>
+                            <span>Common words</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ffc107;"></div>
+                            <span>Medium frequency</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #dc3545;"></div>
+                            <span>Rare/split tokens</span>
+                        </div>
+                    </div>
+                    <div class="token-display" id="tokenDisplay">
+                        <!-- Tokens will be populated here -->
+                    </div>
+                </div>
+                
+                <h3>Power Law Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="powerLawChart"></canvas>
+                </div>
+                
+                <div class="insights-panel">
+                    <h4>Key Insights</h4>
+                    <ul class="insights-list" id="insightsList">
+                        <li>Enter text to see tokenization analysis</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="comparison-section">
+            <h2 class="section-title">
+                <span class="section-icon">⚖️</span>
+                Tokenization Method Comparison
+            </h2>
+            
+            <div class="comparison-grid">
+                <div class="comparison-card character">
+                    <div class="comparison-title">📝 Character-Level</div>
+                    <div id="charTokens"></div>
+                    <p style="margin-top: 1rem; font-size: 0.9rem;">
+                        <strong>Pros:</strong> No vocabulary limits, handles any text<br>
+                        <strong>Cons:</strong> Very long sequences, loses word meaning
+                    </p>
+                </div>
+                
+                <div class="comparison-card word">
+                    <div class="comparison-title">📖 Word-Level</div>
+                    <div id="wordTokens"></div>
+                    <p style="margin-top: 1rem; font-size: 0.9rem;">
+                        <strong>Pros:</strong> Preserves word meaning, intuitive<br>
+                        <strong>Cons:</strong> Huge vocabulary needed, fails on rare words
+                    </p>
+                </div>
+                
+                <div class="comparison-card subword">
+                    <div class="comparison-title">🎯 Subword (BPE)</div>
+                    <div id="subwordTokens"></div>
+                    <p style="margin-top: 1rem; font-size: 0.9rem;">
+                        <strong>Pros:</strong> Balanced approach, handles rare words, efficient<br>
+                        <strong>Cons:</strong> Slightly more complex to implement
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        let currentMethod = 'subword';
+        let currentVocabSize = 1000;
+        let chart = null;
+        
+        const presets = {
+            simple: "The cat sat on the mat. The dog ran in the park.",
+            technical: "Machine learning algorithms utilize neural networks for pattern recognition and data classification.",
+            rare: "The serendipitous discovery revolutionized biotechnology and pharmacokinetics research methodologies.",
+            mixed: "AI transformers use attention mechanisms. Scientists study photosynthesis in chloroplasts. Programming requires debugging skills."
+        };
+        
+        // Common English words for frequency simulation
+        const commonWords = [
+            'the', 'be', 'to', 'of', 'and', 'a', 'in', 'that', 'have', 'i', 'it', 'for', 'not', 'on', 'with',
+            'he', 'as', 'you', 'do', 'at', 'this', 'but', 'his', 'by', 'from', 'they', 'we', 'say', 'her', 'she',
+            'or', 'an', 'will', 'my', 'one', 'all', 'would', 'there', 'their', 'what', 'up', 'out', 'if', 'about',
+            'who', 'get', 'which', 'go', 'me', 'when', 'make', 'can', 'like', 'time', 'no', 'just', 'him', 'know',
+            'take', 'people', 'into', 'year', 'your', 'good', 'some', 'could', 'them', 'see', 'other', 'than',
+            'then', 'now', 'look', 'only', 'come', 'its', 'over', 'think', 'also', 'back', 'after', 'use',
+            'two', 'how', 'our', 'work', 'first', 'well', 'way', 'even', 'new', 'want', 'because', 'any',
+            'these', 'give', 'day', 'most', 'us', 'cat', 'dog', 'sat', 'mat', 'ran', 'park'
+        ];
+        
+        function loadPreset(type) {
+            document.getElementById('textInput').value = presets[type];
+            analyzeText();
+        }
+        
+        function setMethod(method) {
+            currentMethod = method;
+            
+            // Update active method card
+            document.querySelectorAll('.method-card').forEach(card => card.classList.remove('active'));
+            
+            // Map method names to correct IDs
+            const methodIds = {
+                'character': 'methodChar',
+                'word': 'methodWord', 
+                'subword': 'methodSubword'
+            };
+            
+            const targetElement = document.getElementById(methodIds[method]);
+            if (targetElement) {
+                targetElement.classList.add('active');
+            }
+            
+            analyzeText();
+        }
+        
+        function updateVocabSize() {
+            const slider = document.getElementById('vocabSlider');
+            const valueDisplay = document.getElementById('vocabValue');
+            currentVocabSize = parseInt(slider.value);
+            valueDisplay.textContent = currentVocabSize;
+            analyzeText();
+        }
+        
+        function tokenizeCharacter(text) {
+            return text.split('').filter(char => char.trim().length > 0);
+        }
+        
+        function tokenizeWord(text) {
+            return text.toLowerCase()
+                      .replace(/[^\w\s]/g, ' ')
+                      .split(/\s+/)
+                      .filter(word => word.length > 0);
+        }
+        
+        function tokenizeSubword(text, vocabSize) {
+            // Simplified BPE simulation
+            const words = tokenizeWord(text);
+            const tokens = [];
+            
+            for (const word of words) {
+                if (commonWords.includes(word)) {
+                    // Common words stay intact
+                    tokens.push(word);
+                } else if (word.length <= 4) {
+                    // Short words stay intact
+                    tokens.push(word);
+                } else {
+                    // Longer rare words get split
+                    const splitSize = Math.max(2, Math.floor(word.length / 2));
+                    for (let i = 0; i < word.length; i += splitSize) {
+                        const subtoken = word.slice(i, i + splitSize);
+                        if (i > 0) {
+                            tokens.push('##' + subtoken); // Continuation marker
+                        } else {
+                            tokens.push(subtoken);
+                        }
+                    }
+                }
+            }
+            
+            return tokens;
+        }
+        
+        function getTokenFrequency(token) {
+            if (commonWords.includes(token.replace('##', ''))) {
+                return 'common';
+            } else if (token.length <= 3 || token.startsWith('##')) {
+                return 'rare';
+            } else {
+                return 'medium';
+            }
+        }
+        
+        function analyzeText() {
+            const text = document.getElementById('textInput').value.trim();
+            if (!text) return;
+            
+            let tokens = [];
+            
+            switch (currentMethod) {
+                case 'character':
+                    tokens = tokenizeCharacter(text);
+                    break;
+                case 'word':
+                    tokens = tokenizeWord(text);
+                    break;
+                case 'subword':
+                    tokens = tokenizeSubword(text, currentVocabSize);
+                    break;
+            }
+            
+            updateTokenDisplay(tokens);
+            updateStats(tokens);
+            updateComparison(text);
+            updateChart(tokens);
+            updateInsights(tokens, text);
+        }
+        
+        function updateTokenDisplay(tokens) {
+            const container = document.getElementById('tokenDisplay');
+            
+            container.innerHTML = tokens.map(token => {
+                const frequency = getTokenFrequency(token);
+                return `<span class="token ${frequency}">${token}</span>`;
+            }).join('');
+        }
+        
+        function updateStats(tokens) {
+            const uniqueTokens = new Set(tokens);
+            const efficiency = Math.round((tokens.length / (tokens.join('').length)) * 100);
+            
+            document.getElementById('tokenCount').textContent = tokens.length;
+            document.getElementById('vocabUsed').textContent = uniqueTokens.size;
+            document.getElementById('efficiency').textContent = efficiency + '%';
+        }
+        
+        function updateComparison(text) {
+            const charTokens = tokenizeCharacter(text);
+            const wordTokens = tokenizeWord(text);
+            const subwordTokens = tokenizeSubword(text, currentVocabSize);
+            
+            const displayTokens = (tokens, containerId, limit = 20) => {
+                const container = document.getElementById(containerId);
+                const display = tokens.slice(0, limit).map(token => {
+                    const frequency = getTokenFrequency(token);
+                    return `<span class="token ${frequency}">${token}</span>`;
+                }).join('');
+                
+                const extra = tokens.length > limit ? ` <span style="color: #666;">+${tokens.length - limit} more</span>` : '';
+                container.innerHTML = display + extra;
+                
+                // Add stats
+                const statsDiv = document.createElement('div');
+                statsDiv.style.marginTop = '0.5rem';
+                statsDiv.style.fontSize = '0.85rem';
+                statsDiv.style.color = '#666';
+                statsDiv.innerHTML = `<strong>${tokens.length} tokens</strong> | ${new Set(tokens).size} unique`;
+                container.appendChild(statsDiv);
+            };
+            
+            displayTokens(charTokens, 'charTokens');
+            displayTokens(wordTokens, 'wordTokens');
+            displayTokens(subwordTokens, 'subwordTokens');
+        }
+        
+        function updateChart(tokens) {
+            const canvas = document.getElementById('powerLawChart');
+            const ctx = canvas.getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            // Count token frequencies
+            const tokenCounts = {};
+            tokens.forEach(token => {
+                tokenCounts[token] = (tokenCounts[token] || 0) + 1;
+            });
+            
+            // Sort by frequency
+            const sortedTokens = Object.entries(tokenCounts)
+                .sort(([,a], [,b]) => b - a);
+            
+            const ranks = sortedTokens.map((_, i) => i + 1);
+            const frequencies = sortedTokens.map(([, freq]) => freq);
+            
+            // Generate power law trendline
+            const trendlineData = [];
+            if (frequencies.length > 0) {
+                const c = frequencies[0];
+                for (let i = 0; i < Math.min(ranks.length, 20); i++) {
+                    trendlineData.push({
+                        x: ranks[i],
+                        y: c / Math.pow(ranks[i], 0.8) // Power law with exponent 0.8
+                    });
+                }
+            }
+            
+            const datasets = [
+                {
+                    label: 'Token Frequencies',
+                    data: ranks.slice(0, 20).map((rank, i) => ({
+                        x: rank,
+                        y: frequencies[i]
+                    })),
+                    backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 1,
+                    pointRadius: 4
+                }
+            ];
+            
+            if (trendlineData.length > 0) {
+                datasets.push({
+                    label: 'Power Law Trend',
+                    data: trendlineData,
+                    type: 'line',
+                    borderColor: 'rgba(220, 38, 127, 1)',
+                    backgroundColor: 'rgba(220, 38, 127, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0
+                });
+            }
+            
+            chart = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'Token Rank (log scale)'
+                            },
+                            min: 1
+                        },
+                        y: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'Frequency (log scale)'
+                            },
+                            min: 1
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const rank = context.parsed.x;
+                                    const freq = context.parsed.y;
+                                    const token = sortedTokens[rank - 1] ? sortedTokens[rank - 1][0] : '';
+                                    return `"${token}": Rank ${rank}, Frequency ${freq}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateInsights(tokens, text) {
+            const insights = [];
+            const uniqueTokens = new Set(tokens);
+            const compressionRatio = text.length / tokens.length;
+            
+            // Method-specific insights
+            if (currentMethod === 'character') {
+                insights.push('Character-level tokenization creates very long sequences but handles any text');
+                insights.push(`${tokens.length} tokens for ${text.length} characters (1:1 ratio)`);
+            } else if (currentMethod === 'word') {
+                insights.push('Word-level tokenization preserves meaning but struggles with rare words');
+                const unknownWords = tokenizeWord(text).filter(word => !commonWords.includes(word));
+                if (unknownWords.length > 0) {
+                    insights.push(`${unknownWords.length} rare words would be "unknown" tokens in limited vocabulary`);
+                }
+            } else if (currentMethod === 'subword') {
+                insights.push('Subword tokenization balances efficiency with vocabulary coverage');
+                insights.push(`Common words stay intact, rare words split into manageable pieces`);
+            }
+            
+            // General insights
+            insights.push(`Compression ratio: ${compressionRatio.toFixed(1)} characters per token`);
+            insights.push(`Vocabulary efficiency: ${uniqueTokens.size} unique tokens used`);
+            
+            // Power law insight
+            if (tokens.length > 5) {
+                insights.push('Token frequency follows power law: few tokens appear often, most appear rarely');
+            }
+            
+            document.getElementById('insightsList').innerHTML = insights.map(
+                insight => `<li>${insight}</li>`
+            ).join('');
+        }
+        
+        // Event listeners
+        document.getElementById('textInput').addEventListener('input', analyzeText);
+        document.getElementById('vocabSlider').addEventListener('input', updateVocabSize);
+        
+        // Initialize
+        analyzeText();
+    </script>
+</body>
+</html>
