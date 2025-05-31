@@ -382,27 +382,27 @@
 <body>
     <div class="header">
         <h1>LLM4LLM Visualizations</h1>
-        <p>Interactive demonstrations and visual explorations of language model concepts, from foundations to transformers</p>
+        <p>Interactive demonstrations and visual explorations of language model concepts, from foundations to reasoning and alignment</p>
     </div>
     
     <div class="container">
         <div class="intro-section">
             <h2>Explore Language Models Interactively</h2>
-            <p>This collection provides hands-on visualizations that help you understand how language models work, from basic word prediction to modern transformer architectures. Each visualization is designed to make complex concepts intuitive and engaging.</p>
+            <p>This collection provides hands-on visualizations that help you understand how language models work, from basic word prediction to modern transformer architectures and beyond to reasoning and alignment with human values.</p>
         </div>
         
         <div class="stats-overview">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="number" id="totalVizCount">29+</div>
+                    <div class="number" id="totalVizCount">35+</div>
                     <div class="label">Interactive Visualizations</div>
                 </div>
                 <div class="stat-card">
-                    <div class="number">2</div>
+                    <div class="number">3</div>
                     <div class="label">Modules Available</div>
                 </div>
                 <div class="stat-card">
-                    <div class="number">15+</div>
+                    <div class="number">20+</div>
                     <div class="label">Key Concepts Covered</div>
                 </div>
                 <div class="stat-card">
@@ -424,6 +424,9 @@
                 <div class="filter-tag" data-filter="statistics">Statistics</div>
                 <div class="filter-tag" data-filter="tokenization">Tokenization</div>
                 <div class="filter-tag" data-filter="scaling">Scaling</div>
+                <div class="filter-tag" data-filter="reasoning">Reasoning</div>
+                <div class="filter-tag" data-filter="alignment">Alignment</div>
+                <div class="filter-tag" data-filter="rlhf">RLHF</div>
             </div>
         </div>
         
@@ -828,6 +831,126 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Module 3: Beyond Prediction - Reasoning and Alignment -->
+        <div class="module-section">
+            <div class="module-header">
+                <div class="module-info">
+                    <div class="module-number">3</div>
+                    <div class="module-details">
+                        <h3>Beyond Prediction - Reasoning and Alignment</h3>
+                        <p>From pattern matching to reasoning and human value alignment</p>
+                        <a href="module-3/" class="module-link">→ Explore Module 3</a>
+                    </div>
+                </div>
+                <div class="module-stats">
+                    <div class="stat-number">6</div>
+                    <div class="stat-label">Visualizations</div>
+                </div>
+            </div>
+            <div class="sessions-grid">
+                <!-- Session 3.0: Beyond Prediction -->
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">Session 3.0: Beyond Prediction - Learning Without Labels</div>
+                        <div class="session-description">Why language models need reinforcement learning and how it enables new capabilities</div>
+                    </div>
+                    <div class="visualizations-list">
+                        <div class="viz-item" data-tags="reasoning,rlhf">
+                            <div class="viz-icon">🔄</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Learning Paradigm Shift</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Paradigm Shift</span>
+                                    <span class="tag">RL vs Supervised</span>
+                                    <span class="tag">Concepts</span>
+                                </div>
+                            </div>
+                            <a href="module-3/session-3-0/s3.0-learning-paradigm-shift.html" class="viz-link">Explore</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Session 3.1: Alignment and RLHF -->
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">Session 3.1: The Alignment Problem and RLHF</div>
+                        <div class="session-description">How reinforcement learning from human feedback transforms text predictors into helpful assistants</div>
+                    </div>
+                    <div class="visualizations-list">
+                        <div class="viz-item" data-tags="alignment,rlhf">
+                            <div class="viz-icon">🎯</div>
+                            <div class="viz-info">
+                                <div class="viz-name">RLHF Pipeline Demo</div>
+                                <div class="viz-tags">
+                                    <span class="tag">RLHF</span>
+                                    <span class="tag">Alignment</span>
+                                    <span class="tag">Pipeline</span>
+                                </div>
+                            </div>
+                            <a href="module-3/session-3-1/s3.1-rlhf-pipeline-demo.html" class="viz-link">Explore</a>
+                        </div>
+                        <div class="viz-item" data-tags="alignment,rlhf">
+                            <div class="viz-icon">👥</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Preference Learning Demo</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Preference Learning</span>
+                                    <span class="tag">Human Feedback</span>
+                                    <span class="tag">Interactive</span>
+                                </div>
+                            </div>
+                            <a href="module-3/session-3-1/s3.1-preference-learning-demo.html" class="viz-link">Explore</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Session 3.2: Reasoning -->
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">Session 3.2: Beyond Pattern Matching to Reasoning</div>
+                        <div class="session-description">How models develop sophisticated reasoning through chain-of-thought and test-time computation</div>
+                    </div>
+                    <div class="visualizations-list">
+                        <div class="viz-item" data-tags="reasoning">
+                            <div class="viz-icon">⚡</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Test-Time Computation Explorer</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Test-Time Computation</span>
+                                    <span class="tag">Dynamic Reasoning</span>
+                                    <span class="tag">Interactive</span>
+                                </div>
+                            </div>
+                            <a href="module-3/session-3-2/s3.2-test-time-computation-explorer.html" class="viz-link">Explore</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Session 3.3: Complete Journey -->
+                <div class="session-card">
+                    <div class="session-header">
+                        <div class="session-title">Session 3.3: From Prediction to Reasoning - The Complete Journey</div>
+                        <div class="session-description">Synthesis of the entire evolution from n-grams to sophisticated reasoning systems</div>
+                    </div>
+                    <div class="visualizations-list">
+                        <div class="viz-item" data-tags="reasoning,evolution">
+                            <div class="viz-icon">📈</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Evolution Timeline Interactive</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Evolution</span>
+                                    <span class="tag">Timeline</span>
+                                    <span class="tag">Synthesis</span>
+                                    <span class="tag">ML Principles</span>
+                                </div>
+                            </div>
+                            <a href="module-3/session-3-3/s3.3-evolution-timeline.html" class="viz-link">Explore</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <div class="footer">
@@ -905,4 +1028,16 @@
         });
     </script>
 </body>
-</html>
+</html> class="viz-icon">🔗</div>
+                            <div class="viz-info">
+                                <div class="viz-name">Chain-of-Thought vs Direct Prediction</div>
+                                <div class="viz-tags">
+                                    <span class="tag">Chain-of-Thought</span>
+                                    <span class="tag">Reasoning</span>
+                                    <span class="tag">Comparison</span>
+                                </div>
+                            </div>
+                            <a href="module-3/session-3-2/s3.2-cot-vs-direct-demo.html" class="viz-link">Explore</a>
+                        </div>
+                        <div class="viz-item" data-tags="reasoning">
+                            <div
