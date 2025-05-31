@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaling Laws Explorer - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+        
+        .controls-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+        
+        .visualization-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-icon {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        
+        .control-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            outline: none;
+            appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .slider-value {
+            min-width: 80px;
+            font-weight: 500;
+            color: #667eea;
+            text-align: right;
+        }
+        
+        .model-examples {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .model-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .model-item:last-child {
+            border-bottom: none;
+        }
+        
+        .model-name {
+            font-weight: 500;
+        }
+        
+        .model-params {
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+        
+        .performance-display {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        
+        .performance-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .performance-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin: 1rem 0;
+        }
+        
+        .scaling-explanation {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .scaling-explanation h4 {
+            color: #856404;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .scaling-explanation h4:before {
+            content: "📈";
+            margin-right: 0.5rem;
+        }
+        
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .insights-panel h4:before {
+            content: "💡";
+            margin-right: 0.5rem;
+        }
+        
+        .insights-list {
+            list-style: none;
+        }
+        
+        .insights-list li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 2</a> / 
+                Session 2.3 / KP1
+            </div>
+            <h1>Scaling Laws Explorer</h1>
+            <p>Discover how AI performance improves predictably with scale - and why progress seems to slow down</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="main-content">
+            <div class="controls-panel">
+                <h2 class="section-title">
+                    <span class="section-icon">⚙️</span>
+                    Scaling Factors
+                </h2>
+                
+                <div class="control-group">
+                    <label class="control-label">Model Size (Parameters)</label>
+                    <div class="slider-container">
+                        <span>1M</span>
+                        <input type="range" id="modelSlider" class="slider" min="0" max="100" value="30" oninput="updateScaling()">
+                        <span>1T</span>
+                        <span class="slider-value" id="modelValue">1B</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                        More parameters = more knowledge storage capacity
+                    </p>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Training Data (Tokens)</label>
+                    <div class="slider-container">
+                        <span>1M</span>
+                        <input type="range" id="dataSlider" class="slider" min="0" max="100" value="40" oninput="updateScaling()">
+                        <span>100T</span>
+                        <span class="slider-value" id="dataValue">1T</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                        More training data = better pattern learning
+                    </p>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Compute Budget (FLOPs)</label>
+                    <div class="slider-container">
+                        <span>1E18</span>
+                        <input type="range" id="computeSlider" class="slider" min="0" max="100" value="35" oninput="updateScaling()">
+                        <span>1E24</span>
+                        <span class="slider-value" id="computeValue">1E21</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                        More compute = longer training and larger models
+                    </p>
+                </div>
+                
+                <div class="performance-display">
+                    <div class="performance-value" id="performanceValue">75%</div>
+                    <div class="performance-label">Estimated Performance Score</div>
+                </div>
+                
+                <div class="model-examples">
+                    <h4 style="margin-bottom: 1rem;">Real Model Examples</h4>
+                    <div class="model-item">
+                        <span class="model-name">GPT-1</span>
+                        <span class="model-params">117M params</span>
+                    </div>
+                    <div class="model-item">
+                        <span class="model-name">GPT-2</span>
+                        <span class="model-params">1.5B params</span>
+                    </div>
+                    <div class="model-item">
+                        <span class="model-name">GPT-3</span>
+                        <span class="model-params">175B params</span>
+                    </div>
+                    <div class="model-item">
+                        <span class="model-name">GPT-4</span>
+                        <span class="model-params">~1T params</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="visualization-panel">
+                <h2 class="section-title">
+                    <span class="section-icon">📈</span>
+                    Power Law Scaling
+                </h2>
+                
+                <div class="chart-container">
+                    <canvas id="scalingChart"></canvas>
+                </div>
+                
+                <div class="scaling-explanation">
+                    <h4>Why Progress Seems to "Slow Down"</h4>
+                    <p style="margin-bottom: 1rem;">
+                        We're climbing a <strong>power law curve</strong>, not a linear one. Each doubling of resources gives smaller (but consistent) improvements.
+                    </p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+                        <div style="background: white; padding: 1rem; border-radius: 6px;">
+                            <strong>Early Stage (Low-hanging fruit):</strong><br>
+                            <small>First 1000x improvement gives huge gains - basic language understanding</small>
+                        </div>
+                        <div style="background: white; padding: 1rem; border-radius: 6px;">
+                            <strong>Current Stage (Long tail):</strong><br>
+                            <small>Next 1000x improvement gives smaller gains - subtle reasoning, edge cases</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="insights-panel">
+            <h4>Key Insights About Scaling Laws</h4>
+            <ul class="insights-list">
+                <li><strong>Predictable:</strong> Performance follows mathematical power laws - we can forecast improvements</li>
+                <li><strong>Diminishing Returns:</strong> Each 10x increase in resources gives smaller but consistent gains</li>
+                <li><strong>No Plateau:</strong> Unlike other fields, LLMs keep improving with more scale (so far!)</li>
+                <li><strong>Multiple Factors:</strong> Model size, data, and compute all matter - need to scale together</li>
+                <li><strong>Economic Reality:</strong> Each generation requires ~10x more resources for meaningful progress</li>
+                <li><strong>Why GPT-4 > GPT-3:</strong> Not magic - just massive increases in all three scaling factors</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        let chart = null;
+        
+        function updateScaling() {
+            const modelSlider = document.getElementById('modelSlider');
+            const dataSlider = document.getElementById('dataSlider');
+            const computeSlider = document.getElementById('computeSlider');
+            
+            // Convert slider values to actual scales (log scale)
+            const modelParams = Math.pow(10, 6 + (parseInt(modelSlider.value) / 100) * 6); // 1M to 1T
+            const dataTokens = Math.pow(10, 6 + (parseInt(dataSlider.value) / 100) * 8); // 1M to 100T
+            const computeFLOPs = Math.pow(10, 18 + (parseInt(computeSlider.value) / 100) * 6); // 1E18 to 1E24
+            
+            // Update display values
+            document.getElementById('modelValue').textContent = formatNumber(modelParams);
+            document.getElementById('dataValue').textContent = formatNumber(dataTokens);
+            document.getElementById('computeValue').textContent = formatNumber(computeFLOPs);
+            
+            // Calculate performance based on scaling laws (simplified)
+            // Performance ∝ (Model^0.3) * (Data^0.2) * (Compute^0.2)
+            const modelContrib = Math.pow(modelParams / 1e9, 0.3);
+            const dataContrib = Math.pow(dataTokens / 1e12, 0.2);
+            const computeContrib = Math.pow(computeFLOPs / 1e21, 0.2);
+            
+            const performance = Math.min(99, 20 + 60 * modelContrib * dataContrib * computeContrib);
+            document.getElementById('performanceValue').textContent = Math.round(performance) + '%';
+            
+            updateChart();
+        }
+        
+        function formatNumber(num) {
+            if (num >= 1e12) {
+                return (num / 1e12).toFixed(1) + 'T';
+            } else if (num >= 1e9) {
+                return (num / 1e9).toFixed(1) + 'B';
+            } else if (num >= 1e6) {
+                return (num / 1e6).toFixed(1) + 'M';
+            } else if (num >= 1e3) {
+                return (num / 1e3).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+        
+        function updateChart() {
+            const canvas = document.getElementById('scalingChart');
+            const ctx = canvas.getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            // Generate power law data
+            const dataPoints = [];
+            const currentModelValue = parseInt(document.getElementById('modelSlider').value);
+            
+            for (let i = 0; i <= 100; i += 5) {
+                const scale = Math.pow(10, 6 + (i / 100) * 6); // 1M to 1T parameters
+                const performance = 20 + 60 * Math.pow(scale / 1e9, 0.3); // Power law with exponent 0.3
+                dataPoints.push({
+                    x: scale,
+                    y: Math.min(99, performance)
+                });
+            }
+            
+            // Current position
+            const currentScale = Math.pow(10, 6 + (currentModelValue / 100) * 6);
+            const currentPerf = 20 + 60 * Math.pow(currentScale / 1e9, 0.3);
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Performance vs Model Size',
+                        data: dataPoints,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        pointRadius: 0,
+                        tension: 0.4
+                    }, {
+                        label: 'Current Position',
+                        data: [{
+                            x: currentScale,
+                            y: Math.min(99, currentPerf)
+                        }],
+                        backgroundColor: '#dc3545',
+                        borderColor: '#dc3545',
+                        pointRadius: 8,
+                        showLine: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'Model Size (Parameters)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return formatNumber(value);
+                                }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Performance Score (%)'
+                            },
+                            min: 0,
+                            max: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return `Performance: ${context.parsed.y.toFixed(1)}% at ${formatNumber(context.parsed.x)} params`;
+                                    } else {
+                                        return `Current: ${context.parsed.y.toFixed(1)}% (${formatNumber(context.parsed.x)} params)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Initialize
+        updateScaling();
+    </script>
+</body>
+</html>
