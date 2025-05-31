@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test-Time Computation Explorer - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .control-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .slider-section {
+            margin-bottom: 2rem;
+        }
+        
+        .slider-label {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .computation-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            outline: none;
+            margin: 1rem 0;
+        }
+        
+        .computation-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .computation-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .slider-values {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        .current-value {
+            text-align: center;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .value-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .problem-area {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .problem-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .problem-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .problem-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .problem-btn.active {
+            border-color: #667eea;
+            background: #e8f2ff;
+        }
+        
+        .problem-text {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #667eea;
+            font-size: 1.1rem;
+        }
+        
+        .thinking-display {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 2rem;
+            min-height: 300px;
+            position: relative;
+        }
+        
+        .thinking-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .thinking-icon {
+            font-size: 1.5rem;
+        }
+        
+        .thinking-title {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .computation-time {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: auto;
+        }
+        
+        .thinking-paths {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .thinking-path {
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1rem;
+            opacity: 0.3;
+            transition: all 0.5s ease;
+        }
+        
+        .thinking-path.active {
+            opacity: 1;
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+        
+        .thinking-path.best {
+            border-color: #28a745;
+            background: #f0f8f0;
+        }
+        
+        .path-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .path-content {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .verification-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .verification-result {
+            background: #f0f8f0;
+            border: 1px solid #28a745;
+            border-radius: 6px;
+            padding: 1rem;
+            color: #28a745;
+            font-weight: 600;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .verification-result.show {
+            opacity: 1;
+        }
+        
+        .performance-metrics {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .metric-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 0 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .problem-selector {
+                flex-direction: column;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Test-Time Computation Explorer</h1>
+        <p>See how AI models can "think longer" for better solutions</p>
+    </div>
+    
+    <div class="container">
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <h2>Computation Budget</h2>
+            <div class="slider-section">
+                <div class="slider-label">
+                    🧠 Thinking Time Allocation
+                </div>
+                <input 
+                    type="range" 
+                    min="1" 
+                    max="10" 
+                    value="3" 
+                    class="computation-slider" 
+                    id="computationSlider"
+                    onchange="updateComputation(this.value)"
+                >
+                <div class="slider-values">
+                    <span>Quick (1 path)</span>
+                    <span>Balanced (5 paths)</span>
+                    <span>Thorough (10+ paths)</span>
+                </div>
+                <div class="current-value">
+                    <div>Current Setting:</div>
+                    <div class="value-display" id="currentSetting">Balanced Exploration</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Problem Area -->
+        <div class="problem-area">
+            <h2>Problem Selection</h2>
+            <div class="problem-selector">
+                <div class="problem-btn active" onclick="selectProblem('chess')" id="btn-chess">
+                    ♟️ Chess Move
+                </div>
+                <div class="problem-btn" onclick="selectProblem('math')" id="btn-math">
+                    🧮 Math Problem
+                </div>
+                <div class="problem-btn" onclick="selectProblem('coding')" id="btn-coding">
+                    💻 Code Debug
+                </div>
+                <div class="problem-btn" onclick="selectProblem('reasoning')" id="btn-reasoning">
+                    🧩 Logic Puzzle
+                </div>
+            </div>
+            
+            <div class="problem-text" id="problemText">
+                You're playing chess as White. Your opponent just moved their queen to attack your king. You have three possible moves: move the king, block with a rook, or capture the queen with your knight. What's the best move?
+            </div>
+            
+            <!-- Thinking Display -->
+            <div class="thinking-display">
+                <div class="thinking-header">
+                    <div class="thinking-icon">🤔</div>
+                    <div class="thinking-title">AI Reasoning Process</div>
+                    <div class="computation-time" id="computationTime">Exploring 5 paths...</div>
+                </div>
+                
+                <div class="thinking-paths" id="thinkingPaths">
+                    <!-- Paths will be dynamically generated -->
+                </div>
+                
+                <div class="verification-section">
+                    <div class="verification-result" id="verificationResult">
+                        ✅ Best solution verified through multiple reasoning paths
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="runThinking()" id="runBtn">Start Thinking Process</button>
+            <button class="btn" onclick="resetThinking()" id="resetBtn">Reset</button>
+        </div>
+        
+        <!-- Performance Metrics -->
+        <div class="performance-metrics">
+            <h2>Performance Metrics</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value" id="accuracyMetric">85%</div>
+                    <div class="metric-label">Solution Accuracy</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="pathsMetric">5</div>
+                    <div class="metric-label">Reasoning Paths</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="timeMetric">2.3s</div>
+                    <div class="metric-label">Computation Time</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="confidenceMetric">92%</div>
+                    <div class="metric-label">Confidence Level</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentProblem = 'chess';
+        let computationLevel = 3;
+        let isRunning = false;
+        
+        const problems = {
+            chess: {
+                text: "You're playing chess as White. Your opponent just moved their queen to attack your king. You have three possible moves: move the king, block with a rook, or capture the queen with your knight. What's the best move?",
+                paths: [
+                    { label: "Path 1: Move King", content: "King to safety... but this allows opponent to maintain attacking position", quality: "safe" },
+                    { label: "Path 2: Block with Rook", content: "Rook blocks attack... but this pins the rook and limits options", quality: "defensive" },
+                    { label: "Path 3: Capture Queen", content: "Knight takes queen... but need to check if knight is protected", quality: "aggressive" },
+                    { label: "Path 4: Counter-attack", content: "What if we ignore the threat and attack their king instead?", quality: "risky" },
+                    { label: "Path 5: Deeper Analysis", content: "After capturing queen, opponent recaptures with pawn, we're up material", quality: "analytical" },
+                    { label: "Path 6: Verification", content: "Double-checking: knight capture is safe and wins material", quality: "best" }
+                ]
+            },
+            
+            math: {
+                text: "A rectangular garden has a perimeter of 100 meters. If the length is 10 meters more than twice the width, what are the dimensions?",
+                paths: [
+                    { label: "Path 1: Basic Setup", content: "Let width = w, length = 2w + 10", quality: "setup" },
+                    { label: "Path 2: Perimeter Equation", content: "Perimeter = 2(length + width) = 2(2w + 10 + w) = 100", quality: "formula" },
+                    { label: "Path 3: Simplify", content: "2(3w + 10) = 100, so 6w + 20 = 100", quality: "algebra" },
+                    { label: "Path 4: Solve for w", content: "6w = 80, therefore w = 13.33 meters", quality: "solution" },
+                    { label: "Path 5: Find Length", content: "Length = 2(13.33) + 10 = 36.67 meters", quality: "completion" },
+                    { label: "Path 6: Verify", content: "Check: 2(13.33 + 36.67) = 2(50) = 100 ✓", quality: "best" }
+                ]
+            },
+            
+            coding: {
+                text: "This Python function should return the maximum value in a list, but it's returning the wrong answer. Can you find and fix the bug?",
+                paths: [
+                    { label: "Path 1: Read Code", content: "Function iterates through list comparing elements", quality: "analysis" },
+                    { label: "Path 2: Trace Execution", content: "Variable 'max_val' starts at 0, but what if all numbers are negative?", quality: "insight" },
+                    { label: "Path 3: Test Edge Cases", content: "With [-5, -2, -8], function returns 0 instead of -2", quality: "debugging" },
+                    { label: "Path 4: Identify Bug", content: "Problem: initializing max_val to 0 instead of first element", quality: "root_cause" },
+                    { label: "Path 5: Fix Implementation", content: "Change: max_val = nums[0] if nums else None", quality: "solution" },
+                    { label: "Path 6: Comprehensive Test", content: "Test with positive, negative, mixed, and empty lists", quality: "best" }
+                ]
+            },
+            
+            reasoning: {
+                text: "Five friends sit in a row. Alice sits next to Bob. Charlie sits at one end. Dave sits between Alice and Emily. Where does each person sit?",
+                paths: [
+                    { label: "Path 1: List Constraints", content: "Alice next to Bob, Charlie at end, Dave between Alice & Emily", quality: "analysis" },
+                    { label: "Path 2: Try Charlie Left", content: "Charlie-Dave-Alice-Bob-Emily... but Dave isn't between Alice & Emily", quality: "attempt" },
+                    { label: "Path 3: Try Charlie Right", content: "?-?-?-?-Charlie... work backwards", quality: "strategy" },
+                    { label: "Path 4: Place Dave", content: "Dave between Alice & Emily: Alice-Dave-Emily or Emily-Dave-Alice", quality: "progress" },
+                    { label: "Path 5: Add Bob Constraint", content: "Bob next to Alice: Bob-Alice-Dave-Emily-Charlie", quality: "solution" },
+                    { label: "Path 6: Verify All Constraints", content: "✓ Alice next to Bob ✓ Charlie at end ✓ Dave between Alice & Emily", quality: "best" }
+                ]
+            }
+        };
+        
+        const computationSettings = {
+            1: { name: "Lightning Fast", paths: 1, accuracy: 45, time: 0.1, confidence: 60 },
+            2: { name: "Quick Response", paths: 2, accuracy: 60, time: 0.3, confidence: 70 },
+            3: { name: "Balanced Exploration", paths: 3, accuracy: 75, time: 0.8, confidence: 80 },
+            4: { name: "Careful Analysis", paths: 4, accuracy: 82, time: 1.2, confidence: 85 },
+            5: { name: "Thorough Search", paths: 5, accuracy: 88, time: 1.8, confidence: 88 },
+            6: { name: "Deep Thinking", paths: 6, accuracy: 92, time: 2.5, confidence: 92 },
+            7: { name: "Comprehensive", paths: 7, accuracy: 94, time: 3.2, confidence: 94 },
+            8: { name: "Exhaustive", paths: 8, accuracy: 96, time: 4.1, confidence: 96 },
+            9: { name: "Maximum Depth", paths: 9, accuracy: 97, time: 5.2, confidence: 97 },
+            10: { name: "Complete Search", paths: 10, accuracy: 98, time: 6.8, confidence: 98 }
+        };
+        
+        function updateComputation(level) {
+            computationLevel = level;
+            const setting = computationSettings[level];
+            
+            document.getElementById('currentSetting').textContent = setting.name;
+            document.getElementById('computationTime').textContent = `Exploring ${setting.paths} paths...`;
+            
+            // Update metrics
+            document.getElementById('accuracyMetric').textContent = setting.accuracy + '%';
+            document.getElementById('pathsMetric').textContent = setting.paths;
+            document.getElementById('timeMetric').textContent = setting.time + 's';
+            document.getElementById('confidenceMetric').textContent = setting.confidence + '%';
+            
+            // Update thinking paths display
+            updateThinkingPaths();
+        }
+        
+        function selectProblem(problemType) {
+            currentProblem = problemType;
+            
+            // Update button selection
+            document.querySelectorAll('.problem-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('btn-' + problemType).classList.add('active');
+            
+            // Update problem text
+            document.getElementById('problemText').textContent = problems[problemType].text;
+            
+            // Update thinking paths
+            updateThinkingPaths();
+            resetThinking();
+        }
+        
+        function updateThinkingPaths() {
+            const pathsContainer = document.getElementById('thinkingPaths');
+            const problem = problems[currentProblem];
+            const setting = computationSettings[computationLevel];
+            const numPaths = Math.min(setting.paths, problem.paths.length);
+            
+            pathsContainer.innerHTML = '';
+            
+            for (let i = 0; i < numPaths; i++) {
+                const path = problem.paths[i];
+                const pathDiv = document.createElement('div');
+                pathDiv.className = `thinking-path ${path.quality}`;
+                pathDiv.id = `path-${i}`;
+                pathDiv.innerHTML = `
+                    <div class="path-label">${path.label}</div>
+                    <div class="path-content">${path.content}</div>
+                `;
+                pathsContainer.appendChild(pathDiv);
+            }
+        }
+        
+        async function runThinking() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            document.getElementById('runBtn').disabled = true;
+            
+            // Reset all paths
+            document.querySelectorAll('.thinking-path').forEach(path => {
+                path.classList.remove('active', 'best');
+            });
+            document.getElementById('verificationResult').classList.remove('show');
+            
+            const setting = computationSettings[computationLevel];
+            const numPaths = Math.min(setting.paths, problems[currentProblem].paths.length);
+            
+            // Activate paths one by one
+            for (let i = 0; i < numPaths; i++) {
+                await sleep(800);
+                document.getElementById(`path-${i}`).classList.add('active');
+            }
+            
+            // Highlight best path
+            await sleep(1000);
+            if (numPaths > 0) {
+                const lastPath = document.getElementById(`path-${numPaths - 1}`);
+                if (lastPath) {
+                    lastPath.classList.add('best');
+                }
+            }
+            
+            // Show verification
+            await sleep(500);
+            document.getElementById('verificationResult').classList.add('show');
+            
+            isRunning = false;
+            document.getElementById('runBtn').disabled = false;
+        }
+        
+        function resetThinking() {
+            isRunning = false;
+            document.getElementById('runBtn').disabled = false;
+            
+            // Reset all paths
+            document.querySelectorAll('.thinking-path').forEach(path => {
+                path.classList.remove('active', 'best');
+            });
+            
+            // Hide verification
+            document.getElementById('verificationResult').classList.remove('show');
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateComputation(3);
+            updateThinkingPaths();
+        });
+    </script>
+</body>
+</html>
