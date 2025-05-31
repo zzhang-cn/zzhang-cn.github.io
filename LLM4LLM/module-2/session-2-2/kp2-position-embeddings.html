@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Position Embeddings Explorer - LLM4LLM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .demo-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-icon {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .problem-demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .demo-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .demo-card.problem {
+            border-color: #dc3545;
+        }
+        
+        .demo-card.solution {
+            border-color: #28a745;
+        }
+        
+        .demo-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-card.problem .demo-title {
+            color: #dc3545;
+        }
+        
+        .demo-card.solution .demo-title {
+            color: #28a745;
+        }
+        
+        .sentence-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .word-token {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            margin: 0.2rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .word-token.no-position {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .word-token.with-position {
+            background: #28a745;
+            color: white;
+        }
+        
+        .word-token:hover {
+            transform: scale(1.05);
+        }
+        
+        .shuffle-demo {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .shuffle-demo h4 {
+            color: #856404;
+            margin-bottom: 1rem;
+        }
+        
+        .shuffle-controls {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .shuffle-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        
+        .shuffle-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .shuffle-btn.secondary {
+            background: #6c757d;
+        }
+        
+        .shuffle-btn.secondary:hover {
+            background: #5a6268;
+        }
+        
+        .position-visualization {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .position-pattern {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .position-cell {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+        
+        .position-cell:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .position-number {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .position-encoding {
+            height: 20px;
+            border-radius: 10px;
+            margin-top: 0.25rem;
+        }
+        
+        .attention-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .attention-matrix {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        
+        .attention-matrix h4 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .matrix-display {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+            margin: 1rem 0;
+        }
+        
+        .attention-cell {
+            aspect-ratio: 1;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .insights-panel {
+            background: #e8f2ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insights-panel h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .insights-panel h4:before {
+            content: "💡";
+            margin-right: 0.5rem;
+        }
+        
+        .insights-list {
+            list-style: none;
+        }
+        
+        .insights-list li {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .insights-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .problem-demo {
+                grid-template-columns: 1fr;
+            }
+            
+            .attention-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .shuffle-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 2</a> / 
+                Session 2.2 / KP2
+            </div>
+            <h1>Position Embeddings Explorer</h1>
+            <p>Discover why attention needs position information to understand word order</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="demo-section">
+            <h2 class="section-title">
+                <span class="section-icon">🔄</span>
+                The Position Blindness Problem
+            </h2>
+            
+            <p style="margin-bottom: 1.5rem; color: #666;">
+                Attention mechanism by itself is <strong>position-blind</strong> - it treats "John loves Mary" exactly the same as "Mary loves John". 
+                This is a fundamental problem that position embeddings solve.
+            </p>
+            
+            <div class="problem-demo">
+                <div class="demo-card problem">
+                    <div class="demo-title">❌ Without Position Info</div>
+                    <div class="sentence-display">
+                        <span class="word-token no-position">John</span>
+                        <span class="word-token no-position">loves</span>
+                        <span class="word-token no-position">Mary</span>
+                    </div>
+                    <p style="margin: 1rem 0; font-size: 0.9rem;">
+                        Attention sees: {John, loves, Mary}<br>
+                        Same as: {Mary, loves, John}
+                    </p>
+                    <div style="background: #f8d7da; padding: 0.75rem; border-radius: 4px; font-size: 0.85rem;">
+                        <strong>Problem:</strong> Can't tell who loves whom!
+                    </div>
+                </div>
+                
+                <div class="demo-card solution">
+                    <div class="demo-title">✅ With Position Embeddings</div>
+                    <div class="sentence-display">
+                        <span class="word-token with-position">John<sub>1</sub></span>
+                        <span class="word-token with-position">loves<sub>2</sub></span>
+                        <span class="word-token with-position">Mary<sub>3</sub></span>
+                    </div>
+                    <p style="margin: 1rem 0; font-size: 0.9rem;">
+                        Attention sees: {John@pos1, loves@pos2, Mary@pos3}<br>
+                        Different from: {Mary@pos1, loves@pos2, John@pos3}
+                    </p>
+                    <div style="background: #d4edda; padding: 0.75rem; border-radius: 4px; font-size: 0.85rem;">
+                        <strong>Solution:</strong> Position makes order meaningful!
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">
+                <span class="section-icon">🎲</span>
+                Interactive Position Demonstration
+            </h2>
+            
+            <div class="shuffle-demo">
+                <h4>See Position Blindness in Action</h4>
+                <p style="margin-bottom: 1rem;">
+                    Without position embeddings, these sentences would be <strong>identical</strong> to the attention mechanism:
+                </p>
+                
+                <div class="sentence-display" id="shuffledSentence">
+                    <span class="word-token no-position">The</span>
+                    <span class="word-token no-position">cat</span>
+                    <span class="word-token no-position">chased</span>
+                    <span class="word-token no-position">the</span>
+                    <span class="word-token no-position">dog</span>
+                </div>
+                
+                <div class="shuffle-controls">
+                    <button class="shuffle-btn" onclick="shuffleWords()">🎲 Shuffle Words</button>
+                    <button class="shuffle-btn secondary" onclick="resetSentence()">🔄 Reset to Original</button>
+                    <button class="shuffle-btn" onclick="addPositions()">✨ Add Position Info</button>
+                </div>
+                
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                    Try shuffling the words - without position embeddings, attention can't tell the difference between any arrangement!
+                </p>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">
+                <span class="section-icon">📊</span>
+                Position Encoding Patterns
+            </h2>
+            
+            <p style="margin-bottom: 1.5rem;">
+                Each position gets a unique "fingerprint" that helps attention understand word order:
+            </p>
+            
+            <div class="position-visualization">
+                <div class="position-pattern" id="positionPattern">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                <p style="text-align: center; margin-top: 1rem; color: #666;">
+                    Each position has a unique pattern of values. Hover over positions to see their encoding!
+                </p>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2 class="section-title">
+                <span class="section-icon">🔍</span>
+                How Position Embeddings Work
+            </h2>
+            
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                <h4 style="margin-bottom: 1rem;">Simple Formula:</h4>
+                <div style="font-family: 'Courier New', monospace; font-size: 1.1rem; text-align: center; background: white; padding: 1rem; border-radius: 4px;">
+                    <strong>Final Embedding = Word Embedding + Position Embedding</strong>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                <div style="background: #e8f2ff; padding: 1rem; border-radius: 6px; text-align: center;">
+                    <strong>Word Embedding</strong><br>
+                    <small>What the word means</small><br>
+                    <code>"cat" → [0.2, -0.1, 0.8, ...]</code>
+                </div>
+                <div style="font-size: 2rem; text-align: center; align-self: center;">+</div>
+                <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; text-align: center;">
+                    <strong>Position Embedding</strong><br>
+                    <small>Where the word appears</small><br>
+                    <code>pos2 → [0.0, 0.5, -0.3, ...]</code>
+                </div>
+                <div style="font-size: 2rem; text-align: center; align-self: center;">=</div>
+                <div style="background: #d4edda; padding: 1rem; border-radius: 6px; text-align: center;">
+                    <strong>Final Embedding</strong><br>
+                    <small>Word + Position</small><br>
+                    <code>[0.2, 0.4, 0.5, ...]</code>
+                </div>
+            </div>
+        </div>
+        
+        <div class="insights-panel">
+            <h4>Key Insights</h4>
+            <ul class="insights-list">
+                <li><strong>Position Blindness:</strong> Pure attention can't distinguish word order - "John loves Mary" = "Mary loves John"</li>
+                <li><strong>Simple Solution:</strong> Add position embeddings to word embeddings before attention</li>
+                <li><strong>Unique Fingerprints:</strong> Each position gets a unique pattern that attention can learn to use</li>
+                <li><strong>Order Preservation:</strong> Now attention can understand that position 1 comes before position 2</li>
+                <li><strong>Learned Relationships:</strong> The model learns that subjects usually come before verbs, etc.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        const originalWords = ['The', 'cat', 'chased', 'the', 'dog'];
+        let currentWords = [...originalWords];
+        let hasPositions = false;
+        
+        function shuffleWords() {
+            // Fisher-Yates shuffle
+            for (let i = currentWords.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentWords[i], currentWords[j]] = [currentWords[j], currentWords[i]];
+            }
+            updateSentenceDisplay();
+        }
+        
+        function resetSentence() {
+            currentWords = [...originalWords];
+            hasPositions = false;
+            updateSentenceDisplay();
+        }
+        
+        function addPositions() {
+            hasPositions = true;
+            updateSentenceDisplay();
+        }
+        
+        function updateSentenceDisplay() {
+            const container = document.getElementById('shuffledSentence');
+            const className = hasPositions ? 'with-position' : 'no-position';
+            
+            container.innerHTML = currentWords.map((word, index) => {
+                const positionSuffix = hasPositions ? `<sub>${index + 1}</sub>` : '';
+                return `<span class="word-token ${className}">${word}${positionSuffix}</span>`;
+            }).join('');
+        }
+        
+        function generatePositionPattern() {
+            const container = document.getElementById('positionPattern');
+            
+            // Generate 8 positions with unique patterns
+            const positions = [];
+            for (let pos = 0; pos < 8; pos++) {
+                const pattern = [];
+                for (let dim = 0; dim < 8; dim++) {
+                    // Simplified sinusoidal pattern
+                    const value = Math.sin(pos / Math.pow(10000, 2 * dim / 8));
+                    pattern.push(value);
+                }
+                positions.push(pattern);
+            }
+            
+            container.innerHTML = positions.map((pattern, pos) => {
+                const avgValue = pattern.reduce((a, b) => a + b, 0) / pattern.length;
+                const hue = ((avgValue + 1) / 2) * 240; // Map to blue-red spectrum
+                
+                return `
+                    <div class="position-cell" onmouseover="showPattern(${pos})" title="Position ${pos + 1}">
+                        <div class="position-number">Pos ${pos + 1}</div>
+                        <div class="position-encoding" style="background: hsl(${hue}, 70%, 60%);"></div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function showPattern(pos) {
+            // Simple feedback for hover
+            console.log(`Position ${pos + 1} has unique encoding pattern`);
+        }
+        
+        // Initialize
+        updateSentenceDisplay();
+        generatePositionPattern();
+    </script>
+</body>
+</html>
