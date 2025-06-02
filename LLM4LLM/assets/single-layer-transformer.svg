@@ -2,10 +2,10 @@
   
   <!-- Title -->
   <text x="400" y="40" text-anchor="middle" fill="#333333" font-family="Arial, sans-serif" font-size="24" font-weight="bold">Single-Layer Transformer Block</text>
-  <text x="400" y="65" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="18">Next Token Prediction (w_{n+1})</text>
+  <text x="400" y="65" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="18">Example: Next Token Prediction</text>
   
   <!-- Context length annotation -->
-  <text x="400" y="100" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Context Length n = 1024 tokens (2¹⁰)</text>
+  <text x="400" y="100" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Same Example: Context Length n = 1024 tokens (2¹⁰)</text>
   
   <!-- Input tokens row -->
   <rect x="100" y="130" width="35" height="35" fill="#667eea" stroke="none" rx="4"/>
@@ -33,7 +33,7 @@
   <text x="682.5" y="122" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="12">w₁₀₂₄</text>
   
   <!-- Dimension label -->
-  <text x="400" y="185" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="14">Each token:</text>
+  <text x="400" y="185" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="14">Each token (example):</text>
   <text x="400" y="202" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="14">d = 1024 dimensions (2¹⁰)</text>
   
   <!-- Vertical arrows -->
@@ -83,11 +83,12 @@
   <!-- Output layer -->
   <rect x="250" y="395" width="300" height="65" fill="#28a745" stroke="none" rx="8"/>
   <text x="400" y="415" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Output Layer</text>
-  <text x="400" y="435" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">|V| = 50,000 vocabulary</text>
+  <text x="400" y="435" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">|V| = 50,000 vocabulary (example)</text>
   <text x="400" y="450" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">1024 × 50K = 51.2M parameters</text>
   
   <!-- Total comparison -->
-  <text x="400" y="485" text-anchor="middle" fill="#333333" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Total: ~64M parameters</text>
-  <text x="400" y="505" text-anchor="middle" fill="#28a745" font-family="Arial, sans-serif" font-size="14">vs 1+ trillion in Bengio's concatenation approach!</text>
+  <text x="400" y="485" text-anchor="middle" fill="#333333" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Example Total: ~60M parameters</text>
+  <text x="400" y="505" text-anchor="middle" fill="#28a745" font-family="Arial, sans-serif" font-size="14">vs ~1 trillion in Bengio's approach!</text>
+  <text x="400" y="525" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="12" style="font-style: italic;">*Fixed parameter count regardless of context length</text>
   
 </svg>
