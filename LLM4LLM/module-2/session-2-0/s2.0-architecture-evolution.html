@@ -3,554 +3,463 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Architecture Evolution - LLM4LLM</title>
+    <title>Architecture Evolution: From Bengio to Modern Transformers</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
             color: #333;
-            background: #f8f9fa;
-        }
-        
-        .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1.5rem 0;
+            min-height: 100vh;
         }
-        
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-        
-        .breadcrumb {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin-bottom: 0.5rem;
-        }
-        
-        .breadcrumb a {
-            color: white;
-            text-decoration: none;
-        }
-        
-        .breadcrumb a:hover {
-            text-decoration: underline;
-        }
-        
-        .header h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .header p {
-            opacity: 0.9;
-        }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
         }
-        
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 2rem;
-        }
-        
-        .controls-panel {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-            height: fit-content;
-        }
-        
-        .visualization-panel {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        }
-        
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: #333;
-            display: flex;
-            align-items: center;
-        }
-        
-        .section-icon {
-            margin-right: 0.5rem;
-            font-size: 1.2rem;
-        }
-        
-        .architecture-selector {
-            margin-bottom: 2rem;
-        }
-        
-        .arch-button {
-            display: block;
-            width: 100%;
-            margin-bottom: 1rem;
-            padding: 1rem;
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: left;
-        }
-        
-        .arch-button:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-        }
-        
-        .arch-button.active {
-            border-color: #667eea;
-            background: #667eea;
+
+        .header {
+            text-align: center;
             color: white;
+            margin-bottom: 3rem;
         }
-        
-        .arch-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
         }
-        
-        .arch-description {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-        
-        .arch-button.active .arch-description {
+
+        .header p {
+            font-size: 1.2rem;
             opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto 1rem;
         }
-        
-        .comparison-metrics {
-            background: #f8f9fa;
+
+        .example-note {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
             border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+            margin: 1rem auto;
+            max-width: 600px;
+            border-left: 4px solid #fff;
         }
-        
-        .metric {
+
+        .example-note strong {
+            color: #fff;
+        }
+
+        .stages-container {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 3rem;
+            margin-top: 2rem;
+        }
+
+        .stage {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stage:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .stage-header {
+            display: flex;
             align-items: center;
-            margin-bottom: 0.75rem;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
         }
-        
-        .metric:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-        
-        .metric-label {
-            font-weight: 500;
-            color: #555;
-        }
-        
-        .metric-value {
-            font-weight: 600;
-            color: #667eea;
-        }
-        
-        .metric-value.problem {
-            color: #e74c3c;
-        }
-        
-        .metric-value.solution {
-            color: #28a745;
-        }
-        
-        .svg-container {
-            width: 100%;
-            height: 600px;
+
+        .stage-number {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            background: white;
-            position: relative;
-            overflow: hidden;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-right: 1.5rem;
+            flex-shrink: 0;
         }
-        
-        .svg-display {
-            width: 100%;
-            height: 100%;
-            display: none;
+
+        .stage-title {
+            flex: 1;
         }
-        
-        .svg-display.active {
-            display: block;
-        }
-        
-        .svg-display object {
-            width: 100%;
-            height: 100%;
-        }
-        
-        .key-insights {
-            background: #e8f2ff;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 2rem 0;
-            border-left: 4px solid #667eea;
-        }
-        
-        .key-insights h4 {
+
+        .stage-title h2 {
+            font-size: 1.8rem;
             color: #333;
-            margin-bottom: 1rem;
-            display: flex;
+            margin-bottom: 0.5rem;
+        }
+
+        .stage-title p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .stage-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
             align-items: center;
         }
-        
-        .key-insights h4:before {
-            content: "💡";
-            margin-right: 0.5rem;
+
+        .stage-explanation {
+            font-size: 1rem;
+            line-height: 1.7;
         }
-        
-        .insight-list {
-            list-style: none;
-        }
-        
-        .insight-list li {
-            margin-bottom: 0.5rem;
-            padding-left: 1rem;
-            position: relative;
-        }
-        
-        .insight-list li:before {
-            content: "→";
-            position: absolute;
-            left: 0;
+
+        .stage-explanation h3 {
             color: #667eea;
-            font-weight: bold;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
         }
-        
-        .animation-controls {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .animation-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.2s ease;
-            width: 100%;
+
+        .stage-explanation ul {
+            margin-left: 1.5rem;
             margin-bottom: 1rem;
         }
-        
-        .animation-btn:hover {
-            background: #5a6fd8;
+
+        .stage-explanation li {
+            margin-bottom: 0.5rem;
+            color: #555;
         }
-        
-        .animation-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+
+        .highlight-box {
+            background: #f8f9ff;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin: 1rem 0;
         }
-        
-        .evolution-progress {
-            margin-top: 1rem;
+
+        .highlight-box.problem {
+            background: #fff5f5;
+            border-left-color: #e53e3e;
+        }
+
+        .highlight-box.solution {
+            background: #f0fff4;
+            border-left-color: #38a169;
+        }
+
+        .svg-container {
             background: #f8f9fa;
-            border-radius: 4px;
-            height: 8px;
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid #e9ecef;
             overflow: hidden;
         }
-        
-        .evolution-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #e74c3c 0%, #f39c12 50%, #28a745 100%);
-            width: 33.33%;
-            transition: width 0.5s ease;
-            border-radius: 4px;
+
+        .svg-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 600px;
         }
-        
-        @media (max-width: 968px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
+
+        .comparison-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 3rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .comparison-section h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .comparison-item {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .comparison-item.before {
+            background: #fff5f5;
+            border: 2px solid #e53e3e;
+        }
+
+        .comparison-item.after {
+            background: #f0fff4;
+            border: 2px solid #38a169;
+        }
+
+        .comparison-item h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .comparison-item.before h3 {
+            color: #e53e3e;
+        }
+
+        .comparison-item.after h3 {
+            color: #38a169;
+        }
+
+        .big-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .comparison-item.before .big-number {
+            color: #e53e3e;
+        }
+
+        .comparison-item.after .big-number {
+            color: #38a169;
+        }
+
+        .key-insight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 3rem 0;
+            text-align: center;
+        }
+
+        .key-insight h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .key-insight p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .navigation {
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .nav-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0 0.5rem;
+        }
+
+        .nav-button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
             .container {
                 padding: 1rem;
             }
-            
-            .svg-container {
-                height: 400px;
+
+            .stage-content {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .stage-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stage-number {
+                margin-right: 0;
+                margin-bottom: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-content">
-            <div class="breadcrumb">
-                <a href="../../">← All Modules</a> / 
-                <a href="../">Module 2</a> / 
-                Session 2.0 / Architecture Evolution
-            </div>
-            <h1>Architecture Evolution</h1>
-            <p>From Bengio's scaling nightmare to transformer efficiency</p>
-        </div>
-    </div>
-    
     <div class="container">
-        <div class="main-content">
-            <div class="controls-panel">
-                <h2 class="section-title">
-                    <span class="section-icon">🏗️</span>
-                    Architecture Timeline
-                </h2>
-                
-                <div class="architecture-selector">
-                    <button class="arch-button active" data-arch="bengio" onclick="selectArchitecture('bengio')">
-                        <div class="arch-title">Bengio's Neural LM (2003)</div>
-                        <div class="arch-description">The concatenation approach that doesn't scale</div>
-                    </button>
-                    
-                    <button class="arch-button" data-arch="transformer1" onclick="selectArchitecture('transformer1')">
-                        <div class="arch-title">Single-Layer Transformer</div>
-                        <div class="arch-description">Attention solves the scaling problem</div>
-                    </button>
-                    
-                    <button class="arch-button" data-arch="transformer3" onclick="selectArchitecture('transformer3')">
-                        <div class="arch-title">3-Layer Transformer</div>
-                        <div class="arch-description">Stacking for increased capacity</div>
-                    </button>
-                </div>
-                
-                <div class="comparison-metrics" id="metrics">
-                    <h4 style="margin-bottom: 1rem; font-size: 1.1rem;">Architecture Metrics</h4>
-                    <div class="metric">
-                        <span class="metric-label">Context Length</span>
-                        <span class="metric-value" id="contextLength">1024 tokens</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Model Dimension</span>
-                        <span class="metric-value" id="modelDim">1024</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Total Parameters</span>
-                        <span class="metric-value" id="totalParams">1+ trillion</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Scaling Behavior</span>
-                        <span class="metric-value" id="scalingBehavior">O(n²d²)</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Feasibility</span>
-                        <span class="metric-value problem" id="feasibility">Impossible</span>
+        <div class="header">
+            <h1>Architecture Evolution</h1>
+            <p>From Bengio's Scaling Problem to Modern Transformer Breakthroughs</p>
+            
+            <div class="example-note">
+                <strong>Note:</strong> This visualization uses example calculations (1024 context × 1024 dimensions) to illustrate the scaling principles. Real models like GPT-3 use different dimensions, but the same fundamental breakthrough applies.
+            </div>
+        </div>
+
+        <div class="stages-container">
+            <!-- Stage 1: Bengio's Model -->
+            <div class="stage">
+                <div class="stage-header">
+                    <div class="stage-number">1</div>
+                    <div class="stage-title">
+                        <h2>Bengio's Neural Language Model</h2>
+                        <p>The Scaling Crisis</p>
                     </div>
                 </div>
-                
-                <div class="animation-controls">
-                    <h4>Evolution Demo</h4>
-                    <button class="animation-btn" onclick="animateEvolution()">▶️ Show Evolution</button>
-                    <div class="evolution-progress">
-                        <div class="evolution-bar" id="evolutionBar"></div>
+                <div class="stage-content">
+                    <div class="stage-explanation">
+                        <h3>The Problem: Fixed Concatenation</h3>
+                        <ul>
+                            <li><strong>All positions treated equally:</strong> No way to focus on relevant context</li>
+                            <li><strong>Parameter explosion:</strong> Input size grows with context length</li>
+                            <li><strong>Example calculation:</strong> 1024 context × 1024 dimensions = ~1M input size</li>
+                            <li><strong>Hidden layer:</strong> 1M × 1M = 1 trillion parameters</li>
+                        </ul>
+                        
+                        <div class="highlight-box problem">
+                            <strong>The Crisis:</strong> Completely impractical for real applications. Longer contexts meant exponentially more parameters.
+                        </div>
+                        
+                        <p><em>This approach worked for small experiments but couldn't scale to the long contexts needed for real language understanding.</em></p>
                     </div>
-                </div>
-                
-                <div class="key-insights">
-                    <h4>Key Insight</h4>
-                    <ul class="insight-list" id="insights">
-                        <li>Concatenation creates quadratic scaling nightmare</li>
-                        <li>Hidden layer alone needs 1+ trillion parameters</li>
-                        <li>Impossible to train or store in practice</li>
-                    </ul>
+                    <div class="svg-container">
+                        <object data="../../assets/bengio-scaling-problem.svg" type="image/svg+xml">
+                            <p>Your browser does not support SVG</p>
+                        </object>
+                    </div>
                 </div>
             </div>
-            
-            <div class="visualization-panel">
-                <h2 class="section-title">
-                    <span class="section-icon">📊</span>
-                    Architecture Diagram
-                </h2>
-                
-                <div class="svg-container">
-                    <div class="svg-display active" id="bengio-display">
-                        <object data="../../assets/bengio-scaling-problem.svg" type="image/svg+xml"></object>
-                    </div>
-                    <div class="svg-display" id="transformer1-display">
-                        <object data="../../assets/single-layer-transformer.svg" type="image/svg+xml"></object>
-                    </div>
-                    <div class="svg-display" id="transformer3-display">
-                        <object data="../../assets/three-layer-transformer.svg" type="image/svg+xml"></object>
+
+            <!-- Stage 2: Single-Layer Transformer -->
+            <div class="stage">
+                <div class="stage-header">
+                    <div class="stage-number">2</div>
+                    <div class="stage-title">
+                        <h2>Single-Layer Transformer</h2>
+                        <p>The Breakthrough Solution</p>
                     </div>
                 </div>
-                
-                <div class="key-insights">
-                    <h4>Architecture Impact</h4>
-                    <ul class="insight-list">
-                        <li><strong>Bengio's Problem:</strong> Parameters grow as O(n²d²) with context length</li>
-                        <li><strong>Attention Solution:</strong> Fixed parameter count regardless of sequence length</li>
-                        <li><strong>Transformer Advantage:</strong> Linear scaling enables modern context lengths</li>
-                        <li><strong>Stacking Power:</strong> Multiple layers add capacity without explosion</li>
-                        <li><strong>Practical Impact:</strong> 1000x+ parameter reduction for same context</li>
-                    </ul>
+                <div class="stage-content">
+                    <div class="stage-explanation">
+                        <h3>The Solution: Dynamic Computation</h3>
+                        <ul>
+                            <li><strong>Fixed parameters:</strong> Model size doesn't grow with context length</li>
+                            <li><strong>Dynamic attention:</strong> Computes relevance between positions on-the-fly</li>
+                            <li><strong>Knowledge storage:</strong> Feed-forward networks store learned patterns</li>
+                            <li><strong>Example result:</strong> ~60M parameters for any sequence length</li>
+                        </ul>
+                        
+                        <div class="highlight-box solution">
+                            <strong>The Breakthrough:</strong> Same 1024 context length processed with a tiny fraction of the parameters!
+                        </div>
+                        
+                        <p><em>This architecture separates parameter count from context length, enabling both efficiency and dynamic focus.</em></p>
+                    </div>
+                    <div class="svg-container">
+                        <object data="../../assets/single-layer-transformer.svg" type="image/svg+xml">
+                            <p>Your browser does not support SVG</p>
+                        </object>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 3: Multi-Layer Transformer -->
+            <div class="stage">
+                <div class="stage-header">
+                    <div class="stage-number">3</div>
+                    <div class="stage-title">
+                        <h2>Multi-Layer Transformer</h2>
+                        <p>Scaling to Sophistication</p>
+                    </div>
+                </div>
+                <div class="stage-content">
+                    <div class="stage-explanation">
+                        <h3>The Power: Stacking for Sophistication</h3>
+                        <ul>
+                            <li><strong>Linear scaling:</strong> Each layer adds similar parameter count</li>
+                            <li><strong>Refinement process:</strong> Each layer builds on the previous one's output</li>
+                            <li><strong>Example:</strong> 3 layers ≈ 180M parameters</li>
+                            <li><strong>Real models:</strong> Modern LLMs use 12-96+ layers with same principle</li>
+                        </ul>
+                        
+                        <div class="highlight-box">
+                            <strong>The Result:</strong> Complex reasoning and sophisticated language understanding emerge from stacking these simple, efficient building blocks.
+                        </div>
+                        
+                        <p><em>This is how we get from simple text prediction to systems that can reason, converse, and create.</em></p>
+                    </div>
+                    <div class="svg-container">
+                        <object data="../../assets/three-layer-transformer.svg" type="image/svg+xml">
+                            <p>Your browser does not support SVG</p>
+                        </object>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Key Comparison -->
+        <div class="comparison-section">
+            <h2>The Revolutionary Impact</h2>
+            <div class="comparison-grid">
+                <div class="comparison-item before">
+                    <h3>Bengio's Approach</h3>
+                    <div class="big-number">~1T</div>
+                    <p>Parameters needed for 1024 context length</p>
+                    <p><em>Impractical for real applications</em></p>
+                </div>
+                <div class="comparison-item after">
+                    <h3>Transformer Approach</h3>
+                    <div class="big-number">~60M</div>
+                    <p>Parameters for ANY context length</p>
+                    <p><em>Efficient and scalable</em></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Insight -->
+        <div class="key-insight">
+            <h2>The Key Insight</h2>
+            <p>
+                Instead of storing all possible context combinations in parameters (Bengio's approach), 
+                transformers compute context relationships dynamically. This breakthrough solved the scaling 
+                crisis while enabling the dynamic focus that makes sophisticated language generation possible.
+            </p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <a href="../s2.0-search-engine-comparison.html" class="nav-button">← Generative Search Demo</a>
+            <a href="../../session-2-1/kp1-tokenization-explorer.html" class="nav-button">Next: Tokenization →</a>
+        </div>
     </div>
-    
-    <script>
-        let currentArchitecture = 'bengio';
-        let isAnimating = false;
-        
-        const architectureData = {
-            bengio: {
-                contextLength: '1024 tokens',
-                modelDim: '1024',
-                totalParams: '1+ trillion',
-                scalingBehavior: 'O(n²d²)',
-                feasibility: 'Impossible',
-                feasibilityClass: 'problem',
-                insights: [
-                    'Concatenation creates quadratic scaling nightmare',
-                    'Hidden layer alone needs 1+ trillion parameters',
-                    'Impossible to train or store in practice',
-                    'Each context extension multiplies parameter count'
-                ]
-            },
-            transformer1: {
-                contextLength: '1024 tokens',
-                modelDim: '1024',
-                totalParams: '~64M',
-                scalingBehavior: 'O(d²)',
-                feasibility: 'Practical',
-                feasibilityClass: 'solution',
-                insights: [
-                    'Attention solves the selection problem efficiently',
-                    '1000x+ parameter reduction vs Bengio approach',
-                    'Fixed parameter count regardless of sequence length',
-                    'Multi-head attention captures different relationships'
-                ]
-            },
-            transformer3: {
-                contextLength: '1024 tokens',
-                modelDim: '1024',
-                totalParams: '~89M',
-                scalingBehavior: 'O(L×d²)',
-                feasibility: 'Scalable',
-                feasibilityClass: 'solution',
-                insights: [
-                    'Linear scaling with number of layers',
-                    'Each layer adds ~12.6M parameters',
-                    'Intermediate layers process all tokens',
-                    'Final layer focuses on next token prediction',
-                    'Enables deep networks for complex understanding'
-                ]
-            }
-        };
-        
-        function selectArchitecture(arch) {
-            if (isAnimating) return;
-            
-            currentArchitecture = arch;
-            
-            // Update button states
-            document.querySelectorAll('.arch-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[data-arch="${arch}"]`).classList.add('active');
-            
-            // Update displays
-            document.querySelectorAll('.svg-display').forEach(display => {
-                display.classList.remove('active');
-            });
-            document.getElementById(`${arch}-display`).classList.add('active');
-            
-            // Update metrics
-            updateMetrics(arch);
-            
-            // Reset evolution bar
-            const evolutionBar = document.getElementById('evolutionBar');
-            if (arch === 'bengio') {
-                evolutionBar.style.width = '33.33%';
-            } else if (arch === 'transformer1') {
-                evolutionBar.style.width = '66.66%';
-            } else {
-                evolutionBar.style.width = '100%';
-            }
-        }
-        
-        function updateMetrics(arch) {
-            const data = architectureData[arch];
-            
-            document.getElementById('contextLength').textContent = data.contextLength;
-            document.getElementById('modelDim').textContent = data.modelDim;
-            document.getElementById('totalParams').textContent = data.totalParams;
-            document.getElementById('scalingBehavior').textContent = data.scalingBehavior;
-            
-            const feasibilityElement = document.getElementById('feasibility');
-            feasibilityElement.textContent = data.feasibility;
-            feasibilityElement.className = `metric-value ${data.feasibilityClass}`;
-            
-            // Update insights
-            const insightsList = document.getElementById('insights');
-            insightsList.innerHTML = data.insights.map(insight => `<li>${insight}</li>`).join('');
-        }
-        
-        function animateEvolution() {
-            if (isAnimating) return;
-            
-            isAnimating = true;
-            const animBtn = document.querySelector('.animation-btn');
-            animBtn.disabled = true;
-            animBtn.textContent = '🔄 Evolving...';
-            
-            // Reset to bengio
-            selectArchitecture('bengio');
-            
-            setTimeout(() => {
-                selectArchitecture('transformer1');
-                setTimeout(() => {
-                    selectArchitecture('transformer3');
-                    setTimeout(() => {
-                        isAnimating = false;
-                        animBtn.disabled = false;
-                        animBtn.textContent = '▶️ Show Evolution';
-                    }, 2000);
-                }, 2000);
-            }, 2000);
-        }
-        
-        // Add keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (isAnimating) return;
-            
-            if (e.key === '1') selectArchitecture('bengio');
-            else if (e.key === '2') selectArchitecture('transformer1');
-            else if (e.key === '3') selectArchitecture('transformer3');
-            else if (e.key === ' ') {
-                e.preventDefault();
-                animateEvolution();
-            }
-        });
-        
-        // Initialize
-        updateMetrics('bengio');
-    </script>
 </body>
 </html>
