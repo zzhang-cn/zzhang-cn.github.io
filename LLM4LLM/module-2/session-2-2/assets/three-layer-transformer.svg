@@ -1,0 +1,131 @@
+<svg viewBox="0 0 800 900" xmlns="http://www.w3.org/2000/svg" style="background-color: white;">
+  
+  <!-- Title -->
+  <text x="400" y="40" text-anchor="middle" fill="#333333" font-family="Arial, sans-serif" font-size="24" font-weight="bold">3-Layer Transformer</text>
+  <text x="400" y="65" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="18">Intermediate vs Final Layer</text>
+  
+  <!-- Context length annotation -->
+  <text x="400" y="100" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Context Length n = 1024 tokens (2¹⁰)</text>
+  
+  <!-- Input tokens row -->
+  <rect x="100" y="130" width="35" height="35" fill="#667eea" stroke="none" rx="4"/>
+  <rect x="145" y="130" width="35" height="35" fill="#667eea" stroke="none" rx="4"/>
+  <rect x="190" y="130" width="35" height="35" fill="#667eea" stroke="none" rx="4"/>
+  <rect x="235" y="130" width="35" height="35" fill="#667eea" stroke="none" rx="4"/>
+  
+  <!-- Dots indicating more tokens -->
+  <text x="290" y="155" fill="#667eea" font-family="Arial, sans-serif" font-size="24" font-weight="bold">...</text>
+  
+  <rect x="530" y="130" width="35" height="35" fill="#667eea" stroke="none" rx="4"/>
+  <rect x="575" y="130" width="35" height="35" fill="#667eea" stroke="none" rx="4"/>
+  <rect x="620" y="130" width="35" height="35" fill="#667eea" stroke="none" rx="4"/>
+  <rect x="665" y="130" width="35" height="35" fill="#667eea" stroke="none" rx="4"/>
+  
+  <!-- Token labels -->
+  <text x="117.5" y="122" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="12">w₁</text>
+  <text x="162.5" y="122" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="12">w₂</text>
+  <text x="207.5" y="122" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="12">w₃</text>
+  <text x="252.5" y="122" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="12">w₄</text>
+  
+  <text x="547.5" y="122" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="12">w₁₀₂₁</text>
+  <text x="592.5" y="122" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="12">w₁₀₂₂</text>
+  <text x="637.5" y="122" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="12">w₁₀₂₃</text>
+  <text x="682.5" y="122" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="12">w₁₀₂₄</text>
+  
+  <!-- Dimension label -->
+  <text x="400" y="185" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="14">Each token:</text>
+  <text x="400" y="202" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="14">d = 1024 dimensions (2¹⁰)</text>
+  
+  <!-- Vertical arrows -->
+  <line x1="117.5" y1="165" x2="117.5" y2="220" stroke="#667eea" stroke-width="3"/>
+  <polygon points="112,215 123,215 117.5,220" fill="#667eea"/>
+  
+  <line x1="162.5" y1="165" x2="162.5" y2="220" stroke="#667eea" stroke-width="3"/>
+  <polygon points="157,215 168,215 162.5,220" fill="#667eea"/>
+  
+  <line x1="207.5" y1="165" x2="207.5" y2="220" stroke="#667eea" stroke-width="3"/>
+  <polygon points="202,215 213,215 207.5,220" fill="#667eea"/>
+  
+  <line x1="252.5" y1="165" x2="252.5" y2="220" stroke="#667eea" stroke-width="3"/>
+  <polygon points="247,215 258,215 252.5,220" fill="#667eea"/>
+  
+  <line x1="547.5" y1="165" x2="547.5" y2="220" stroke="#667eea" stroke-width="3"/>
+  <polygon points="542,215 553,215 547.5,220" fill="#667eea"/>
+  
+  <line x1="592.5" y1="165" x2="592.5" y2="220" stroke="#667eea" stroke-width="3"/>
+  <polygon points="587,215 598,215 592.5,220" fill="#667eea"/>
+  
+  <line x1="637.5" y1="165" x2="637.5" y2="220" stroke="#667eea" stroke-width="3"/>
+  <polygon points="632,215 643,215 637.5,220" fill="#667eea"/>
+  
+  <line x1="682.5" y1="165" x2="682.5" y2="220" stroke="#667eea" stroke-width="3"/>
+  <polygon points="677,215 688,215 682.5,220" fill="#667eea"/>
+  
+  <!-- Layer 1: Attention -->
+  <rect x="100" y="220" width="600" height="50" fill="#e8f4fd" stroke="#2196f3" stroke-width="3" rx="8"/>
+  <text x="400" y="240" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Layer 1: Multi-Head Attention (Intermediate)</text>
+  <text x="400" y="260" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="14">Parameters: 4 × 1024² = 4.2M, Output: n × 1024 (all tokens)</text>
+  
+  <!-- Arrow to Layer 1 FFN -->
+  <line x1="400" y1="270" x2="400" y2="290" stroke="#667eea" stroke-width="4"/>
+  <polygon points="390,290 410,290 400,300" fill="#667eea"/>
+  
+  <!-- Layer 1: FFN -->
+  <rect x="100" y="300" width="600" height="65" fill="#fff0f0" stroke="#e74c3c" stroke-width="4" rx="10"/>
+  <text x="400" y="325" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Layer 1: Feed-Forward Network</text>
+  <text x="400" y="345" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="15">n×1024 → n×4096 → n×1024 (same weights for all positions)</text>
+  <text x="400" y="360" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="13">Layer 1: 1024×4096=4.2M, Layer 2: 4096×1024=4.2M</text>
+  
+  <!-- Arrow to Layer 2 -->
+  <line x1="400" y1="365" x2="400" y2="385" stroke="#667eea" stroke-width="4"/>
+  <polygon points="390,385 410,385 400,395" fill="#667eea"/>
+  
+  <!-- Layer 2: Attention -->
+  <rect x="100" y="395" width="600" height="50" fill="#e8f4fd" stroke="#2196f3" stroke-width="3" rx="8"/>
+  <text x="400" y="415" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Layer 2: Multi-Head Attention (Intermediate)</text>
+  <text x="400" y="435" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="14">Parameters: 4 × 1024² = 4.2M, Output: n × 1024 (all tokens)</text>
+  
+  <!-- Arrow to Layer 2 FFN -->
+  <line x1="400" y1="445" x2="400" y2="465" stroke="#667eea" stroke-width="4"/>
+  <polygon points="390,465 410,465 400,475" fill="#667eea"/>
+  
+  <!-- Layer 2: FFN -->
+  <rect x="100" y="475" width="600" height="65" fill="#fff0f0" stroke="#e74c3c" stroke-width="4" rx="10"/>
+  <text x="400" y="500" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Layer 2: Feed-Forward Network</text>
+  <text x="400" y="520" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="15">n×1024 → n×4096 → n×1024 (own weights, different from Layer 1)</text>
+  <text x="400" y="535" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="13">Layer 1: 1024×4096=4.2M, Layer 2: 4096×1024=4.2M</text>
+  
+  <!-- Arrow to Layer 3 -->
+  <line x1="400" y1="540" x2="400" y2="560" stroke="#667eea" stroke-width="4"/>
+  <polygon points="390,560 410,560 400,570" fill="#667eea"/>
+  
+  <!-- Layer 3: Attention (Final) -->
+  <rect x="100" y="570" width="600" height="50" fill="#e8f4fd" stroke="#2196f3" stroke-width="3" rx="8"/>
+  <text x="400" y="590" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Layer 3: Multi-Head Attention (Final)</text>
+  <text x="400" y="610" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="14">Parameters: 4 × 1024² = 4.2M, Output: 1 × 1024 (last token only)</text>
+  
+  <!-- Arrow from Layer 3 to Final FFN -->
+  <line x1="400" y1="620" x2="400" y2="640" stroke="#ff6b6b" stroke-width="4"/>
+  <polygon points="390,640 410,640 400,650" fill="#ff6b6b"/>
+  
+  <!-- Layer 3: FFN (Final) -->
+  <rect x="100" y="650" width="600" height="65" fill="#fff0f0" stroke="#e74c3c" stroke-width="4" rx="10"/>
+  <text x="400" y="675" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Layer 3: Feed-Forward Network</text>
+  <text x="400" y="695" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="15">1×1024 → 1×4096 → 1×1024 (own weights, different from Layers 1&2)</text>
+  <text x="400" y="710" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="13">Layer 1: 1024×4096=4.2M, Layer 2: 4096×1024=4.2M</text>
+  
+  <!-- Arrow to final output -->
+  <line x1="400" y1="715" x2="400" y2="735" stroke="#ff6b6b" stroke-width="4"/>
+  <polygon points="390,735 410,735 400,745" fill="#ff6b6b"/>
+  
+  <!-- Output layer -->
+  <rect x="200" y="745" width="400" height="65" fill="#28a745" stroke="none" rx="8"/>
+  <text x="400" y="765" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Output Layer</text>
+  <text x="400" y="785" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">|V| = 50,000 vocabulary</text>
+  <text x="400" y="800" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">1024 × 50K = 51.2M parameters</text>
+  
+  <!-- Summary -->
+  <text x="400" y="840" text-anchor="middle" fill="#333333" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Total per layer: ~12.6M params × 3 layers = ~38M + 51M output = ~89M total</text>
+  <text x="400" y="860" text-anchor="middle" fill="#28a745" font-family="Arial, sans-serif" font-size="14">vs 1+ trillion in Bengio's concatenation approach!</text>
+  
+</svg>
