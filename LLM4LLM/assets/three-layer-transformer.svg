@@ -111,7 +111,7 @@
   <!-- Layer 3: FFN (Final) -->
   <rect x="100" y="650" width="600" height="65" fill="#fff0f0" stroke="#e74c3c" stroke-width="4" rx="10"/>
   <text x="400" y="675" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Layer 3: Feed-Forward Network</text>
-  <text x="400" y="695" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="15">1×1024 → 1×4096 → 1×1024 (own weights, different from Layers 1&2)</text>
+  <text x="400" y="695" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="15">1×1024 → 1×4096 → 1×1024 (own weights, different from Layers 1 and 2)</text>
   <text x="400" y="710" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="13">Layer 1: 1024×4096=4.2M, Layer 2: 4096×1024=4.2M</text>
   
   <!-- Arrow to final output -->
