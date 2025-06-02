@@ -2,10 +2,10 @@
   
   <!-- Title -->
   <text x="400" y="40" text-anchor="middle" fill="#333333" font-family="Arial, sans-serif" font-size="24" font-weight="bold">3-Layer Transformer</text>
-  <text x="400" y="65" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="18">Intermediate vs Final Layer</text>
+  <text x="400" y="65" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="18">Example: Scaling to Sophistication</text>
   
   <!-- Context length annotation -->
-  <text x="400" y="100" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Context Length n = 1024 tokens (2¹⁰)</text>
+  <text x="400" y="100" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Same Example: Context Length n = 1024 tokens (2¹⁰)</text>
   
   <!-- Input tokens row -->
   <rect x="100" y="130" width="35" height="35" fill="#667eea" stroke="none" rx="4"/>
@@ -33,7 +33,7 @@
   <text x="682.5" y="122" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="12">w₁₀₂₄</text>
   
   <!-- Dimension label -->
-  <text x="400" y="185" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="14">Each token:</text>
+  <text x="400" y="185" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="14">Each token (example):</text>
   <text x="400" y="202" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="14">d = 1024 dimensions (2¹⁰)</text>
   
   <!-- Vertical arrows -->
@@ -63,7 +63,7 @@
   
   <!-- Layer 1: Attention -->
   <rect x="100" y="220" width="600" height="50" fill="#e8f4fd" stroke="#2196f3" stroke-width="3" rx="8"/>
-  <text x="400" y="240" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Layer 1: Multi-Head Attention (Intermediate)</text>
+  <text x="400" y="240" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Layer 1: Multi-Head Attention</text>
   <text x="400" y="260" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="14">Parameters: 4 × 1024² = 4.2M, Output: n × 1024 (all tokens)</text>
   
   <!-- Arrow to Layer 1 FFN -->
@@ -73,8 +73,8 @@
   <!-- Layer 1: FFN -->
   <rect x="100" y="300" width="600" height="65" fill="#fff0f0" stroke="#e74c3c" stroke-width="4" rx="10"/>
   <text x="400" y="325" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Layer 1: Feed-Forward Network</text>
-  <text x="400" y="345" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="15">n×1024 → n×4096 → n×1024 (same weights for all positions)</text>
-  <text x="400" y="360" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="13">Layer 1: 1024×4096=4.2M, Layer 2: 4096×1024=4.2M</text>
+  <text x="400" y="345" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="15">n×1024 → n×4096 → n×1024</text>
+  <text x="400" y="360" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="13">1024×4096=4.2M + 4096×1024=4.2M = 8.4M total</text>
   
   <!-- Arrow to Layer 2 -->
   <line x1="400" y1="365" x2="400" y2="385" stroke="#667eea" stroke-width="4"/>
@@ -82,7 +82,7 @@
   
   <!-- Layer 2: Attention -->
   <rect x="100" y="395" width="600" height="50" fill="#e8f4fd" stroke="#2196f3" stroke-width="3" rx="8"/>
-  <text x="400" y="415" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Layer 2: Multi-Head Attention (Intermediate)</text>
+  <text x="400" y="415" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Layer 2: Multi-Head Attention</text>
   <text x="400" y="435" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="14">Parameters: 4 × 1024² = 4.2M, Output: n × 1024 (all tokens)</text>
   
   <!-- Arrow to Layer 2 FFN -->
@@ -92,8 +92,8 @@
   <!-- Layer 2: FFN -->
   <rect x="100" y="475" width="600" height="65" fill="#fff0f0" stroke="#e74c3c" stroke-width="4" rx="10"/>
   <text x="400" y="500" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Layer 2: Feed-Forward Network</text>
-  <text x="400" y="520" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="15">n×1024 → n×4096 → n×1024 (own weights, different from Layer 1)</text>
-  <text x="400" y="535" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="13">Layer 1: 1024×4096=4.2M, Layer 2: 4096×1024=4.2M</text>
+  <text x="400" y="520" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="15">n×1024 → n×4096 → n×1024 (different weights)</text>
+  <text x="400" y="535" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="13">1024×4096=4.2M + 4096×1024=4.2M = 8.4M total</text>
   
   <!-- Arrow to Layer 3 -->
   <line x1="400" y1="540" x2="400" y2="560" stroke="#667eea" stroke-width="4"/>
@@ -102,7 +102,7 @@
   <!-- Layer 3: Attention (Final) -->
   <rect x="100" y="570" width="600" height="50" fill="#e8f4fd" stroke="#2196f3" stroke-width="3" rx="8"/>
   <text x="400" y="590" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Layer 3: Multi-Head Attention (Final)</text>
-  <text x="400" y="610" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="14">Parameters: 4 × 1024² = 4.2M, Output: 1 × 1024 (last token only)</text>
+  <text x="400" y="610" text-anchor="middle" fill="#2196f3" font-family="Arial, sans-serif" font-size="14">Parameters: 4 × 1024² = 4.2M, Output: 1 × 1024 (last token)</text>
   
   <!-- Arrow from Layer 3 to Final FFN -->
   <line x1="400" y1="620" x2="400" y2="640" stroke="#ff6b6b" stroke-width="4"/>
@@ -111,8 +111,8 @@
   <!-- Layer 3: FFN (Final) -->
   <rect x="100" y="650" width="600" height="65" fill="#fff0f0" stroke="#e74c3c" stroke-width="4" rx="10"/>
   <text x="400" y="675" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Layer 3: Feed-Forward Network</text>
-  <text x="400" y="695" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="15">1×1024 → 1×4096 → 1×1024 (own weights, different from Layers 1 and 2)</text>
-  <text x="400" y="710" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="13">Layer 1: 1024×4096=4.2M, Layer 2: 4096×1024=4.2M</text>
+  <text x="400" y="695" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="15">1×1024 → 1×4096 → 1×1024 (different weights)</text>
+  <text x="400" y="710" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="13">1024×4096=4.2M + 4096×1024=4.2M = 8.4M total</text>
   
   <!-- Arrow to final output -->
   <line x1="400" y1="715" x2="400" y2="735" stroke="#ff6b6b" stroke-width="4"/>
@@ -121,11 +121,12 @@
   <!-- Output layer -->
   <rect x="200" y="745" width="400" height="65" fill="#28a745" stroke="none" rx="8"/>
   <text x="400" y="765" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Output Layer</text>
-  <text x="400" y="785" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">|V| = 50,000 vocabulary</text>
+  <text x="400" y="785" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">|V| = 50,000 vocabulary (example)</text>
   <text x="400" y="800" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">1024 × 50K = 51.2M parameters</text>
   
   <!-- Summary -->
-  <text x="400" y="840" text-anchor="middle" fill="#333333" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Total per layer: ~12.6M params × 3 layers = ~38M + 51M output = ~89M total</text>
-  <text x="400" y="860" text-anchor="middle" fill="#28a745" font-family="Arial, sans-serif" font-size="14">vs 1+ trillion in Bengio's concatenation approach!</text>
+  <text x="400" y="840" text-anchor="middle" fill="#333333" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Example Total: 3 × (4.2M + 8.4M) + 51.2M ≈ 89M params</text>
+  <text x="400" y="860" text-anchor="middle" fill="#28a745" font-family="Arial, sans-serif" font-size="14">Linear scaling vs exponential explosion!</text>
+  <text x="400" y="880" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="12" style="font-style: italic;">*Real models: GPT-3 uses different dimensions but same scaling principle</text>
   
 </svg>
