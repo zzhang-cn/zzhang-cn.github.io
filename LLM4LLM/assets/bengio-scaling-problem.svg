@@ -2,10 +2,10 @@
   
   <!-- Title -->
   <text x="400" y="40" text-anchor="middle" fill="#333333" font-family="Arial, sans-serif" font-size="24" font-weight="bold">Bengio's Neural Language Model</text>
-  <text x="400" y="65" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="18">The Scaling Problem</text>
+  <text x="400" y="65" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="18">Example: The Scaling Problem</text>
   
   <!-- Context length annotation -->
-  <text x="400" y="100" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Context Length n = 1024 words (2¹⁰)</text>
+  <text x="400" y="100" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Example Context Length n = 1024 tokens (2¹⁰)</text>
   
   <!-- Input tokens row -->
   <rect x="100" y="130" width="35" height="35" fill="#667eea" stroke="none" rx="4"/>
@@ -33,7 +33,7 @@
   <text x="682.5" y="122" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="12">w₁₀₂₄</text>
   
   <!-- Dimension label -->
-  <text x="400" y="185" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="14">Each token:</text>
+  <text x="400" y="185" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="14">Each token (example):</text>
   <text x="400" y="202" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="14">d = 1024 dimensions (2¹⁰)</text>
   
   <!-- Vertical arrows -->
@@ -64,7 +64,7 @@
   <!-- Concatenated input layer -->
   <rect x="100" y="220" width="600" height="50" fill="#f8f9ff" stroke="#667eea" stroke-width="3" rx="8"/>
   <text x="400" y="240" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Concatenated Input Layer</text>
-  <text x="400" y="260" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="14">2¹⁰ × 2¹⁰ = 2²⁰ = 1,048,576 dimensions</text>
+  <text x="400" y="260" text-anchor="middle" fill="#667eea" font-family="Arial, sans-serif" font-size="14">Example: 2¹⁰ × 2¹⁰ = 2²⁰ = 1,048,576 dimensions</text>
   
   <!-- Arrow pointing down -->
   <line x1="400" y1="270" x2="400" y2="290" stroke="#667eea" stroke-width="4"/>
@@ -72,7 +72,7 @@
   
   <!-- Hidden layer -->
   <rect x="100" y="300" width="600" height="65" fill="#fff0f0" stroke="#e74c3c" stroke-width="4" rx="10"/>
-  <text x="400" y="325" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Hidden Layer</text>
+  <text x="400" y="325" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Hidden Layer (Example Calculation)</text>
   <text x="400" y="345" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="15">Weight matrix: 2²⁰ × 2²⁰ = 2⁴⁰ ≈ 1.1 trillion parameters</text>
   <text x="400" y="360" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="13">Just the input connections alone!</text>
   
@@ -83,11 +83,12 @@
   <!-- Output layer -->
   <rect x="250" y="395" width="300" height="65" fill="#28a745" stroke="none" rx="8"/>
   <text x="400" y="415" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Output Layer</text>
-  <text x="400" y="435" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">|V| = 50,000 vocabulary</text>
+  <text x="400" y="435" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">|V| = 50,000 vocabulary (example)</text>
   <text x="400" y="450" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">2²⁰ × 50K = 52.4 billion parameters</text>
   
   <!-- Problem statement -->
   <text x="400" y="485" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="16" font-weight="bold">The Scaling Problem:</text>
-  <text x="400" y="505" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="14">Input size grows as n × d with context length</text>
+  <text x="400" y="505" text-anchor="middle" fill="#e74c3c" font-family="Arial, sans-serif" font-size="14">Parameter count explodes with context length</text>
+  <text x="400" y="525" text-anchor="middle" fill="#666666" font-family="Arial, sans-serif" font-size="12" style="font-style: italic;">*Illustrative calculation - real models vary</text>
   
 </svg>
