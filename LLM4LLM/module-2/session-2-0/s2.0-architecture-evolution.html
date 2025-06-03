@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Architecture Evolution: From Bengio to Modern Transformers</title>
+    <title>Architecture Evolution: From Bengio to Modern Transformers - LLM4LLM</title>
     <style>
         * {
             margin: 0;
@@ -19,25 +19,51 @@
             min-height: 100vh;
         }
 
+        .header {
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
         }
 
-        .header {
+        .header-title {
             text-align: center;
             color: white;
             margin-bottom: 3rem;
         }
 
-        .header h1 {
+        .header-title h1 {
             font-size: 2.5rem;
             margin-bottom: 1rem;
             font-weight: 700;
         }
 
-        .header p {
+        .header-title p {
             font-size: 1.2rem;
             opacity: 0.9;
             max-width: 800px;
@@ -298,7 +324,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .header h1 {
+            .header-title h1 {
                 font-size: 2rem;
             }
 
@@ -315,8 +341,18 @@
     </style>
 </head>
 <body>
+    <div class="header">
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 2</a> / 
+                Session 2.0
+            </div>
+        </div>
+    </div>
+    
     <div class="container">
-        <div class="header">
+        <div class="header-title">
             <h1>Architecture Evolution</h1>
             <p>From Bengio's Scaling Problem to Modern Transformer Breakthroughs</p>
             
