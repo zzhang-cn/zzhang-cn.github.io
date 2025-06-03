@@ -22,7 +22,27 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 1.5rem 0;
-            text-align: center;
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
         }
         
         .header h1 {
@@ -32,7 +52,6 @@
         
         .header p {
             opacity: 0.9;
-            font-size: 1.1rem;
         }
         
         .container {
@@ -384,8 +403,15 @@
 </head>
 <body>
     <div class="header">
-        <h1>Search Engine vs Generative Search Engine</h1>
-        <p>See how the same user need is handled by traditional search vs modern LLMs</p>
+        <div class="header-content">
+            <div class="breadcrumb">
+                <a href="../../">← All Modules</a> / 
+                <a href="../">Module 2</a> / 
+                Session 2.0
+            </div>
+            <h1>Search Engine vs Generative Search Engine</h1>
+            <p>See how the same user need is handled by traditional search vs modern LLMs</p>
+        </div>
     </div>
     
     <div class="container">
