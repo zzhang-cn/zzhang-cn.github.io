@@ -7,5 +7,5 @@
 - [LLMs and their Fundamental Limitations (Part 2) (hackmd)](https://hackmd.io/@LFNB9ifoT024aMHXU49sog/BksWwZosR)
 
 ## Other Random Stuff
-- To be added later
+- [Consciousness: A Computational Perspective (hackmd)](https://hackmd.io/@LFNB9ifoT024aMHXU49sog/S1SYuF3yZe)
 
