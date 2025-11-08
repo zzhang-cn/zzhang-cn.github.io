@@ -8,5 +8,5 @@
 - [Part 5: Series Conclusion](https://hackmd.io/@LFNB9ifoT024aMHXU49sog/HJnhXiJGJl) - Concluding remarks and areas of innovations needed
 
 ## Other random stuff
-- - [Consciousness: A Computational Perspective (hackmd)](https://hackmd.io/@LFNB9ifoT024aMHXU49sog/S1SYuF3yZe)
+- [Consciousness: A Computational Perspective (hackmd)](https://hackmd.io/@LFNB9ifoT024aMHXU49sog/S1SYuF3yZe)
 
